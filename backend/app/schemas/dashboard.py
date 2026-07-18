@@ -1,6 +1,7 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional
 from uuid import UUID
+from app.schemas.transaction import TransactionResponse
 
 class BudgetUsage(BaseModel):
     category_id: UUID
@@ -28,6 +29,19 @@ class GoalProgress(BaseModel):
 
 
 class DashboardSummaryResponse(BaseModel):
+    total_income: float
+    total_expense: float
+    total_savings: float
+    monthly_budget: float
+    budget_remaining: float
+    financial_health_score: int
+    top_category: Optional[str]
+    monthly_growth: float
+    goal_progress: float
+    recent_transactions: List[TransactionResponse] = []
+
+
+class DashboardAnalyticsResponse(BaseModel):
     net_worth: float
     monthly_income: float
     monthly_expense: float

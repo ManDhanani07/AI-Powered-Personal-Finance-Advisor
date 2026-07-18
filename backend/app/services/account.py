@@ -26,12 +26,21 @@ class AccountService:
     def create_account(self, user_id: Any, data: AccountCreate) -> Account:
         """Create a new financial account and commit the database transaction safely."""
         try:
+            if data.is_default:
+                # Reset any other default accounts for this user to false
+                self.db.query(Account).filter(
+                    Account.user_id == user_id,
+                    Account.is_default == True
+                ).update({"is_default": False})
+
             account = Account(
                 user_id=user_id,
                 name=data.name.strip(),
-                type=data.type,
+                institution=data.institution.strip() if data.institution else None,
+                account_type=data.account_type,
                 balance=data.balance,
-                currency=data.currency
+                currency=data.currency,
+                is_default=data.is_default
             )
             created = self.repo.create(account)
             self.db.commit()
@@ -47,8 +56,19 @@ class AccountService:
         account = self.get_account(account_id, user_id)
         try:
             update_dict = data.model_dump(exclude_unset=True)
+            
+            if update_dict.get("is_default"):
+                # Reset other default accounts for this user to false
+                self.db.query(Account).filter(
+                    Account.user_id == user_id,
+                    Account.is_default == True
+                ).update({"is_default": False})
+
             for key, value in update_dict.items():
+                if key == "institution" and value is not None:
+                    value = value.strip()
                 setattr(account, key, value)
+                
             updated = self.repo.update(account)
             self.db.commit()
             logger.info(f"Updated account ID {account_id} for user ID {user_id}")

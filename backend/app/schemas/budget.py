@@ -1,52 +1,67 @@
 from pydantic import BaseModel, Field, field_validator
 from typing import Optional
 from uuid import UUID
-from datetime import datetime, date
+from datetime import datetime
 
 class BudgetCreate(BaseModel):
     category_id: UUID = Field(..., description="Category UUID under budget constraint")
-    amount_limit: float = Field(..., description="Budget spending limit")
-    period: str = Field(default="monthly", description="Budget period: weekly, monthly, yearly, custom")
-    start_date: date = Field(..., description="Start date of budget")
-    end_date: date = Field(..., description="End date of budget")
+    monthly_limit: float = Field(..., description="Budget monthly spending limit")
+    warning_percentage: int = Field(default=80, ge=1, le=100, description="Warning limit percentage trigger")
+    month: int = Field(..., ge=1, le=12, description="Target calendar month (1-12)")
+    year: int = Field(..., ge=2000, le=2100, description="Target calendar year")
+    currency: str = Field(default="INR", min_length=3, max_length=3, description="Currency ISO code")
 
-    @field_validator("amount_limit")
+    @field_validator("monthly_limit")
     @classmethod
     def validate_amount(cls, v: float) -> float:
         if v <= 0.0:
-            raise ValueError("Amount limit must be greater than zero.")
+            raise ValueError("Monthly limit must be greater than zero.")
         return v
 
-    @field_validator("period")
+    @field_validator("currency")
     @classmethod
-    def validate_period(cls, v: str) -> str:
-        v = v.strip().lower()
-        if v not in {'weekly', 'monthly', 'yearly', 'custom'}:
-            raise ValueError("Period must be: weekly, monthly, yearly, or custom.")
+    def validate_currency(cls, v: str) -> str:
+        v = v.strip().upper()
+        if len(v) != 3 or not v.isalpha():
+            raise ValueError("Currency must be a 3-letter ISO code.")
         return v
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "category_id": "42dbceb5-4a5c-42ea-8226-5b4d6d1cf98f",
+                "monthly_limit": 6000.0,
+                "warning_percentage": 80,
+                "month": 7,
+                "year": 2026,
+                "currency": "INR"
+            }
+        }
+    }
 
 
 class BudgetUpdate(BaseModel):
     category_id: Optional[UUID] = Field(None)
-    amount_limit: Optional[float] = Field(None)
-    period: Optional[str] = Field(None)
-    start_date: Optional[date] = Field(None)
-    end_date: Optional[date] = Field(None)
+    monthly_limit: Optional[float] = Field(None)
+    warning_percentage: Optional[int] = Field(None, ge=1, le=100)
+    month: Optional[int] = Field(None, ge=1, le=12)
+    year: Optional[int] = Field(None, ge=2000, le=2100)
+    currency: Optional[str] = Field(None, min_length=3, max_length=3)
 
-    @field_validator("amount_limit")
+    @field_validator("monthly_limit")
     @classmethod
     def validate_amount(cls, v: Optional[float]) -> Optional[float]:
         if v is not None and v <= 0.0:
-            raise ValueError("Amount limit must be greater than zero.")
+            raise ValueError("Monthly limit must be greater than zero.")
         return v
 
-    @field_validator("period")
+    @field_validator("currency")
     @classmethod
-    def validate_period(cls, v: Optional[str]) -> Optional[str]:
+    def validate_currency(cls, v: Optional[str]) -> Optional[str]:
         if v is not None:
-            v = v.strip().lower()
-            if v not in {'weekly', 'monthly', 'yearly', 'custom'}:
-                raise ValueError("Period must be: weekly, monthly, yearly, or custom.")
+            v = v.strip().upper()
+            if len(v) != 3 or not v.isalpha():
+                raise ValueError("Currency must be a 3-letter ISO code.")
         return v
 
 
@@ -54,10 +69,11 @@ class BudgetResponse(BaseModel):
     id: UUID
     user_id: UUID
     category_id: UUID
-    amount_limit: float
-    period: str
-    start_date: date
-    end_date: date
+    monthly_limit: float
+    warning_percentage: int
+    month: int
+    year: int
+    currency: str
     created_at: datetime
     updated_at: datetime
 

@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, date
 from typing import Optional, List
-from sqlalchemy import String, text, Uuid, ForeignKey, Numeric, CheckConstraint, Date
+from sqlalchemy import String, Boolean, text, Uuid, ForeignKey, Numeric, CheckConstraint, Date
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 from app.database.database import Base
@@ -14,7 +14,15 @@ class Goal(Base):
             name="chk_goal_target_amount"
         ),
         CheckConstraint(
-            "status IN ('active', 'completed', 'abandoned')",
+            "current_amount >= 0.0000",
+            name="chk_goal_current_amount"
+        ),
+        CheckConstraint(
+            "priority IN ('High', 'Medium', 'Low')",
+            name="chk_goal_priority"
+        ),
+        CheckConstraint(
+            "goal_status IN ('In Progress', 'Completed', 'Abandoned')",
             name="chk_goal_status"
         ),
     )
@@ -25,10 +33,16 @@ class Goal(Base):
     user_id: Mapped[uuid.UUID] = mapped_column(
         Uuid, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
     )
-    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    title: Mapped[str] = mapped_column(String(100), nullable=False)
+    goal_type: Mapped[str] = mapped_column(String(50), nullable=False)
     target_amount: Mapped[float] = mapped_column(Numeric(15, 4), nullable=False)
+    current_amount: Mapped[float] = mapped_column(Numeric(15, 4), default=0.0000, server_default=text("0.0000"), nullable=False)
     target_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
-    status: Mapped[str] = mapped_column(String(15), default="active", server_default=text("'active'"))
+    priority: Mapped[str] = mapped_column(String(15), nullable=False)
+    goal_status: Mapped[str] = mapped_column(String(30), default="In Progress", server_default=text("'In Progress'"), nullable=False)
+    auto_save: Mapped[bool] = mapped_column(Boolean, default=False, server_default=text("false"), nullable=False)
+    monthly_target: Mapped[float] = mapped_column(Numeric(15, 4), default=0.0000, server_default=text("0.0000"), nullable=False)
+    notes: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())

@@ -16,7 +16,29 @@ def list_accounts(
     current_user: User = Depends(get_current_user)
 ):
     """
+    ### Description
     List all active financial accounts (assets & liabilities) owned by the current user.
+
+    ### Professional Response Example
+    ```json
+    [
+      {
+        "id": "e4a2d5cf-72b1-4c6e-8e3d-0d62bf3f9829",
+        "user_id": "87c3e5df-c49b-4e16-ba62-a548323c21a4",
+        "name": "HDFC Savings",
+        "institution": "HDFC Bank",
+        "account_type": "Savings",
+        "balance": 50000.0,
+        "currency": "INR",
+        "is_default": true,
+        "created_at": "2026-07-18T14:11:31Z",
+        "updated_at": "2026-07-18T14:11:31Z"
+      }
+    ]
+    ```
+
+    ### Possible Error Responses
+    - **401 Unauthorized**: Invalid or expired access token.
     """
     service = AccountService(db)
     return service.list_accounts(current_user.id)
@@ -29,7 +51,28 @@ def get_account(
     current_user: User = Depends(get_current_user)
 ):
     """
+    ### Description
     Fetch structural and balance details for an account by its unique UUID.
+
+    ### Professional Response Example
+    ```json
+    {
+      "id": "e4a2d5cf-72b1-4c6e-8e3d-0d62bf3f9829",
+      "user_id": "87c3e5df-c49b-4e16-ba62-a548323c21a4",
+      "name": "HDFC Savings",
+      "institution": "HDFC Bank",
+      "account_type": "Savings",
+      "balance": 50000.0,
+      "currency": "INR",
+      "is_default": true,
+      "created_at": "2026-07-18T14:11:31Z",
+      "updated_at": "2026-07-18T14:11:31Z"
+    }
+    ```
+
+    ### Possible Error Responses
+    - **401 Unauthorized**: Invalid or expired access token.
+    - **404 Not Found**: Account UUID not found or does not belong to the user.
     """
     service = AccountService(db)
     return service.get_account(id, current_user.id)
@@ -47,7 +90,45 @@ def create_account(
     current_user: User = Depends(get_current_user)
 ):
     """
-    Initialize a new account ledger (e.g., checking, savings, credit cards).
+    ### Description
+    Initialize a new account ledger (checking, savings, cash, credit cards, wallet, investment).
+
+    ### Validation Rules
+    - **name**: Must be between 1 and 100 characters.
+    - **account_type**: Must be one of: `Savings`, `Current`, `Cash`, `Credit Card`, `Wallet`, `Investment`.
+    - **currency**: Must be a 3-letter currency ISO code.
+
+    ### Professional Request Example
+    ```json
+    {
+      "name": "HDFC Savings",
+      "institution": "HDFC Bank",
+      "account_type": "Savings",
+      "balance": 50000.0,
+      "currency": "INR",
+      "is_default": true
+    }
+    ```
+
+    ### Professional Response Example
+    ```json
+    {
+      "id": "e4a2d5cf-72b1-4c6e-8e3d-0d62bf3f9829",
+      "user_id": "87c3e5df-c49b-4e16-ba62-a548323c21a4",
+      "name": "HDFC Savings",
+      "institution": "HDFC Bank",
+      "account_type": "Savings",
+      "balance": 50000.0,
+      "currency": "INR",
+      "is_default": true,
+      "created_at": "2026-07-18T14:11:31Z",
+      "updated_at": "2026-07-18T14:11:31Z"
+    }
+    ```
+
+    ### Possible Error Responses
+    - **401 Unauthorized**: Invalid or expired access token.
+    - **400 Bad Request**: Invalid parameters or invalid type.
     """
     service = AccountService(db)
     return service.create_account(current_user.id, data)
@@ -61,7 +142,40 @@ def update_account(
     current_user: User = Depends(get_current_user)
 ):
     """
+    ### Description
     Modify parameters like friendly name, custom limits, or balance thresholds.
+
+    ### Validation Rules
+    - **name**: Optional. Length 1 to 100.
+    - **account_type**: Optional. One of: `Savings`, `Current`, `Cash`, `Credit Card`, `Wallet`, `Investment`.
+
+    ### Professional Request Example
+    ```json
+    {
+      "name": "HDFC Savings Revised",
+      "balance": 55000.0
+    }
+    ```
+
+    ### Professional Response Example
+    ```json
+    {
+      "id": "e4a2d5cf-72b1-4c6e-8e3d-0d62bf3f9829",
+      "user_id": "87c3e5df-c49b-4e16-ba62-a548323c21a4",
+      "name": "HDFC Savings Revised",
+      "institution": "HDFC Bank",
+      "account_type": "Savings",
+      "balance": 55000.0,
+      "currency": "INR",
+      "is_default": true,
+      "created_at": "2026-07-18T14:11:31Z",
+      "updated_at": "2026-07-18T14:11:31Z"
+    }
+    ```
+
+    ### Possible Error Responses
+    - **401 Unauthorized**: Invalid or expired access token.
+    - **404 Not Found**: Account UUID not found.
     """
     service = AccountService(db)
     return service.update_account(id, current_user.id, data)
@@ -74,7 +188,20 @@ def delete_account(
     current_user: User = Depends(get_current_user)
 ):
     """
+    ### Description
     Remove an account. Will fail with HTTP 400 if the account contains active transaction records.
+
+    ### Professional Response Example
+    ```json
+    {
+      "message": "Account successfully deleted."
+    }
+    ```
+
+    ### Possible Error Responses
+    - **401 Unauthorized**: Invalid or expired access token.
+    - **404 Not Found**: Account UUID not found.
+    - **400 Bad Request**: Account cannot be deleted because transaction records rely on it.
     """
     service = AccountService(db)
     service.delete_account(id, current_user.id)

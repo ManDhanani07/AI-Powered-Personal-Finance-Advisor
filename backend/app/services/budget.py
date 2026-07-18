@@ -1,6 +1,5 @@
 from sqlalchemy.orm import Session
 from typing import List, Any
-from datetime import date
 from app.repositories.budget import BudgetRepository
 from app.repositories.category import CategoryRepository
 from app.schemas.budget import BudgetCreate, BudgetUpdate
@@ -34,18 +33,15 @@ class BudgetService:
             logger.warning(f"Category query failed for budget creation: ID {data.category_id}")
             raise EntityNotFoundError("Category not found.")
 
-        # Date validations
-        if data.start_date > data.end_date:
-            raise BusinessRuleError("Start date must occur on or before end date.")
-
         try:
             budget = Budget(
                 user_id=user_id,
                 category_id=data.category_id,
-                amount_limit=data.amount_limit,
-                period=data.period,
-                start_date=data.start_date,
-                end_date=data.end_date
+                monthly_limit=data.monthly_limit,
+                warning_percentage=data.warning_percentage,
+                month=data.month,
+                year=data.year,
+                currency=data.currency
             )
             created = self.repo.create(budget)
             self.db.commit()
@@ -54,7 +50,7 @@ class BudgetService:
         except Exception as e:
             self.db.rollback()
             logger.error(f"Failed to create budget for user ID {user_id}: {str(e)}")
-            raise BusinessRuleError("Failed to create budget.")
+            raise BusinessRuleError("Failed to create budget. Duplicate entries for a category in a single month are rejected.")
 
     def update_budget(self, budget_id: Any, user_id: Any, data: BudgetUpdate) -> Budget:
         """Modify budget threshold details and commit safely."""
@@ -66,13 +62,10 @@ class BudgetService:
             if not cat or (cat.user_id is not None and cat.user_id != user_id):
                 raise EntityNotFoundError("Category not found.")
 
-        new_start = update_dict.get("start_date", budget.start_date)
-        new_end = update_dict.get("end_date", budget.end_date)
-        if new_start > new_end:
-            raise BusinessRuleError("Start date must occur on or before end date.")
-
         try:
             for key, value in update_dict.items():
+                if key == "currency" and value is not None:
+                    value = value.strip().upper()
                 setattr(budget, key, value)
             updated = self.repo.update(budget)
             self.db.commit()

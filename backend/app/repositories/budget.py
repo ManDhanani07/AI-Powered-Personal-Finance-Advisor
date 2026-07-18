@@ -13,9 +13,9 @@ class BudgetRepository(BaseRepository[Budget]):
         return self.db.query(Budget).filter(Budget.user_id == user_id).all()
 
     def get_active(self, user_id: Any, query_date: date) -> List[Budget]:
-        """Fetch user budgets active on a given date (e.g., today)."""
+        """Fetch user budgets active on a given date (matching month and year)."""
         return self.db.query(Budget).filter(
             Budget.user_id == user_id,
-            Budget.start_date <= query_date,
-            Budget.end_date >= query_date
+            Budget.month == query_date.month,
+            Budget.year == query_date.year
         ).all()

@@ -30,18 +30,13 @@ class TransactionRepository(BaseRepository[Transaction]):
 
         # Category and Type Filtering
         if type:
-            query = query.filter(Transaction.type == type)
+            query = query.filter(Transaction.transaction_type == type)
         if category_id:
             query = query.filter(Transaction.category_id == category_id)
             
-        # Account Filter (checks if account was source OR destination)
+        # Account Filter (checks the single account_id column)
         if account_id:
-            query = query.filter(
-                or_(
-                    Transaction.src_account_id == account_id,
-                    Transaction.dest_account_id == account_id
-                )
-            )
+            query = query.filter(Transaction.account_id == account_id)
             
         # Date Boundaries
         if start_date:
@@ -61,7 +56,8 @@ class TransactionRepository(BaseRepository[Transaction]):
             query = query.filter(
                 or_(
                     Transaction.description.ilike(search_pattern),
-                    Transaction.notes.ilike(search_pattern)
+                    Transaction.notes.ilike(search_pattern),
+                    Transaction.merchant.ilike(search_pattern)
                 )
             )
 

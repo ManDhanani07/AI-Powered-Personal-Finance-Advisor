@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 from typing import List, Optional
-from sqlalchemy import String, CHAR, text, Uuid, ForeignKey, CheckConstraint, UniqueConstraint
+from sqlalchemy import String, Boolean, CHAR, text, Uuid, ForeignKey, CheckConstraint, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 from app.database.database import Base
@@ -10,7 +10,7 @@ class Category(Base):
     __tablename__ = "categories"
     __table_args__ = (
         CheckConstraint(
-            "type IN ('income', 'expense', 'transfer')",
+            "category_type IN ('Expense', 'Income', 'Investment', 'Transfer')",
             name="chk_category_type"
         ),
         CheckConstraint(
@@ -30,9 +30,10 @@ class Category(Base):
         Uuid, ForeignKey("categories.id", ondelete="RESTRICT"), nullable=True, index=True
     )
     name: Mapped[str] = mapped_column(String(50), nullable=False)
-    type: Mapped[str] = mapped_column(String(15), nullable=False)
+    category_type: Mapped[str] = mapped_column(String(30), nullable=False)
     icon: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     color: Mapped[Optional[str]] = mapped_column(CHAR(7), nullable=True)
+    is_default: Mapped[bool] = mapped_column(Boolean, default=False, server_default=text("false"))
 
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())

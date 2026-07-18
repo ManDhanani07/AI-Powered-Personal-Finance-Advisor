@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, date
 from typing import Optional
-from sqlalchemy import String, text, Uuid, ForeignKey, Numeric, CheckConstraint, UniqueConstraint, Date, Boolean, Index
+from sqlalchemy import String, text, Uuid, ForeignKey, Numeric, CheckConstraint, UniqueConstraint, Date, Boolean, Index, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 from app.database.database import Base
@@ -79,3 +79,27 @@ class AICategorizationFeedback(Base):
     user: Mapped["User"] = relationship(back_populates="ai_feedbacks")
     predicted_category: Mapped["Category"] = relationship("Category", foreign_keys=[predicted_category_id])
     actual_category: Mapped["Category"] = relationship("Category", foreign_keys=[actual_category_id])
+
+
+class Prediction(Base):
+    __tablename__ = "predictions"
+    __table_args__ = (
+        CheckConstraint(
+            "confidence_score BETWEEN 0.0000 AND 1.0000",
+            name="chk_prediction_confidence"
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, primary_key=True, default=uuid.uuid4, server_default=text("gen_random_uuid()")
+    )
+    transaction_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("transactions.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    predicted_category: Mapped[str] = mapped_column(String(100), nullable=False)
+    confidence_score: Mapped[float] = mapped_column(Numeric(5, 4), nullable=False)
+    model_version: Mapped[str] = mapped_column(String(50), nullable=False)
+    prediction_time: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+
+    # Relationships
+    transaction: Mapped["Transaction"] = relationship()

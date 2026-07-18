@@ -58,33 +58,34 @@ class TransactionService:
         return tx
 
     def create_transaction(self, user_id: Any, data: TransactionCreate) -> Transaction:
-        """Create transaction, adjust account balances, and commit unit of work atomically."""
+        """Create transaction, adjust account balance, and commit unit of work atomically."""
         # Validation checks
-        self._validate_relationship_keys(user_id, data.category_id, data.src_account_id, data.dest_account_id)
-        self._validate_ledger_rules(data.type, data.src_account_id, data.dest_account_id)
-
+        self._validate_relationship_keys(user_id, data.category_id, data.account_id)
         tx_date = data.transaction_date if data.transaction_date else datetime.now(timezone.utc)
 
         try:
-            # 1. Adjust accounts balances
-            self._adjust_balances(data.type, data.amount, data.src_account_id, data.dest_account_id, revert=False)
+            # 1. Adjust accounts balance
+            self._adjust_balances(data.transaction_type, data.amount, data.account_id, revert=False)
 
             # 2. Add ledger entry
             tx = Transaction(
                 user_id=user_id,
+                account_id=data.account_id,
                 category_id=data.category_id,
-                src_account_id=data.src_account_id,
-                dest_account_id=data.dest_account_id,
+                merchant=data.merchant.strip() if data.merchant else None,
                 amount=data.amount,
-                type=data.type,
-                status=data.status,
-                description=data.description.strip() if data.description else None,
+                transaction_type=data.transaction_type,
+                payment_method=data.payment_method.strip() if data.payment_method else None,
                 transaction_date=tx_date,
-                notes=data.notes.strip() if data.notes else None
+                description=data.description.strip() if data.description else None,
+                notes=data.notes.strip() if data.notes else None,
+                location=data.location.strip() if data.location else None,
+                ai_predicted_category=data.ai_predicted_category.strip() if data.ai_predicted_category else None,
+                prediction_confidence=data.prediction_confidence,
+                is_user_corrected=data.is_user_corrected,
+                receipt_image=data.receipt_image.strip() if data.receipt_image else None
             )
             created = self.repo.create(tx)
-            
-            # Commit the unit of work atomically
             self.db.commit()
             logger.info(f"Created transaction ID {created.id} (amount: {created.amount}) for user ID {user_id}")
             return created
@@ -94,33 +95,31 @@ class TransactionService:
             raise BusinessRuleError("Failed to record transaction.")
 
     def update_transaction(self, transaction_id: Any, user_id: Any, data: TransactionUpdate) -> Transaction:
-        """Revert old adjustments, apply new balance updates, and commit transaction safely."""
+        """Revert old balance impact, apply new parameters, and commit atomically."""
         tx = self.get_transaction(transaction_id, user_id)
         
-        new_type = data.type if data.type is not None else tx.type
-        new_amount = data.amount if data.amount is not None else tx.amount
-        new_src = data.src_account_id if data.src_account_id is not None else tx.src_account_id
-        new_dest = data.dest_account_id if data.dest_account_id is not None else tx.dest_account_id
+        new_account = data.account_id if data.account_id is not None else tx.account_id
         new_category = data.category_id if data.category_id is not None else tx.category_id
+        new_type = data.transaction_type if data.transaction_type is not None else tx.transaction_type
+        new_amount = data.amount if data.amount is not None else tx.amount
 
-        self._validate_relationship_keys(user_id, new_category, new_src, new_dest)
-        self._validate_ledger_rules(new_type, new_src, new_dest)
+        self._validate_relationship_keys(user_id, new_category, new_account)
 
         try:
             # 1. Rollback old balance impact
-            self._adjust_balances(tx.type, tx.amount, tx.src_account_id, tx.dest_account_id, revert=True)
+            self._adjust_balances(tx.transaction_type, tx.amount, tx.account_id, revert=True)
 
             # 2. Apply new balance impact
-            self._adjust_balances(new_type, new_amount, new_src, new_dest, revert=False)
+            self._adjust_balances(new_type, new_amount, new_account, revert=False)
 
             # 3. Apply updates to the transaction entity
             update_dict = data.model_dump(exclude_unset=True)
             for key, value in update_dict.items():
+                if isinstance(value, str):
+                    value = value.strip()
                 setattr(tx, key, value)
             
             updated = self.repo.update(tx)
-            
-            # Commit unit of work atomically
             self.db.commit()
             logger.info(f"Updated transaction ID {transaction_id} for user ID {user_id}")
             return updated
@@ -130,17 +129,15 @@ class TransactionService:
             raise BusinessRuleError("Failed to update transaction.")
 
     def delete_transaction(self, transaction_id: Any, user_id: Any) -> None:
-        """Remove ledger entry, revert balance impacts, and commit unit of work safely."""
+        """Remove ledger entry, revert balance impact, and commit safely."""
         tx = self.get_transaction(transaction_id, user_id)
 
         try:
             # 1. Rollback balance changes
-            self._adjust_balances(tx.type, tx.amount, tx.src_account_id, tx.dest_account_id, revert=True)
+            self._adjust_balances(tx.transaction_type, tx.amount, tx.account_id, revert=True)
 
             # 2. Delete ledger row
             self.repo.remove(tx.id)
-            
-            # Commit unit of work atomically
             self.db.commit()
             logger.info(f"Deleted transaction ID {transaction_id} for user ID {user_id}")
         except Exception as e:
@@ -153,42 +150,26 @@ class TransactionService:
         self,
         tx_type: str,
         amount: float,
-        src_id: Optional[Any],
-        dest_id: Optional[Any],
+        account_id: Any,
         revert: bool = False
     ) -> None:
+        """Deduct or add funds to the single linked account balance based on transaction type."""
         factor = -1 if revert else 1
+        acc = self.account_repo.get(account_id)
+        if not acc:
+            return
 
-        if tx_type == "expense" and src_id:
-            src = self.account_repo.get(src_id)
-            if src:
-                src.balance -= amount * factor
-                self.db.add(src)
-                
-        elif tx_type == "income" and dest_id:
-            dest = self.account_repo.get(dest_id)
-            if dest:
-                dest.balance += amount * factor
-                self.db.add(dest)
-                
-        elif tx_type == "transfer":
-            if src_id:
-                src = self.account_repo.get(src_id)
-                if src:
-                    src.balance -= amount * factor
-                    self.db.add(src)
-            if dest_id:
-                dest = self.account_repo.get(dest_id)
-                if dest:
-                    dest.balance += amount * factor
-                    self.db.add(dest)
+        if tx_type == "Income":
+            acc.balance += amount * factor
+        else:  # Expense, Investment, and Transfer behave as monetary outflows (deductions)
+            acc.balance -= amount * factor
+        self.db.add(acc)
 
     def _validate_relationship_keys(
         self,
         user_id: Any,
         category_id: Optional[Any],
-        src_id: Optional[Any],
-        dest_id: Optional[Any]
+        account_id: Any
     ) -> None:
         if category_id:
             cat = self.category_repo.get(category_id)
@@ -196,30 +177,8 @@ class TransactionService:
                 logger.warning(f"Category constraint validation fail: ID {category_id} for user {user_id}")
                 raise EntityNotFoundError("Category not found.")
                 
-        if src_id:
-            src = self.account_repo.get(src_id)
-            if not src or src.user_id != user_id:
-                logger.warning(f"Source account validation fail: ID {src_id} for user {user_id}")
-                raise EntityNotFoundError("Source account not found.")
-                
-        if dest_id:
-            dest = self.account_repo.get(dest_id)
-            if not dest or dest.user_id != user_id:
-                logger.warning(f"Destination account validation fail: ID {dest_id} for user {user_id}")
-                raise EntityNotFoundError("Destination account not found.")
-
-    def _validate_ledger_rules(
-        self,
-        tx_type: str,
-        src_id: Optional[Any],
-        dest_id: Optional[Any]
-    ) -> None:
-        if tx_type == "expense" and (not src_id or dest_id):
-            raise BusinessRuleError("Expenses must specify a source account and no destination account.")
-        if tx_type == "income" and (src_id or not dest_id):
-            raise BusinessRuleError("Incomes must specify a destination account and no source account.")
-        if tx_type == "transfer":
-            if not src_id or not dest_id:
-                raise BusinessRuleError("Transfers require both source and destination accounts.")
-            if src_id == dest_id:
-                raise BusinessRuleError("Source and destination accounts must be different.")
+        if account_id:
+            acc = self.account_repo.get(account_id)
+            if not acc or acc.user_id != user_id:
+                logger.warning(f"Account validation fail: ID {account_id} for user {user_id}")
+                raise EntityNotFoundError("Account not found.")

@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 from sqlalchemy import String, Boolean, CHAR, text, Uuid, ForeignKey, Numeric, CheckConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
@@ -10,7 +10,7 @@ class Account(Base):
     __tablename__ = "accounts"
     __table_args__ = (
         CheckConstraint(
-            "type IN ('checking', 'savings', 'credit_card', 'investment', 'cash', 'loan')",
+            "account_type IN ('Savings', 'Current', 'Cash', 'Credit Card', 'Wallet', 'Investment')",
             name="chk_account_type"
         ),
     )
@@ -22,10 +22,11 @@ class Account(Base):
         Uuid, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
     )
     name: Mapped[str] = mapped_column(String(100), nullable=False)
-    type: Mapped[str] = mapped_column(String(30), nullable=False)
+    institution: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    account_type: Mapped[str] = mapped_column(String(30), nullable=False)
     balance: Mapped[float] = mapped_column(Numeric(15, 4), default=0.0000, server_default=text("0.0000"))
-    currency: Mapped[str] = mapped_column(CHAR(3), default="USD", server_default=text("'USD'"))
-    is_active: Mapped[bool] = mapped_column(Boolean, default=True, server_default=text("true"))
+    currency: Mapped[str] = mapped_column(CHAR(3), default="INR", server_default=text("'INR'"))
+    is_default: Mapped[bool] = mapped_column(Boolean, default=False, server_default=text("false"))
 
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
@@ -33,13 +34,8 @@ class Account(Base):
     # Relationships
     user: Mapped["User"] = relationship(back_populates="accounts")
     
-    outgoing_transactions: Mapped[List["Transaction"]] = relationship(
+    transactions: Mapped[List["Transaction"]] = relationship(
         "Transaction",
-        foreign_keys="[Transaction.src_account_id]",
-        back_populates="src_account"
-    )
-    incoming_transactions: Mapped[List["Transaction"]] = relationship(
-        "Transaction",
-        foreign_keys="[Transaction.dest_account_id]",
-        back_populates="dest_account"
+        back_populates="account",
+        cascade="all, delete-orphan"
     )

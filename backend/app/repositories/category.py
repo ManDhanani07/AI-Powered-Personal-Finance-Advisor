@@ -14,7 +14,7 @@ class CategoryRepository(BaseRepository[Category]):
             or_(Category.user_id == None, Category.user_id == user_id)
         )
         if category_type:
-            query = query.filter(Category.type == category_type)
+            query = query.filter(Category.category_type == category_type)
         return query.all()
 
     def get_by_name(self, name: str, user_id: Any, parent_id: Optional[Any] = None) -> Optional[Category]:

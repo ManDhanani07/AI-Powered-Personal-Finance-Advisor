@@ -17,6 +17,9 @@ from app.routers.transaction import router as transaction_router
 from app.routers.budget import router as budget_router
 from app.routers.goal import router as goal_router
 from app.routers.dashboard import router as dashboard_router
+from app.routers.prediction import router as prediction_router
+from app.routers.recommendation import router as recommendation_router
+from app.routers.financial_health import router as financial_health_router
 
 # Initialize structured logging configurations
 setup_logging()
@@ -87,6 +90,9 @@ app.include_router(transaction_router, prefix="/api/v1")
 app.include_router(budget_router, prefix="/api/v1")
 app.include_router(goal_router, prefix="/api/v1")
 app.include_router(dashboard_router, prefix="/api/v1")
+app.include_router(prediction_router, prefix="/api/v1")
+app.include_router(recommendation_router, prefix="/api/v1")
+app.include_router(financial_health_router, prefix="/api/v1")
 
 @app.get("/")
 def home():

@@ -1,6 +1,6 @@
 import uuid
-from datetime import datetime, date
-from sqlalchemy import String, text, Uuid, ForeignKey, Numeric, CheckConstraint, UniqueConstraint, Date
+from datetime import datetime
+from sqlalchemy import String, Integer, text, Uuid, ForeignKey, Numeric, CheckConstraint, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 from app.database.database import Base
@@ -9,18 +9,22 @@ class Budget(Base):
     __tablename__ = "budgets"
     __table_args__ = (
         CheckConstraint(
-            "amount_limit > 0.0000",
-            name="chk_budget_amount_limit"
+            "monthly_limit > 0.0000",
+            name="chk_budget_monthly_limit"
         ),
         CheckConstraint(
-            "start_date <= end_date",
-            name="chk_budget_dates"
+            "warning_percentage > 0 AND warning_percentage <= 100",
+            name="chk_budget_warning_percentage"
         ),
         CheckConstraint(
-            "period IN ('weekly', 'monthly', 'yearly', 'custom')",
-            name="chk_budget_period"
+            "month >= 1 AND month <= 12",
+            name="chk_budget_month"
         ),
-        UniqueConstraint("user_id", "category_id", "period", "start_date", name="uq_budget_category_period"),
+        CheckConstraint(
+            "year >= 2000 AND year <= 2100",
+            name="chk_budget_year"
+        ),
+        UniqueConstraint("user_id", "category_id", "month", "year", name="uq_budget_category_month_year"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -32,10 +36,11 @@ class Budget(Base):
     category_id: Mapped[uuid.UUID] = mapped_column(
         Uuid, ForeignKey("categories.id", ondelete="CASCADE"), nullable=False, index=True
     )
-    amount_limit: Mapped[float] = mapped_column(Numeric(15, 4), nullable=False)
-    period: Mapped[str] = mapped_column(String(15), default="monthly", server_default=text("'monthly'"))
-    start_date: Mapped[date] = mapped_column(Date, nullable=False)
-    end_date: Mapped[date] = mapped_column(Date, nullable=False)
+    monthly_limit: Mapped[float] = mapped_column(Numeric(15, 4), nullable=False)
+    warning_percentage: Mapped[int] = mapped_column(Integer, default=80, server_default=text("80"))
+    month: Mapped[int] = mapped_column(Integer, nullable=False)
+    year: Mapped[int] = mapped_column(Integer, nullable=False)
+    currency: Mapped[str] = mapped_column(String(3), default="INR", server_default=text("'INR'"))
 
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())

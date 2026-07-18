@@ -38,9 +38,10 @@ class CategoryService:
                 user_id=user_id,
                 parent_id=data.parent_id,
                 name=data.name.strip(),
-                type=data.type,
+                category_type=data.category_type,
                 icon=data.icon,
-                color=data.color
+                color=data.color,
+                is_default=data.is_default
             )
             created = self.repo.create(category)
             self.db.commit()

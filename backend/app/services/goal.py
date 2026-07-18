@@ -31,14 +31,20 @@ class GoalService:
         try:
             goal = Goal(
                 user_id=user_id,
-                name=data.name.strip(),
+                title=data.title.strip(),
+                goal_type=data.goal_type.strip(),
                 target_amount=data.target_amount,
+                current_amount=data.current_amount,
                 target_date=data.target_date,
-                status=data.status
+                priority=data.priority,
+                goal_status=data.goal_status,
+                auto_save=data.auto_save,
+                monthly_target=data.monthly_target,
+                notes=data.notes.strip() if data.notes else None
             )
             created = self.repo.create(goal)
             self.db.commit()
-            logger.info(f"Created goal ID {created.id} ({created.name}) for user ID {user_id}")
+            logger.info(f"Created goal ID {created.id} ({created.title}) for user ID {user_id}")
             return created
         except Exception as e:
             self.db.rollback()
@@ -74,7 +80,7 @@ class GoalService:
             raise BusinessRuleError("Failed to delete goal.")
 
     def add_goal_contribution(self, goal_id: Any, user_id: Any, data: GoalContributionCreate) -> GoalContribution:
-        """Log a savings contribution and commit safely."""
+        """Log a savings contribution, increment current_amount, and commit safely."""
         goal = self.get_goal(goal_id, user_id)
         
         # Verify transaction pointer if linked
@@ -90,6 +96,11 @@ class GoalService:
                 amount=data.amount
             )
             created = self.repo.create_contribution(contribution)
+            
+            # Increment current saved amount
+            goal.current_amount += data.amount
+            self.db.add(goal)
+            
             self.db.commit()
             logger.info(f"Created contribution ID {created.id} (amount: {created.amount}) for goal ID {goal_id}")
             return created

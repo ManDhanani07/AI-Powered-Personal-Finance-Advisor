@@ -24,7 +24,13 @@ def register_user(db: Session, user_data: UserRegister) -> User:
         new_user = User(
             email=user_data.email.strip().lower(),
             hashed_password=hashed_pwd,
-            full_name=user_data.full_name.strip()
+            full_name=user_data.full_name.strip(),
+            phone=user_data.phone,
+            occupation=user_data.occupation,
+            monthly_income=user_data.monthly_income,
+            preferred_currency=user_data.preferred_currency,
+            language=user_data.language,
+            timezone=user_data.timezone
         )
         db.add(new_user)
         db.commit()
@@ -46,6 +52,15 @@ def authenticate_user(db: Session, login_data: UserLogin) -> User:
     if not user.is_active:
         logger.warning(f"Blocked inactive user login: {login_data.email}")
         raise ForbiddenError("This account has been deactivated.")
+        
+    try:
+        user.last_login = datetime.now(timezone.utc)
+        db.add(user)
+        db.commit()
+        logger.info(f"Updated last_login timestamp for user: {user.email}")
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Failed updating last_login for user ID {user.id}: {str(e)}")
         
     return user
 
