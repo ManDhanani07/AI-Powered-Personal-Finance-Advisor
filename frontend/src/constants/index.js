@@ -1,0 +1,62 @@
+export const ROUTES = {
+  HOME: '/',
+  AUTH: {
+    LOGIN: '/auth/login',
+    REGISTER: '/auth/register',
+    FORGOT_PASSWORD: '/auth/forgot-password',
+    RESET_PASSWORD: '/auth/reset-password',
+  },
+  DASHBOARD: '/dashboard',
+  TRANSACTIONS: '/transactions',
+  CATEGORIES: '/categories',
+  BUDGETS: '/budgets',
+  GOALS: '/goals',
+  FINANCIAL_HEALTH: '/financial-health',
+  REPORTS: '/reports',
+  FORECAST: '/forecast',
+  AI_ADVISOR: '/ai',
+  PROFILE: '/profile',
+  SETTINGS: '/settings',
+  NOTIFICATIONS: '/notifications',
+  NOT_FOUND: '/404',
+};
+
+export const API_URLS = {
+  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/v1',
+  AUTH: {
+    REGISTER: '/auth/register',
+    LOGIN: '/auth/login',
+    GOOGLE: '/auth/google',
+    LOGOUT: '/auth/logout',
+    REFRESH: '/auth/refresh',
+    FORGOT_PASSWORD: '/auth/forgot-password',
+    RESET_PASSWORD: '/auth/reset-password',
+    CHANGE_PASSWORD: '/auth/change-password',
+    ME: '/auth/me',
+  },
+  USER: {
+    PROFILE: '/user/profile',
+    SETTINGS: '/user/settings',
+  },
+};
+
+export const STORAGE_KEYS = {
+  THEME: 'fintech_theme_mode',
+  AUTH_TOKEN: 'fintech_auth_token',
+  REFRESH_TOKEN: 'fintech_refresh_token',
+  USER_PREFERENCES: 'fintech_user_prefs',
+};
+
+export const APP_CONSTANTS = {
+  APP_NAME: 'AI-Powered Personal Finance Advisor',
+  DEFAULT_CURRENCY: 'INR',
+  DEFAULT_LOCALE: 'en-IN',
+  DATE_FORMAT: 'DD MMM YYYY',
+  PAGINATION_LIMIT: 20,
+};
+
+export const THEME_CONSTANTS = {
+  LIGHT: 'light',
+  DARK: 'dark',
+  SYSTEM: 'system',
+};
