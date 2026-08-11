@@ -17,17 +17,17 @@ import {
   Briefcase,
   Building2,
   ShieldCheck,
-  Landmark,
   Sparkles,
+  Eye,
+  EyeOff,
+  Lock,
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 
 import useAuth from '../../hooks/useAuth.js';
-import PasswordInput from './PasswordInput.jsx';
 import SocialLoginButtons from './SocialLoginButtons.jsx';
 import { ROUTES } from '../../constants/index.js';
 
-// Personas for Step 2
 const PERSONAS = [
   {
     id: 'student',
@@ -52,7 +52,6 @@ const PERSONAS = [
   },
 ];
 
-// Bank Link Prompts for Step 3
 const BANKS = [
   { name: 'HDFC Bank', logo: '🏦' },
   { name: 'ICICI Bank', logo: '🏛️' },
@@ -61,15 +60,22 @@ const BANKS = [
   { name: 'Zerodha Kite', logo: '📈' },
 ];
 
+// Shared dark input class
+const INPUT_BASE = 'block w-full rounded-xl border py-2 text-xs bg-[#09090B] text-white placeholder-slate-700 transition-all focus:outline-none focus:ring-2';
+const INPUT_NORMAL = 'border-zinc-800 focus:border-emerald-500/50 focus:ring-emerald-500/10';
+const INPUT_ERROR = 'border-rose-500/50 focus:ring-rose-500/15';
+const LABEL_BASE = 'block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1';
+
 export const RegisterForm = () => {
   const { register: registerAuth } = useAuth();
   const navigate = useNavigate();
 
-  // Multi-step state (1: Credentials, 2: Persona, 3: Bank Sync Prompt)
   const [step, setStep] = useState(1);
   const [selectedPersona, setSelectedPersona] = useState('professional');
   const [selectedBanks, setSelectedBanks] = useState(['HDFC Bank']);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     register,
@@ -79,6 +85,7 @@ export const RegisterForm = () => {
     setValue,
     formState: { errors },
   } = useForm({
+    mode: 'onChange',
     defaultValues: {
       first_name: '',
       last_name: '',
@@ -92,22 +99,16 @@ export const RegisterForm = () => {
 
   const watchPassword = watch('password', '');
 
-  // Password strength criteria
-  const passwordCriteria = useMemo(() => {
-    return {
-      length: watchPassword.length >= 8,
-      uppercase: /[A-Z]/.test(watchPassword),
-      lowercase: /[a-z]/.test(watchPassword),
-      number: /[0-9]/.test(watchPassword),
-      special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?]/.test(watchPassword),
-    };
-  }, [watchPassword]);
+  const passwordCriteria = useMemo(() => ({
+    length: watchPassword.length >= 8,
+    uppercase: /[A-Z]/.test(watchPassword),
+    lowercase: /[a-z]/.test(watchPassword),
+    number: /[0-9]/.test(watchPassword),
+    special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(watchPassword),
+  }), [watchPassword]);
 
-  const passedCount = useMemo(() => {
-    return Object.values(passwordCriteria).filter(Boolean).length;
-  }, [passwordCriteria]);
+  const passedCount = useMemo(() => Object.values(passwordCriteria).filter(Boolean).length, [passwordCriteria]);
 
-  // Step 1 -> Step 2 validation
   const goToStep2 = async () => {
     const valid = await trigger(['first_name', 'last_name', 'email', 'password', 'confirm_password']);
     if (valid) {
@@ -119,20 +120,14 @@ export const RegisterForm = () => {
     }
   };
 
-  // Step 2 -> Step 3
-  const goToStep3 = () => {
-    setStep(3);
-  };
+  const goToStep3 = () => setStep(3);
 
   const toggleBankSelect = (bankName) => {
-    if (selectedBanks.includes(bankName)) {
-      setSelectedBanks(selectedBanks.filter((b) => b !== bankName));
-    } else {
-      setSelectedBanks([...selectedBanks, bankName]);
-    }
+    setSelectedBanks((prev) =>
+      prev.includes(bankName) ? prev.filter((b) => b !== bankName) : [...prev, bankName]
+    );
   };
 
-  // Final Submission
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     try {
@@ -145,7 +140,6 @@ export const RegisterForm = () => {
         monthly_income: parseFloat(data.monthly_income) || 0.0,
         occupation: selectedPersona,
       };
-
       await registerAuth(payload);
       toast.success('Account created successfully! Welcome to FinAdvisor.', { icon: '🎉' });
       navigate(ROUTES.DASHBOARD);
@@ -161,373 +155,361 @@ export const RegisterForm = () => {
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: 'easeOut' }}
-      className="w-full max-w-lg mx-auto"
+      className="w-full"
     >
-      <div className="rounded-3xl border border-border-strong bg-bg-surface/90 p-8 shadow-2xl backdrop-blur-2xl">
-        {/* Form Header */}
-        <div className="mb-6 text-center">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-500/10 text-primary-500 border border-primary-500/20">
-            <UserPlus className="h-6 w-6" />
-          </div>
-          <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-outfit">
-            Create Free Account
-          </h2>
-          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            Step {step} of 3: {step === 1 ? 'Account Credentials' : step === 2 ? 'Persona Setup' : 'Bank Integration'}
-          </p>
-
-          {/* Step Progress Bar */}
-          <div className="mt-4 flex items-center justify-center gap-2">
-            {[1, 2, 3].map((s) => (
-              <div
-                key={s}
-                className={`h-1.5 rounded-full transition-all duration-300 ${
-                  s === step
-                    ? 'w-10 bg-primary-500'
-                    : s < step
-                    ? 'w-6 bg-emerald-500'
-                    : 'w-6 bg-border-strong'
-                }`}
-              />
-            ))}
-          </div>
+      {/* Form Header */}
+      <div className="mb-3 text-center">
+        <div className="mx-auto mb-1.5 flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+          <UserPlus className="h-4 w-4" />
         </div>
+        <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white font-outfit">
+          Create Free Account
+        </h2>
+        <p className="mt-0.5 text-[11px] text-slate-500">
+          Step {step} of 3: {step === 1 ? 'Account Credentials' : step === 2 ? 'Personal Setup' : 'Bank Integration'}
+        </p>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <AnimatePresence mode="wait">
-            {/* STEP 1: ACCOUNT CREDENTIALS */}
-            {step === 1 && (
-              <motion.div
-                key="step1"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.25 }}
-                className="space-y-4"
-              >
-                {/* First & Last Name Grid */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                      First Name
-                    </label>
-                    <div className="relative rounded-xl shadow-sm">
-                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
-                        <User className="h-4 w-4" />
-                      </div>
-                      <input
-                        type="text"
-                        placeholder="John"
-                        {...register('first_name', { required: 'First name is required' })}
-                        className={`block w-full rounded-xl border py-2.5 pl-10 pr-3 text-sm transition-all focus:outline-none focus:ring-2 bg-bg-surface text-slate-900 dark:text-white ${
-                          errors.first_name ? 'border-rose-500' : 'border-border-strong focus:ring-primary-500/20'
-                        }`}
-                      />
+        {/* Step Progress Dots */}
+        <div className="mt-2 flex items-center justify-center gap-1.5">
+          {[1, 2, 3].map((s) => (
+            <div
+              key={s}
+              className={`h-1 rounded-full transition-all duration-300 ${
+                s === step
+                  ? 'w-6 bg-emerald-500'
+                  : s < step
+                  ? 'w-4 bg-emerald-700'
+                  : 'w-4 bg-zinc-800'
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <AnimatePresence mode="wait">
+
+          {/* ── STEP 1: ACCOUNT CREDENTIALS ── */}
+          {step === 1 && (
+            <motion.div
+              key="step1"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.22 }}
+              className="space-y-2.5"
+            >
+              {/* Name Grid */}
+              <div className="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label className={LABEL_BASE}>First Name</label>
+                  <div className="relative">
+                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-600">
+                      <User className="h-3.5 w-3.5" />
                     </div>
-                    {errors.first_name && <p className="text-[11px] text-rose-500">{errors.first_name.message}</p>}
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                      Last Name
-                    </label>
                     <input
                       type="text"
-                      placeholder="Doe"
-                      {...register('last_name', { required: 'Last name is required' })}
-                      className={`block w-full rounded-xl border py-2.5 px-3.5 text-sm transition-all focus:outline-none focus:ring-2 bg-bg-surface text-slate-900 dark:text-white ${
-                        errors.last_name ? 'border-rose-500' : 'border-border-strong focus:ring-primary-500/20'
-                      }`}
-                    />
-                    {errors.last_name && <p className="text-[11px] text-rose-500">{errors.last_name.message}</p>}
-                  </div>
-                </div>
-
-                {/* Email Address */}
-                <div className="space-y-1">
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                    Email Address
-                  </label>
-                  <div className="relative rounded-xl shadow-sm">
-                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
-                      <Mail className="h-4 w-4" />
-                    </div>
-                    <input
-                      type="email"
-                      placeholder="john.doe@example.com"
-                      {...register('email', {
-                        required: 'Email is required',
-                        pattern: {
-                          value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                          message: 'Invalid email address',
-                        },
-                      })}
-                      className={`block w-full rounded-xl border py-2.5 pl-10 pr-3.5 text-sm transition-all focus:outline-none focus:ring-2 bg-bg-surface text-slate-900 dark:text-white ${
-                        errors.email ? 'border-rose-500' : 'border-border-strong focus:ring-primary-500/20'
-                      }`}
+                      placeholder="John"
+                      autoComplete="given-name"
+                      {...register('first_name', { required: 'Required' })}
+                      className={`${INPUT_BASE} pl-9 pr-2.5 ${errors.first_name ? INPUT_ERROR : INPUT_NORMAL}`}
                     />
                   </div>
-                  {errors.email && <p className="text-[11px] text-rose-500">{errors.email.message}</p>}
+                  {errors.first_name && <p className="text-[10px] text-rose-400 mt-0.5">{errors.first_name.message}</p>}
                 </div>
 
-                {/* Password Input */}
-                <PasswordInput
-                  id="password"
-                  name="password"
-                  label="Password"
-                  register={register}
-                  error={errors.password}
-                  validation={{
-                    required: 'Password is required',
-                    validate: () => passedCount === 5 || 'Password must satisfy all strength requirements',
-                  }}
-                />
+                <div>
+                  <label className={LABEL_BASE}>Last Name</label>
+                  <input
+                    type="text"
+                    placeholder="Doe"
+                    autoComplete="family-name"
+                    {...register('last_name', { required: 'Required' })}
+                    className={`${INPUT_BASE} px-3 ${errors.last_name ? INPUT_ERROR : INPUT_NORMAL}`}
+                  />
+                  {errors.last_name && <p className="text-[10px] text-rose-400 mt-0.5">{errors.last_name.message}</p>}
+                </div>
+              </div>
 
-                {/* Real-time Password Strength Meter */}
-                {watchPassword && (
-                  <div className="rounded-2xl border border-border-subtle bg-bg-elevated/60 p-3.5 space-y-2.5">
-                    <div className="flex items-center justify-between text-[11px] font-bold">
-                      <span className="text-slate-400">Password Strength</span>
-                      <span className={passedCount === 5 ? 'text-emerald-500' : passedCount >= 3 ? 'text-amber-500' : 'text-rose-500'}>
-                        {passedCount === 5 ? 'Strong ✨' : passedCount >= 3 ? 'Medium' : 'Weak'}
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-5 gap-1.5 h-1.5 w-full">
-                      {[1, 2, 3, 4, 5].map((level) => (
-                        <div
-                          key={level}
-                          className={`h-full rounded-full transition-all duration-300 ${
-                            level <= passedCount
-                              ? passedCount === 5
-                                ? 'bg-emerald-500'
-                                : passedCount >= 3
-                                ? 'bg-amber-500'
-                                : 'bg-rose-500'
-                              : 'bg-border-strong'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <div className="grid grid-cols-2 gap-1.5 pt-1 text-[10px] text-slate-400">
-                      <span className={`flex items-center gap-1 ${passwordCriteria.length ? 'text-emerald-500 font-bold' : ''}`}>
-                        {passwordCriteria.length ? <Check className="h-3 w-3" /> : <X className="h-3 w-3 text-slate-500" />} 8+ Characters
-                      </span>
-                      <span className={`flex items-center gap-1 ${passwordCriteria.uppercase ? 'text-emerald-500 font-bold' : ''}`}>
-                        {passwordCriteria.uppercase ? <Check className="h-3 w-3" /> : <X className="h-3 w-3 text-slate-500" />} Uppercase Letter
-                      </span>
-                      <span className={`flex items-center gap-1 ${passwordCriteria.lowercase ? 'text-emerald-500 font-bold' : ''}`}>
-                        {passwordCriteria.lowercase ? <Check className="h-3 w-3" /> : <X className="h-3 w-3 text-slate-500" />} Lowercase Letter
-                      </span>
-                      <span className={`flex items-center gap-1 ${passwordCriteria.number ? 'text-emerald-500 font-bold' : ''}`}>
-                        {passwordCriteria.number ? <Check className="h-3 w-3" /> : <X className="h-3 w-3 text-slate-500" />} Number (0-9)
-                      </span>
-                      <span className={`flex items-center gap-1 col-span-2 ${passwordCriteria.special ? 'text-emerald-500 font-bold' : ''}`}>
-                        {passwordCriteria.special ? <Check className="h-3 w-3" /> : <X className="h-3 w-3 text-slate-500" />} Special Character (!@#$%^&*)
-                      </span>
-                    </div>
+              {/* Email */}
+              <div>
+                <label className={LABEL_BASE}>Email Address</label>
+                <div className="relative">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-600">
+                    <Mail className="h-3.5 w-3.5" />
                   </div>
-                )}
+                  <input
+                    type="email"
+                    placeholder="john.doe@example.com"
+                    autoComplete="email"
+                    {...register('email', {
+                      required: 'Email is required',
+                      pattern: { value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, message: 'Invalid email' },
+                    })}
+                    className={`${INPUT_BASE} pl-9 pr-3 ${errors.email ? INPUT_ERROR : INPUT_NORMAL}`}
+                  />
+                </div>
+                {errors.email && <p className="text-[10px] text-rose-400 mt-0.5">{errors.email.message}</p>}
+              </div>
 
-                {/* Confirm Password */}
-                <PasswordInput
-                  id="confirm_password"
-                  name="confirm_password"
-                  label="Confirm Password"
-                  register={register}
-                  error={errors.confirm_password}
-                  validation={{
-                    required: 'Please confirm your password',
-                    validate: (val) => val === watchPassword || 'Passwords do not match',
-                  }}
-                />
+              {/* Password */}
+              <div>
+                <label className={LABEL_BASE}>Password</label>
+                <div className="relative">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-600">
+                    <Lock className="h-3.5 w-3.5" />
+                  </div>
+                  <input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    autoComplete="new-password"
+                    {...register('password', {
+                      required: 'Password is required',
+                      validate: () => passedCount === 5 || 'Password must satisfy all requirements',
+                    })}
+                    className={`${INPUT_BASE} pl-9 pr-9 ${errors.password ? INPUT_ERROR : INPUT_NORMAL}`}
+                  />
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    onClick={() => setShowPassword((s) => !s)}
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-600 hover:text-slate-400"
+                  >
+                    {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                  </button>
+                </div>
+                {errors.password && <p className="text-[10px] text-rose-400 mt-0.5">{errors.password.message}</p>}
+              </div>
 
-                {/* Continue to Step 2 Button */}
-                <button
-                  type="button"
-                  onClick={goToStep2}
-                  className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-primary-500 to-indigo-600 py-3.5 px-4 text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-primary-500/25 hover:shadow-xl hover:scale-[1.01] active:scale-[0.98] transition-all"
-                >
-                  <span>Continue to Persona Setup</span>
-                  <ArrowRight className="h-4 w-4" />
-                </button>
+              {/* Confirm Password */}
+              <div>
+                <label className={LABEL_BASE}>Confirm Password</label>
+                <div className="relative">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-600">
+                    <Lock className="h-3.5 w-3.5" />
+                  </div>
+                  <input
+                    id="confirm_password"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    autoComplete="new-password"
+                    {...register('confirm_password', {
+                      required: 'Please confirm password',
+                      validate: (v) => v === watchPassword || 'Passwords do not match',
+                    })}
+                    className={`${INPUT_BASE} pl-9 pr-9 ${errors.confirm_password ? INPUT_ERROR : INPUT_NORMAL}`}
+                  />
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    onClick={() => setShowConfirmPassword((s) => !s)}
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-600 hover:text-slate-400"
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                  </button>
+                </div>
+                {errors.confirm_password && <p className="text-[10px] text-rose-400 mt-0.5">{errors.confirm_password.message}</p>}
+              </div>
 
-                <SocialLoginButtons />
-              </motion.div>
-            )}
-
-            {/* STEP 2: PERSONA SELECTION */}
-            {step === 2 && (
-              <motion.div
-                key="step2"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.25 }}
-                className="space-y-4"
+              {/* Action Button */}
+              <button
+                type="button"
+                onClick={goToStep2}
+                className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl bg-white py-2.5 text-xs font-bold text-slate-950 shadow-md transition-all hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.99]"
               >
-                <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
-                  Select Your Financial Profile
-                </p>
+                <span>Continue to Personal Setup</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </button>
 
-                <div className="space-y-3">
+              <SocialLoginButtons />
+
+              <p className="pt-1 text-center text-[11px] text-slate-500">
+                Already have an account?{' '}
+                <Link to={ROUTES.AUTH.LOGIN} className="font-semibold text-emerald-400 hover:text-emerald-300">
+                  Sign in instead
+                </Link>
+              </p>
+            </motion.div>
+          )}
+
+          {/* ── STEP 2: PERSONAL SETUP ── */}
+          {step === 2 && (
+            <motion.div
+              key="step2"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.22 }}
+              className="space-y-3"
+            >
+              <div>
+                <label className={LABEL_BASE}>Financial Persona / Occupation</label>
+                <div className="grid grid-cols-1 gap-2">
                   {PERSONAS.map((p) => {
                     const Icon = p.icon;
                     const isSelected = selectedPersona === p.id;
                     return (
-                      <div
+                      <button
                         key={p.id}
+                        type="button"
                         onClick={() => {
                           setSelectedPersona(p.id);
                           setValue('monthly_income', p.defaultIncome);
                         }}
-                        className={`p-4 rounded-2xl border cursor-pointer transition-all ${
+                        className={`flex items-start gap-2.5 rounded-xl border p-2.5 text-left transition-all ${
                           isSelected
-                            ? 'border-primary-500 bg-primary-500/10 shadow-lg shadow-primary-500/10'
-                            : 'border-border-strong bg-bg-elevated/60 hover:bg-bg-elevated'
+                            ? 'border-emerald-500/60 bg-emerald-500/10 text-white shadow-sm'
+                            : 'border-zinc-800 bg-[#09090B] text-slate-400 hover:border-zinc-700'
                         }`}
                       >
-                        <div className="flex items-start space-x-3.5">
-                          <div className={`p-2.5 rounded-xl ${isSelected ? 'bg-primary-500 text-white' : 'bg-bg-surface text-slate-400'}`}>
-                            <Icon className="w-5 h-5" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between">
-                              <p className="text-sm font-bold text-slate-900 dark:text-white">{p.title}</p>
-                              {isSelected && <Check className="w-4 h-4 text-primary-500" />}
-                            </div>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{p.desc}</p>
-                          </div>
+                        <div className={`rounded-lg p-1.5 ${isSelected ? 'bg-emerald-500 text-slate-950' : 'bg-zinc-800 text-slate-400'}`}>
+                          <Icon className="h-4 w-4" />
                         </div>
-                      </div>
+                        <div>
+                          <p className="text-xs font-bold text-white">{p.title}</p>
+                          <p className="text-[10px] text-slate-400 leading-tight mt-0.5">{p.desc}</p>
+                        </div>
+                      </button>
                     );
                   })}
                 </div>
+              </div>
 
-                {/* Monthly Income Field */}
-                <div className="space-y-1.5 pt-2">
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                    Estimated Monthly Income (₹)
-                  </label>
-                  <div className="relative rounded-xl shadow-sm">
-                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
-                      <IndianRupee className="h-4 w-4" />
-                    </div>
-                    <input
-                      type="number"
-                      placeholder="85000"
-                      {...register('monthly_income')}
-                      className="block w-full rounded-xl border border-border-strong bg-bg-surface py-2.5 pl-10 pr-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 text-slate-900 dark:text-white"
-                    />
+              {/* Monthly Income */}
+              <div>
+                <label className={LABEL_BASE}>Estimated Monthly Income (₹)</label>
+                <div className="relative">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-600">
+                    <IndianRupee className="h-3.5 w-3.5" />
                   </div>
+                  <input
+                    type="number"
+                    placeholder="85000"
+                    {...register('monthly_income', { required: 'Monthly income is required' })}
+                    className={`${INPUT_BASE} pl-9 pr-3 ${errors.monthly_income ? INPUT_ERROR : INPUT_NORMAL}`}
+                  />
                 </div>
+              </div>
 
-                {/* Step 2 Buttons */}
-                <div className="flex items-center gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setStep(1)}
-                    className="flex-1 py-3.5 rounded-2xl border border-border-strong bg-bg-elevated font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 transition-all"
-                  >
-                    <ArrowLeft className="w-4 h-4 inline mr-1" /> Back
-                  </button>
-                  <button
-                    type="button"
-                    onClick={goToStep3}
-                    className="flex-1 py-3.5 rounded-2xl bg-gradient-to-r from-primary-500 to-indigo-600 font-bold text-xs uppercase tracking-wider text-white shadow-lg shadow-primary-500/25 hover:shadow-xl transition-all"
-                  >
-                    Next: Bank Sync <ArrowRight className="w-4 h-4 inline ml-1" />
-                  </button>
-                </div>
-              </motion.div>
-            )}
-
-            {/* STEP 3: BANK SYNC PROMPT */}
-            {step === 3 && (
-              <motion.div
-                key="step3"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.25 }}
-                className="space-y-4"
-              >
-                <div className="p-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 text-center space-y-1">
-                  <div className="inline-flex items-center space-x-1.5 text-xs font-bold text-emerald-500">
-                    <ShieldCheck className="w-4 h-4" />
-                    <span>Bank Account Aggregator Sync</span>
+              {/* Phone */}
+              <div>
+                <label className={LABEL_BASE}>Phone Number (Optional)</label>
+                <div className="relative">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-600">
+                    <Phone className="h-3.5 w-3.5" />
                   </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-300">
-                    Select your primary accounts to enable instant automated transaction streaming.
-                  </p>
+                  <input
+                    type="tel"
+                    placeholder="+91 98765 43210"
+                    {...register('phone')}
+                    className={`${INPUT_BASE} pl-9 pr-3 ${INPUT_NORMAL}`}
+                  />
                 </div>
+              </div>
 
-                <div className="grid grid-cols-2 gap-2.5">
+              {/* Buttons */}
+              <div className="flex gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setStep(1)}
+                  className="flex items-center justify-center gap-1.5 rounded-xl border border-zinc-800 bg-[#09090B] px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-zinc-800"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5" />
+                  <span>Back</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={goToStep3}
+                  className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-white py-2 text-xs font-bold text-slate-950 hover:bg-slate-100"
+                >
+                  <span>Continue to Bank Sync</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </motion.div>
+          )}
+
+          {/* ── STEP 3: BANK INTEGRATION ── */}
+          {step === 3 && (
+            <motion.div
+              key="step3"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.22 }}
+              className="space-y-3"
+            >
+              <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-2.5 text-center">
+                <div className="flex justify-center mb-1">
+                  <ShieldCheck className="h-5 w-5 text-emerald-400" />
+                </div>
+                <p className="text-xs font-bold text-white">RBI Account Aggregator (AA) Ready</p>
+                <p className="text-[10px] text-slate-400 mt-0.5">
+                  Select your primary accounts to auto-sync transactions safely via 256-bit AES encryption.
+                </p>
+              </div>
+
+              <div>
+                <label className={LABEL_BASE}>Select Your Financial Accounts</label>
+                <div className="grid grid-cols-2 gap-2">
                   {BANKS.map((b) => {
                     const isSelected = selectedBanks.includes(b.name);
                     return (
-                      <div
+                      <button
                         key={b.name}
+                        type="button"
                         onClick={() => toggleBankSelect(b.name)}
-                        className={`p-3 rounded-2xl border cursor-pointer flex items-center justify-between text-xs font-bold transition-all ${
+                        className={`flex items-center gap-2 rounded-xl border p-2 text-left transition-all ${
                           isSelected
-                            ? 'border-primary-500 bg-primary-500/10 text-primary-500'
-                            : 'border-border-strong bg-bg-elevated/60 text-slate-700 dark:text-slate-300'
+                            ? 'border-emerald-500/60 bg-emerald-500/10 text-white'
+                            : 'border-zinc-800 bg-[#09090B] text-slate-400 hover:border-zinc-700'
                         }`}
                       >
-                        <span className="flex items-center space-x-2 truncate">
-                          <span>{b.logo}</span>
-                          <span className="truncate">{b.name}</span>
-                        </span>
-                        {isSelected && <Check className="w-3.5 h-3.5 flex-shrink-0" />}
-                      </div>
+                        <span className="text-sm">{b.logo}</span>
+                        <span className="text-[11px] font-semibold flex-1 truncate">{b.name}</span>
+                        {isSelected && <Check className="h-3.5 w-3.5 text-emerald-400 shrink-0" />}
+                      </button>
                     );
                   })}
                 </div>
+              </div>
 
-                {/* Final Submission Buttons */}
-                <div className="space-y-2 pt-2">
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-primary-500 via-indigo-600 to-accent-500 py-3.5 px-4 text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-primary-500/25 transition-all hover:shadow-xl hover:scale-[1.01] active:scale-[0.98] disabled:opacity-70"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Completing Setup...
-                      </>
-                    ) : (
-                      <>
-                        <span>Connect & Complete Setup</span>
-                        <Sparkles className="h-4 w-4" />
-                      </>
-                    )}
-                  </button>
+              {/* Final Submit */}
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setStep(2)}
+                  className="flex items-center justify-center gap-1.5 rounded-xl border border-zinc-800 bg-[#09090B] px-4 py-2.5 text-xs font-semibold text-slate-300 hover:bg-zinc-800"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5" />
+                  <span>Back</span>
+                </button>
 
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-slate-200 transition-colors"
-                  >
-                    Skip bank sync for now
-                  </button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </form>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-emerald-500 py-2.5 text-xs font-bold text-slate-950 shadow-lg shadow-emerald-500/20 hover:bg-emerald-400 disabled:opacity-50"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>Creating Account...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Complete Registration</span>
+                      <Sparkles className="h-4 w-4" />
+                    </>
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          )}
 
-        {/* Footer Link */}
-        <p className="mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
-          Already have an account?{' '}
-          <Link
-            to={ROUTES.AUTH.LOGIN}
-            className="font-bold text-primary-500 hover:text-primary-400"
-          >
-            Sign in instead
-          </Link>
-        </p>
-      </div>
+        </AnimatePresence>
+      </form>
     </motion.div>
   );
 };

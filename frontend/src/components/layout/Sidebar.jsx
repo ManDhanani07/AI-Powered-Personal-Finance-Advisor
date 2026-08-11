@@ -28,7 +28,6 @@ const NAV_ITEMS = [
   { label: 'Settings', path: ROUTES.SETTINGS, icon: Settings },
 ];
 
-// Key mobile bottom bar navigation items
 const MOBILE_NAV_ITEMS = [
   { label: 'Dashboard', path: ROUTES.DASHBOARD, icon: LayoutDashboard },
   { label: 'Transactions', path: ROUTES.TRANSACTIONS, icon: Receipt },
@@ -42,12 +41,12 @@ export const Sidebar = ({ isCollapsed, onToggleCollapse }) => {
     <>
       {/* Desktop & Tablet Sidebar (≥ 768px) */}
       <aside
-        className={`hidden md:flex flex-col sticky top-[72px] h-[calc(100vh-72px)] bg-bg-surface border-r border-border-subtle transition-all duration-300 z-30 ${
-          isCollapsed ? 'w-[80px]' : 'w-[260px]'
+        className={`hidden md:flex flex-col sticky top-[72px] h-[calc(100vh-72px)] bg-[#000000] border-r border-zinc-900 transition-all duration-300 z-30 ${
+          isCollapsed ? 'w-[80px]' : 'w-[250px]'
         }`}
       >
         {/* Navigation Item List */}
-        <nav className="flex-1 p-3 space-y-1.5 overflow-y-auto">
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             return (
@@ -55,14 +54,14 @@ export const Sidebar = ({ isCollapsed, onToggleCollapse }) => {
                 key={item.path}
                 to={item.path}
                 className={({ isActive }) =>
-                  `group relative flex items-center px-3.5 py-3 rounded-2xl text-sm font-medium transition-all duration-200 ${
+                  `group relative flex items-center px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 ${
                     isActive
-                      ? 'bg-primary-500/10 text-primary-500 font-semibold shadow-sm'
-                      : 'text-slate-600 dark:text-slate-400 hover:bg-bg-elevated hover:text-slate-900 dark:hover:text-white'
+                      ? 'bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20 shadow-sm'
+                      : 'text-slate-400 hover:bg-[#09090B] hover:text-white border border-transparent'
                   }`
                 }
               >
-                <Icon className={`w-5 h-5 flex-shrink-0 ${isCollapsed ? 'mx-auto' : 'mr-3.5'}`} />
+                <Icon className={`w-4.5 h-4.5 flex-shrink-0 ${isCollapsed ? 'mx-auto' : 'mr-3'}`} />
 
                 {!isCollapsed && (
                   <span className="truncate">{item.label}</span>
@@ -70,7 +69,7 @@ export const Sidebar = ({ isCollapsed, onToggleCollapse }) => {
 
                 {/* Collapsed Tooltip Hover */}
                 {isCollapsed && (
-                  <div className="absolute left-full ml-3 hidden group-hover:block z-50 px-2.5 py-1 rounded-xl bg-slate-900 text-white text-xs font-semibold whitespace-nowrap shadow-lg">
+                  <div className="absolute left-full ml-3 hidden group-hover:block z-50 px-2.5 py-1 rounded-lg bg-[#09090B] border border-zinc-800 text-white text-xs font-semibold whitespace-nowrap shadow-lg">
                     {item.label}
                   </div>
                 )}
@@ -81,7 +80,7 @@ export const Sidebar = ({ isCollapsed, onToggleCollapse }) => {
       </aside>
 
       {/* Mobile Bottom Navigation Bar (< 768px) */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-bg-surface/90 backdrop-blur-lg border-t border-border-subtle z-40 flex items-center justify-around px-2 shadow-2xl">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-[#000000] border-t border-zinc-900 z-40 flex items-center justify-around px-2 shadow-2xl">
         {MOBILE_NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           return (
@@ -91,8 +90,8 @@ export const Sidebar = ({ isCollapsed, onToggleCollapse }) => {
               className={({ isActive }) =>
                 `flex flex-col items-center justify-center w-14 py-1 rounded-xl transition-all ${
                   isActive
-                    ? 'text-primary-500 font-bold scale-105'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    ? 'text-emerald-400 font-bold scale-105'
+                    : 'text-slate-500 hover:text-white'
                 }`
               }
             >
@@ -103,7 +102,7 @@ export const Sidebar = ({ isCollapsed, onToggleCollapse }) => {
                   {isActive && (
                     <motion.div
                       layoutId="mobileActiveTab"
-                      className="w-1 h-1 rounded-full bg-primary-500 mt-0.5"
+                      className="w-1 h-1 rounded-full bg-emerald-400 mt-0.5"
                     />
                   )}
                 </>

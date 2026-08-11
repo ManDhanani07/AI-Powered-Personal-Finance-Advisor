@@ -1,85 +1,84 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import {
-  Receipt,
-  PieChart,
-  Target,
-  LineChart,
+  Workflow,
+  Layers,
+  Crosshair,
+  Binary,
   Activity,
-  FileBarChart,
-  Sparkles,
+  FileSpreadsheet,
+  Orbit,
 } from 'lucide-react';
-import SectionTitle from './ui/SectionTitle.jsx';
 
 const FEATURES = [
   {
-    icon: Receipt,
+    icon: Workflow,
     title: 'Expense Tracking',
     desc: 'Auto-sync transactions via Secure Bank Aggregator with AI regex merchant categorization rules and custom tags.',
-    color: 'from-blue-500 to-indigo-600',
-    iconColor: 'text-primary-400',
-    glowColor: 'group-hover:shadow-primary-500/25',
+    color: 'text-[#FF5A5F]',
+    bgColor: 'bg-[#FF5A5F]/15 border-[#FF5A5F]/20',
   },
   {
-    icon: PieChart,
+    icon: Layers,
     title: 'Budget Planning',
     desc: 'Zero-based envelope budgeting with real-time limit sliders, surplus reallocation tools, and over-budget burn rate warnings.',
-    color: 'from-accent-500 to-teal-600',
-    iconColor: 'text-accent-400',
-    glowColor: 'group-hover:shadow-accent-500/25',
+    color: 'text-[#00F2FE]',
+    bgColor: 'bg-[#00F2FE]/15 border-[#00F2FE]/20',
   },
   {
-    icon: Target,
+    icon: Crosshair,
     title: 'Savings Goals',
-    desc: 'Visual goal vaults with dynamic liquid progress wave indicators, target date projections, and Framer Motion celebration particle states.',
-    color: 'from-emerald-500 to-green-600',
-    iconColor: 'text-emerald-400',
-    glowColor: 'group-hover:shadow-emerald-500/25',
+    desc: 'Visual goal vaults with dynamic progress wave indicators, target date projections, and Framer Motion particle celebrations.',
+    color: 'text-purple-400',
+    bgColor: 'bg-purple-500/15 border-purple-500/20',
   },
   {
-    icon: LineChart,
+    icon: Binary,
     title: 'AI Forecast Engine',
     desc: 'Machine learning cash flow canvas displaying 12-month future trajectories with interactive scenario sliders and 95% confidence bands.',
-    color: 'from-purple-500 to-indigo-600',
-    iconColor: 'text-purple-400',
-    glowColor: 'group-hover:shadow-purple-500/25',
+    color: 'text-emerald-400',
+    bgColor: 'bg-emerald-500/15 border-emerald-500/20',
   },
   {
     icon: Activity,
     title: 'Financial Health Score',
     desc: 'Real-time liquidity risk alerts, emergency fund readiness metrics, and vendor concentration dependency matrix.',
-    color: 'from-amber-500 to-orange-600',
-    iconColor: 'text-amber-400',
-    glowColor: 'group-hover:shadow-amber-500/25',
+    color: 'text-sky-400',
+    bgColor: 'bg-sky-500/15 border-sky-500/20',
   },
   {
-    icon: FileBarChart,
+    icon: FileSpreadsheet,
     title: 'Reports & Tax Planning',
     desc: 'Visual reports with category breakdown, spending trends, income vs expense comparison, and 1-click executive PDF exports.',
-    color: 'from-rose-500 to-pink-600',
-    iconColor: 'text-rose-400',
-    glowColor: 'group-hover:shadow-rose-500/25',
+    color: 'text-rose-400',
+    bgColor: 'bg-rose-500/15 border-rose-500/20',
   },
 ];
 
 export const FeaturesSection = () => {
   return (
-    <section id="features" className="py-24 bg-bg-base relative overflow-hidden">
-      {/* Glow Orbs */}
-      <div className="pointer-events-none absolute top-1/2 -left-40 w-96 h-96 rounded-full bg-primary-500/10 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-10 -right-40 w-96 h-96 rounded-full bg-accent-500/10 blur-3xl" />
-
+    <section id="features" className="py-12 bg-transparent relative overflow-hidden">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <SectionTitle
-          badge="Core Capabilities"
-          badgeIcon={Sparkles}
-          title="6 Intelligent Pillars of"
-          highlightText="Wealth OS"
-          subtitle="Everything you need to organize, protect, and grow your wealth in one unified platform."
-          className="mb-16"
-        />
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.6 }}
+          className="text-center max-w-3xl mx-auto mb-10"
+        >
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-[#141418] border border-purple-500/20 text-purple-400 text-xs font-extrabold uppercase tracking-widest mb-4">
+            <Orbit className="w-4 h-4 text-purple-400" />
+            <span>Core Capabilities</span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight font-outfit">
+            6 Intelligent Pillars of <span className="bg-gradient-to-r from-[#FF5A5F] via-[#A855F7] to-[#00F2FE] bg-clip-text text-transparent">Wealth OS</span>
+          </h2>
+          <p className="mt-4 text-base sm:text-lg text-slate-300">
+            Everything you need to organize, protect, and grow your wealth in one unified platform.
+          </p>
+        </motion.div>
 
-        {/* Clean 6 Cards Grid */}
+        {/* Clean 6 Cards Grid with circular icon styling matching screenshot */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {FEATURES.map((feat, idx) => {
             const Icon = feat.icon;
@@ -89,30 +88,25 @@ export const FeaturesSection = () => {
                 key={idx}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-50px' }}
+                viewport={{ once: true, amount: 0.2 }}
                 transition={{ duration: 0.5, delay: idx * 0.08 }}
-                whileHover={{ y: -8 }}
-                className={`rounded-3xl border border-border-subtle bg-bg-surface p-7 shadow-glass flex flex-col justify-between space-y-6 relative overflow-hidden group hover:border-primary-500/40 hover:shadow-2xl ${feat.glowColor} transition-all duration-300`}
+                className="rounded-3xl border border-zinc-800 bg-[#09090B] p-7 shadow-[0_10px_30px_rgba(0,0,0,0.85)] transition-all flex flex-col justify-between space-y-6 group"
               >
-                {/* Background ambient gradient glow on hover */}
-                <div className="pointer-events-none absolute -right-12 -top-12 w-40 h-40 rounded-full bg-primary-500/5 group-hover:bg-primary-500/15 blur-2xl transition-all duration-300" />
-
                 <div className="space-y-4 relative z-10">
-                  {/* Icon Container with hover rotation */}
                   <div className="flex items-center justify-between">
-                    <div className={`p-3.5 rounded-2xl bg-gradient-to-br ${feat.color} text-white shadow-md group-hover:rotate-6 group-hover:scale-110 transition-transform duration-300`}>
-                      <Icon className="w-6 h-6" />
+                    <div className={`w-12 h-12 rounded-full border flex items-center justify-center ${feat.bgColor} ${feat.color}`}>
+                      <Icon className="w-5 h-5" />
                     </div>
-                    <span className="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-bg-elevated text-slate-400 border border-border-subtle">
-                      AI Module
+                    <span className="text-[10px] font-bold uppercase px-2.5 py-1 rounded-full bg-[#141418] border border-zinc-800 text-slate-400">
+                      AI MODULE
                     </span>
                   </div>
 
-                  <h3 className="text-xl font-extrabold text-slate-900 dark:text-white font-outfit">
+                  <h3 className="text-xl font-bold text-white font-outfit">
                     {feat.title}
                   </h3>
 
-                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
+                  <p className="text-xs text-slate-300 leading-relaxed font-normal">
                     {feat.desc}
                   </p>
                 </div>

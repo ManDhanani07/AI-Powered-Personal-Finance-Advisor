@@ -57,10 +57,10 @@ export const ReportFilters = ({
               <button
                 key={opt.id}
                 onClick={() => handleSelect(opt.id)}
-                className={`px-3.5 py-1.5 rounded-2xl text-xs font-extrabold transition-all ${
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
                   isActive
-                    ? 'bg-gradient-to-r from-primary-500 to-indigo-600 text-white shadow-md shadow-primary-500/20 scale-105'
-                    : 'bg-bg-card hover:bg-border-subtle/50 text-slate-300 border border-border-subtle'
+                    ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-extrabold shadow-sm'
+                    : 'bg-[#09090B] hover:bg-zinc-900 text-slate-400 hover:text-white border border-zinc-800'
                 }`}
               >
                 {opt.label}

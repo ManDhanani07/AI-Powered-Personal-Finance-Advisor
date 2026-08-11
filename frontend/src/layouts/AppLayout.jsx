@@ -23,7 +23,7 @@ export const AppLayout = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-base text-slate-900 dark:text-slate-100 font-sans transition-colors duration-200">
+    <div className="min-h-screen flex flex-col bg-[#000000] text-slate-100 font-sans transition-colors duration-200">
       {/* Top Navigation Header (72px height) */}
       <Navbar
         onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}

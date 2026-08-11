@@ -1,19 +1,22 @@
 import React, { useState } from 'react';
-import useAuth from '../../hooks/useAuth.js';
 
 // ─── LANDING PAGE SECTIONS ───────────────────────────────────────────────
 import { LandingNavbar } from '../../components/landing/LandingNavbar.jsx';
 import { HeroSection } from '../../components/landing/HeroSection.jsx';
 import { SocialProofMarquee } from '../../components/landing/SocialProofMarquee.jsx';
 import { StatsSection } from '../../components/landing/StatsSection.jsx';
+import { WhatIsThisSection } from '../../components/landing/WhatIsThisSection.jsx';
 import { FeaturesSection } from '../../components/landing/FeaturesSection.jsx';
 import { HowItWorksSection } from '../../components/landing/HowItWorksSection.jsx';
 import { WhyUsSection } from '../../components/landing/WhyUsSection.jsx';
 import { TestimonialsSection } from '../../components/landing/TestimonialsSection.jsx';
+import { PricingSection } from '../../components/landing/PricingSection.jsx';
 import { FAQSection } from '../../components/landing/FAQSection.jsx';
+import { CTASection } from '../../components/landing/CTASection.jsx';
 import { LandingFooter } from '../../components/landing/LandingFooter.jsx';
 import { LandingLoginModal } from '../../components/landing/LandingLoginModal.jsx';
 import { MouseGlow } from '../../components/landing/ui/MouseGlow.jsx';
+import Particles from '../../components/landing/Particles.jsx';
 
 export const LandingPage = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -22,42 +25,71 @@ export const LandingPage = () => {
   const handleCloseLogin = () => setIsLoginModalOpen(false);
 
   return (
-    <div className="min-h-screen bg-bg-base text-slate-100 font-sans selection:bg-primary-500/20 selection:text-primary-400 relative overflow-x-hidden">
+    <div className="min-h-screen bg-[#000000] text-slate-100 font-sans selection:bg-emerald-500/30 selection:text-white relative overflow-x-hidden">
+      
+      {/* ─── WebGL Ambient Background Particles (BEHIND EVERYTHING AT Z-0) ─── */}
+      <div className="fixed inset-0 pointer-events-none z-0 opacity-75">
+        <Particles
+          particleColors={["#ffffff", "#10B981", "#00F2FE", "#34D399"]}
+          particleCount={200}
+          particleSpread={12}
+          speed={0.12}
+          particleBaseSize={140}
+          moveParticlesOnHover={true}
+          particleHoverFactor={0.8}
+          alphaParticles={false}
+          disableRotation={false}
+          pixelRatio={typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1}
+        />
+      </div>
+
       {/* Interactive Cursor Mouse Glow */}
       <MouseGlow />
 
-      {/* ─── 1. STICKY GLASS NAVIGATION BAR ──────────────────────────── */}
-      <LandingNavbar onOpenLogin={handleOpenLogin} />
+      {/* Content Layer (ALL TEXT, CARDS, BUTTONS & MOCKUPS RENDER AT Z-10 IN FRONT OF PARTICLES) */}
+      <div className="relative z-10">
+        {/* ─── 1. STICKY NAVIGATION BAR ─────────────────────────────────── */}
+        <LandingNavbar onOpenLogin={handleOpenLogin} />
 
-      {/* ─── 2. HERO SECTION ─────────────────────────────────────────── */}
-      <HeroSection onOpenLogin={handleOpenLogin} />
+        {/* ─── 2. HERO SECTION ─────────────────────────────────────────── */}
+        <HeroSection onOpenLogin={handleOpenLogin} />
 
-      {/* ─── INTEGRATION PARTNERS MARQUEE ───────────────────────────── */}
-      <SocialProofMarquee />
+        {/* ─── INTEGRATION PARTNERS MARQUEE ───────────────────────────── */}
+        <SocialProofMarquee />
 
-      {/* ─── 3. STATISTICS SECTION ───────────────────────────────────── */}
-      <StatsSection />
+        {/* ─── 3. STATISTICS SECTION ───────────────────────────────────── */}
+        <StatsSection />
 
-      {/* ─── 4. FEATURES SECTION ─────────────────────────────────────── */}
-      <FeaturesSection />
+        {/* ─── 4. WHAT IS THIS SECTION (AI INSIGHTS VISUAL SHOWCASE) ───── */}
+        <WhatIsThisSection />
 
-      {/* ─── 5. HOW IT WORKS SECTION ─────────────────────────────────── */}
-      <HowItWorksSection />
+        {/* ─── 5. FEATURES SECTION ─────────────────────────────────────── */}
+        <FeaturesSection />
 
-      {/* ─── 6. WHY CHOOSE US SECTION ────────────────────────────────── */}
-      <WhyUsSection />
+        {/* ─── 6. HOW IT WORKS SECTION ─────────────────────────────────── */}
+        <HowItWorksSection />
 
-      {/* ─── 7. TESTIMONIALS SECTION ─────────────────────────────────── */}
-      <TestimonialsSection />
+        {/* ─── 7. WHY CHOOSE US & SECURITY SECTION ──────────────────────── */}
+        <WhyUsSection />
 
-      {/* ─── 8. FAQ ACCORDION SECTION ────────────────────────────────── */}
-      <FAQSection />
+        {/* ─── 8. TESTIMONIALS SECTION ─────────────────────────────────── */}
+        <TestimonialsSection />
 
-      {/* ─── 10. PROFESSIONAL FOOTER ─────────────────────────────────── */}
-      <LandingFooter />
+        {/* ─── 9. PRICING SECTION ──────────────────────────────────────── */}
+        <PricingSection />
 
-      {/* ─── QUICK LOGIN MODAL OVERLAY ───────────────────────────────── */}
-      <LandingLoginModal isOpen={isLoginModalOpen} onClose={handleCloseLogin} />
+        {/* ─── 10. FAQ ACCORDION SECTION ────────────────────────────────── */}
+        <FAQSection />
+
+        {/* ─── 11. CALL TO ACTION BANNER ────────────────────────────────── */}
+        <CTASection onOpenLogin={handleOpenLogin} />
+
+        {/* ─── 12. PROFESSIONAL FOOTER ─────────────────────────────────── */}
+        <LandingFooter />
+
+        {/* ─── QUICK LOGIN MODAL OVERLAY ───────────────────────────────── */}
+        <LandingLoginModal isOpen={isLoginModalOpen} onClose={handleCloseLogin} />
+      </div>
     </div>
   );
 };

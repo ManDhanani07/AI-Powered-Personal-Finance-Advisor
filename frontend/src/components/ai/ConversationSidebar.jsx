@@ -51,9 +51,9 @@ export const ConversationSidebar = ({
           <button
             onClick={onNewSession}
             disabled={loading}
-            className="w-full py-2.5 px-3 rounded-2xl bg-gradient-to-r from-primary-500 to-indigo-600 hover:from-primary-600 hover:to-indigo-700 text-white text-xs font-extrabold flex items-center justify-center space-x-1.5 shadow-md hover:shadow-lg transition-all cursor-pointer disabled:opacity-50"
+            className="w-full py-2.5 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold flex items-center justify-center space-x-1.5 shadow-sm transition-all cursor-pointer disabled:opacity-50"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 text-slate-950" />
             <span>New AI Session</span>
           </button>
 

@@ -40,7 +40,7 @@ export const TransactionTable = ({
   if (!transactions.length) return null;
 
   return (
-    <div className="overflow-x-auto rounded-3xl border border-border-subtle bg-bg-surface/80 shadow-glass backdrop-blur-xl [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+    <div className="overflow-x-auto rounded-3xl border border-zinc-800 bg-[#09090B] shadow-[0_10px_30px_rgba(0,0,0,0.85)] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <table className="w-full text-left text-xs border-collapse">
         {/* Table Header */}
         <thead className="bg-bg-elevated/90 text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-border-subtle sticky top-0 backdrop-blur-md z-10">
@@ -150,16 +150,12 @@ export const TransactionTable = ({
                   </div>
                 </td>
 
-                {/* Category Pill */}
+                {/* Category Name (No border, no dot) */}
                 <td className="py-3 px-3">
                   <span
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold border border-border-subtle bg-bg-elevated text-slate-700 dark:text-slate-200 shadow-sm"
-                    style={{ borderColor: tx.category?.color || 'inherit' }}
+                    className="text-xs font-semibold"
+                    style={{ color: tx.category?.color || '#94A3B8' }}
                   >
-                    <span
-                      className="w-1.5 h-1.5 rounded-full"
-                      style={{ backgroundColor: tx.category?.color || '#6366F1' }}
-                    />
                     {tx.category?.category_name || 'Uncategorized'}
                   </span>
                 </td>

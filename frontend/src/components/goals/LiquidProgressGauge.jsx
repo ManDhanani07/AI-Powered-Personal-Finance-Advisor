@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-export const LiquidProgressGauge = ({ percentage = 45, color = '#6366F1' }) => {
+export const LiquidProgressGauge = ({ percentage = 45, color = '#10B981' }) => {
   const safePct = Math.min(100, Math.max(0, percentage));
   // Y offset for wave fill (100% -> y=0, 0% -> y=100)
   const waveY = 100 - safePct;

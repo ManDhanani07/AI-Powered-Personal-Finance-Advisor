@@ -38,7 +38,7 @@ export const ProfileCard = ({ user, onEditClick }) => {
   ];
 
   return (
-    <div className="rounded-3xl border border-slate-200/80 bg-white/80 p-6 shadow-xl shadow-slate-200/40 backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-900/80 dark:shadow-none space-y-6">
+    <div className="rounded-3xl border border-zinc-800 bg-[#09090B] p-6 shadow-[0_10px_30px_rgba(0,0,0,0.85)] space-y-6">
       <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
         <div>
           <h3 className="text-lg font-bold text-slate-900 dark:text-white">Personal Information</h3>

@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Check, Sparkles, Zap, ShieldCheck } from 'lucide-react';
+import { Check, ShieldCheck } from 'lucide-react';
 import { ROUTES } from '../../constants/index.js';
 
 const PLANS = [
   {
     id: 'starter',
-    name: 'Student & Starter',
+    name: 'Starter Account',
     description: 'Essential money tracking for students and early career professionals.',
     priceMonthlyINR: 0,
     priceAnnualINR: 0,
@@ -28,7 +28,7 @@ const PLANS = [
     name: 'Professional Wealth',
     description: 'Full AI Wealth OS for individuals seeking automated growth & tax optimization.',
     priceMonthlyINR: 299,
-    priceAnnualINR: 2999, // ~20% discount
+    priceAnnualINR: 2999,
     priceMonthlyUSD: 4.99,
     priceAnnualUSD: 49.99,
     features: [
@@ -66,36 +66,42 @@ const PLANS = [
 ];
 
 export const PricingSection = () => {
-  const [billingCycle, setBillingCycle] = useState('ANNUAL'); // 'MONTHLY' | 'ANNUAL'
-  const [currency, setCurrency] = useState('INR'); // 'INR' | 'USD'
+  const [billingCycle, setBillingCycle] = useState('ANNUAL');
+  const [currency, setCurrency] = useState('INR');
   const navigate = useNavigate();
 
   return (
-    <section id="pricing" className="py-24 bg-bg-surface relative overflow-hidden">
+    <section id="pricing" className="py-16 bg-transparent relative overflow-hidden">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-primary-500/10 border border-primary-500/25 text-primary-500 text-xs font-bold uppercase tracking-widest mb-4">
-            <Zap className="w-3.5 h-3.5" />
-            <span>Transparent Pricing</span>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.6 }}
+          className="text-center max-w-3xl mx-auto mb-8"
+        >
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-[#141418] border border-zinc-800 text-slate-300 text-xs font-semibold tracking-wide mb-4">
+            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            <span>Transparent Enterprise Pricing</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white tracking-tight font-outfit">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight font-outfit">
             Invest in Your Financial Freedom
           </h2>
-          <p className="mt-4 text-base text-slate-600 dark:text-slate-300">
+          <p className="mt-4 text-base text-slate-400">
             Choose the plan that fits your wealth journey. Upgrade or cancel anytime.
           </p>
-        </div>
+        </motion.div>
 
         {/* Dynamic Controls: Billing Cycle + Currency Switcher */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-14">
           {/* Monthly / Annual Toggle */}
-          <div className="flex items-center bg-bg-elevated p-1.5 rounded-2xl border border-border-strong shadow-sm">
+          <div className="flex items-center bg-[#141418] p-1.5 rounded-xl border border-zinc-800">
             <button
               onClick={() => setBillingCycle('MONTHLY')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+              className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${
                 billingCycle === 'MONTHLY'
-                  ? 'bg-bg-surface text-slate-900 dark:text-white shadow-sm'
+                  ? 'bg-[#09090B] text-white shadow-sm'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
@@ -103,26 +109,26 @@ export const PricingSection = () => {
             </button>
             <button
               onClick={() => setBillingCycle('ANNUAL')}
-              className={`flex items-center space-x-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+              className={`flex items-center space-x-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
                 billingCycle === 'ANNUAL'
-                  ? 'bg-primary-500 text-white shadow-md'
+                  ? 'bg-emerald-500 text-slate-950 shadow-sm'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               <span>Annual Billing</span>
-              <span className="px-1.5 py-0.5 rounded-full bg-emerald-400 text-slate-950 text-[9px] font-black uppercase">
+              <span className="px-1.5 py-0.5 rounded-md bg-slate-950 text-emerald-400 text-[9px] font-black uppercase">
                 Save 20%
               </span>
             </button>
           </div>
 
           {/* Currency Switcher */}
-          <div className="flex items-center bg-bg-elevated p-1.5 rounded-2xl border border-border-strong shadow-sm">
+          <div className="flex items-center bg-[#141418] p-1.5 rounded-xl border border-zinc-800">
             <button
               onClick={() => setCurrency('INR')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
                 currency === 'INR'
-                  ? 'bg-bg-surface text-slate-900 dark:text-white shadow-sm'
+                  ? 'bg-[#09090B] text-white shadow-sm'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
@@ -130,9 +136,9 @@ export const PricingSection = () => {
             </button>
             <button
               onClick={() => setCurrency('USD')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
                 currency === 'USD'
-                  ? 'bg-bg-surface text-slate-900 dark:text-white shadow-sm'
+                  ? 'bg-[#09090B] text-white shadow-sm'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
@@ -156,31 +162,34 @@ export const PricingSection = () => {
             return (
               <motion.div
                 key={plan.id}
-                whileHover={{ y: -6 }}
-                className={`relative rounded-3xl p-6 sm:p-8 flex flex-col justify-between transition-all duration-300 ${
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                whileHover={{ y: -4 }}
+                className={`relative rounded-3xl p-7 flex flex-col justify-between transition-all duration-300 bg-[#09090B] ${
                   plan.featured
-                    ? 'bg-bg-surface border-2 border-primary-500 shadow-2xl shadow-primary-500/20 md:-translate-y-2'
-                    : 'bg-bg-surface border border-border-strong shadow-xl'
+                    ? 'border-2 border-emerald-500/80 md:-translate-y-2'
+                    : 'border border-zinc-800'
                 }`}
               >
                 {/* Featured Badge */}
                 {plan.featured && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-primary-500 to-accent-500 text-white text-[10px] font-black uppercase tracking-widest shadow-md">
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-emerald-500 text-slate-950 text-[10px] font-black uppercase tracking-widest shadow-md">
                     {plan.badge}
                   </div>
                 )}
 
                 <div>
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight font-outfit">
+                  <h3 className="text-xl font-bold text-white tracking-tight font-outfit">
                     {plan.name}
                   </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 min-h-[36px]">
+                  <p className="text-xs text-slate-400 mt-2 min-h-[36px]">
                     {plan.description}
                   </p>
 
                   {/* Price */}
                   <div className="mt-6 flex items-baseline">
-                    <span className="text-4xl font-black text-slate-900 dark:text-white tracking-tight font-outfit">
+                    <span className="text-4xl font-black text-white tracking-tight font-outfit">
                       {displayPrice}
                     </span>
                     <span className="text-xs text-slate-400 font-semibold ml-1.5">
@@ -191,8 +200,8 @@ export const PricingSection = () => {
                   {/* Feature Checklist */}
                   <ul className="mt-8 space-y-3">
                     {plan.features.map((feat, i) => (
-                      <li key={i} className="flex items-start text-xs font-semibold text-slate-700 dark:text-slate-300">
-                        <div className="p-0.5 rounded-full bg-emerald-500/10 text-emerald-500 mr-2.5 mt-0.5 flex-shrink-0">
+                      <li key={i} className="flex items-start text-xs font-semibold text-slate-300">
+                        <div className="p-0.5 rounded-full bg-emerald-500/10 text-emerald-400 mr-2.5 mt-0.5 flex-shrink-0">
                           <Check className="w-3.5 h-3.5" />
                         </div>
                         <span>{feat}</span>
@@ -204,10 +213,10 @@ export const PricingSection = () => {
                 {/* Plan CTA */}
                 <button
                   onClick={() => navigate(`${ROUTES.AUTH.REGISTER}?plan=${plan.id}`)}
-                  className={`mt-8 w-full py-3.5 rounded-2xl font-bold text-xs uppercase tracking-wider transition-all shadow-md ${
+                  className={`mt-8 w-full py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all ${
                     plan.featured
-                      ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white hover:shadow-lg hover:scale-105'
-                      : 'bg-bg-elevated text-slate-900 dark:text-white border border-border-strong hover:bg-slate-200 dark:hover:bg-slate-800'
+                      ? 'bg-white hover:bg-slate-100 text-slate-950 font-bold shadow-md'
+                      : 'bg-[#141418] text-white hover:bg-zinc-800 border border-zinc-800'
                   }`}
                 >
                   {plan.cta}

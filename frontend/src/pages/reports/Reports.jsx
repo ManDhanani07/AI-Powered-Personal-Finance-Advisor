@@ -223,7 +223,7 @@ export const Reports = () => {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center space-x-2 px-5 py-3 text-xs font-bold transition-all border-b-2 whitespace-nowrap ${
                   isActive
-                    ? 'border-primary-500 text-primary-400 bg-primary-500/10 rounded-t-2xl shadow-sm'
+                    ? 'border-emerald-500 text-emerald-400 bg-emerald-500/10 rounded-t-xl font-extrabold shadow-sm'
                     : 'border-transparent text-slate-400 hover:text-slate-200'
                 }`}
               >

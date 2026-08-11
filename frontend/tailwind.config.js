@@ -12,19 +12,19 @@ export default {
         outfit: ['Outfit', 'sans-serif'],
       },
       colors: {
-        // Design System Custom Palette (As specified)
+        // MNC Dark Enterprise Palette — Emerald / Teal Primary
         primary: {
-          50: '#EFF6FF',
-          100: '#DBEAFE',
-          200: '#BFDBFE',
-          300: '#93C5FD',
-          400: '#60A5FA',
-          500: '#2563EB', // Specified Primary Blue
-          600: '#1D4ED8',
-          700: '#1E40AF',
-          800: '#1E3A8A',
-          900: '#172554',
-          DEFAULT: '#2563EB',
+          50: '#ECFDF5',
+          100: '#D1FAE5',
+          200: '#A7F3D0',
+          300: '#6EE7B7',
+          400: '#34D399',
+          500: '#10B981', // MNC Emerald Primary
+          600: '#059669',
+          700: '#047857',
+          800: '#065F46',
+          900: '#064E3B',
+          DEFAULT: '#10B981',
         },
         accent: {
           50: '#F0FDFA',
@@ -32,34 +32,34 @@ export default {
           200: '#99F6E4',
           300: '#5EEAD4',
           400: '#2DD4BF',
-          500: '#14B8A6', // Specified Accent Teal
+          500: '#14B8A6', // Accent Teal
           600: '#0D9488',
           700: '#0F766E',
           800: '#115E59',
           DEFAULT: '#14B8A6',
         },
         success: {
-          DEFAULT: '#22C55E', // Specified Green
-          500: '#22C55E',
+          DEFAULT: '#10B981',
+          500: '#10B981',
         },
         warning: {
-          DEFAULT: '#F59E0B', // Specified Amber
+          DEFAULT: '#F59E0B',
           500: '#F59E0B',
         },
         danger: {
-          DEFAULT: '#EF4444', // Specified Red
-          500: '#EF4444',
+          DEFAULT: '#F43F5E',
+          500: '#F43F5E',
         },
         dark: {
-          DEFAULT: '#0F172A', // Specified Dark Navy/Slate
-          900: '#0F172A',
-          950: '#080B11',
+          DEFAULT: '#000000',
+          900: '#09090B',
+          950: '#000000',
         },
         light: {
-          DEFAULT: '#F8FAFC', // Specified Light Slate
+          DEFAULT: '#F8FAFC',
           50: '#F8FAFC',
         },
-        // Theme variables for dark glass design
+        // MNC Theme variables for dark glass surface design
         base: 'var(--color-bg-base)',
         surface: 'var(--color-bg-surface)',
         elevated: 'var(--color-bg-elevated)',
@@ -76,11 +76,11 @@ export default {
         '4xl': '2.5rem',
       },
       boxShadow: {
-        soft: '0 4px 20px -2px rgba(15, 23, 42, 0.05)',
-        'soft-lg': '0 10px 30px -4px rgba(15, 23, 42, 0.08)',
-        glass: '0 8px 32px 0 rgba(0, 0, 0, 0.25)',
-        'glow-primary': '0 0 40px -5px rgba(37, 99, 235, 0.4)',
-        'glow-accent': '0 0 40px -5px rgba(20, 184, 166, 0.4)',
+        soft: '0 4px 20px -2px rgba(0, 0, 0, 0.5)',
+        'soft-lg': '0 10px 30px -4px rgba(0, 0, 0, 0.8)',
+        glass: '0 8px 32px 0 rgba(0, 0, 0, 0.6)',
+        'glow-primary': '0 0 40px -5px rgba(16, 185, 129, 0.3)',
+        'glow-accent': '0 0 40px -5px rgba(20, 184, 166, 0.3)',
       },
       animation: {
         'float-slow': 'float 6s ease-in-out infinite',

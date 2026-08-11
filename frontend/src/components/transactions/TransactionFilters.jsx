@@ -25,7 +25,7 @@ export const TransactionFilters = ({
   ];
 
   return (
-    <div className="rounded-3xl border border-slate-200/80 bg-white/80 p-5 shadow-lg shadow-slate-200/30 backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-900/80 dark:shadow-none space-y-4">
+    <div className="rounded-3xl border border-zinc-800 bg-[#09090B] p-5 shadow-[0_10px_30px_rgba(0,0,0,0.85)] space-y-4">
       <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
         <div className="flex items-center gap-2">
           <Filter className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />

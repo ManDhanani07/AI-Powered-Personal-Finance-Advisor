@@ -8,7 +8,7 @@ export const ContentWrapper = ({ children, className = '' }) => {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.2 }}
-        className={`rounded-3xl border border-border-subtle bg-bg-surface/60 dark:bg-bg-surface/40 backdrop-blur-md p-4 sm:p-6 shadow-glass min-h-[calc(100vh-120px)] ${className}`}
+        className={`rounded-3xl bg-[#09090B] p-4 sm:p-6 shadow-[0_20px_60px_rgba(0,0,0,0.95)] min-h-[calc(100vh-120px)] ${className}`}
       >
         {children}
       </motion.div>

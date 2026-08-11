@@ -92,7 +92,7 @@ export const OverviewCards = ({ overview, loading }) => {
         return (
           <div
             key={card.key}
-            className="group rounded-3xl border border-border-subtle bg-bg-surface p-5 shadow-glass hover:border-primary-500/40 hover:shadow-2xl transition-all duration-300 relative overflow-hidden"
+            className="group rounded-3xl bg-[#09090B] p-5 shadow-[0_15px_45px_rgba(0,0,0,0.85)] hover:shadow-[0_25px_60px_rgba(0,0,0,0.98)] transition-all duration-300 relative overflow-hidden"
           >
             <div className="flex items-start justify-between mb-3">
               <p className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 font-outfit">

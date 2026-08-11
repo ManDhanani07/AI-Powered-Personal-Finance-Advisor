@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Star, Quote, ChevronLeft, ChevronRight, CheckCircle2 } from 'lucide-react';
-import SectionTitle from './ui/SectionTitle.jsx';
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Star, CheckCircle2 } from 'lucide-react';
 
 const TESTIMONIALS = [
   {
@@ -11,9 +10,10 @@ const TESTIMONIALS = [
     location: 'Bangalore',
     avatar: 'AM',
     rating: 5,
-    quote: 'Finally replaced 4 different apps — CRED, Zerodha console, Excel sheets — with one platform. The AI Copilot answered my spending questions instantly, and the Prophet forecast helped me plan my home down payment.',
+    quote: 'Finally replaced scattered tracking tools with one platform. The AI Copilot answered my spending questions instantly, and the Prophet forecast helped me plan my home down payment.',
     highlight: 'All-in-one financial OS',
-    gradient: 'from-primary-500 to-blue-600',
+    avatarGradient: 'from-indigo-600 to-purple-600',
+    badgeColor: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20',
   },
   {
     id: 2,
@@ -22,20 +22,22 @@ const TESTIMONIALS = [
     location: 'Mumbai',
     avatar: 'PS',
     rating: 5,
-    quote: 'The AI Copilot is scary smart. I asked "Am I on track for my home down payment?" and it gave me a complete breakdown with adjusted savings targets and an investment allocation plan in 3 seconds.',
+    quote: 'The AI Copilot is incredibly smart. I asked "Am I on track for my savings target?" and it gave me a complete breakdown with adjusted savings goals in 3 seconds.',
     highlight: 'Instant AI Wealth Strategy',
-    gradient: 'from-accent-500 to-teal-600',
+    avatarGradient: 'from-emerald-500 to-teal-600',
+    badgeColor: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
   },
   {
     id: 3,
     name: 'Rahul Verma',
-    role: 'Freelance Design Director',
+    role: 'Design Director',
     location: 'Delhi NCR',
     avatar: 'RV',
     rating: 5,
-    quote: 'As a freelancer with variable monthly income, the Cash Flow Forecast is a lifesaver. It projects my next 12 months and warns me of potential cash shortfalls 3 months in advance.',
-    highlight: '12-Month Monte Carlo Forecast',
-    gradient: 'from-purple-500 to-indigo-600',
+    quote: 'As a freelancer with variable monthly income, the Cash Flow Forecast is essential. It projects my next 12 months and alerts me to potential cash shortfalls.',
+    highlight: '12-Month Prophet Forecast',
+    avatarGradient: 'from-cyan-500 to-blue-600',
+    badgeColor: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20',
   },
   {
     id: 4,
@@ -44,9 +46,10 @@ const TESTIMONIALS = [
     location: 'Ahmedabad',
     avatar: 'SP',
     rating: 5,
-    quote: 'The Old vs New Tax Regime comparison paid for 5 years of Pro subscription in the first month. Switched to New Regime Sec 115BAC and my effective tax rate dropped by 18%.',
-    highlight: '18% Effective Tax Reduction',
-    gradient: 'from-amber-500 to-orange-600',
+    quote: 'The executive financial summary paid for 5 years of Pro subscription in the first month. Clear category spending breakdowns helped me reroute surplus savings.',
+    highlight: 'Executive Financial Digest',
+    avatarGradient: 'from-purple-500 to-pink-600',
+    badgeColor: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
   },
   {
     id: 5,
@@ -56,8 +59,9 @@ const TESTIMONIALS = [
     avatar: 'KR',
     rating: 5,
     quote: 'The envelope budgeting grid keeps my startup burn rate and personal finances completely separated. The AI burn rate warnings hit before I even notice I am overspending.',
-    highlight: 'Zero-Based Envelope Grid',
-    gradient: 'from-rose-500 to-pink-600',
+    highlight: 'Envelope Budgeting Grid',
+    avatarGradient: 'from-rose-500 to-red-600',
+    badgeColor: 'text-rose-400 bg-rose-500/10 border-rose-500/20',
   },
   {
     id: 6,
@@ -66,88 +70,73 @@ const TESTIMONIALS = [
     location: 'Chennai',
     avatar: 'AK',
     rating: 5,
-    quote: 'The merchant dependency matrix in reports showed I was spending ₹28,000/month on food delivery. Cut it down to ₹8,000 and routed the ₹20,000 surplus straight into index fund vaults.',
+    quote: 'The category breakdown showed I was spending ₹28,000/month on food delivery. Cut it down to ₹8,000 and routed the ₹20,000 surplus straight into savings goals.',
     highlight: '₹20,000 Monthly Savings Rerouted',
-    gradient: 'from-sky-500 to-blue-600',
+    avatarGradient: 'from-amber-500 to-orange-600',
+    badgeColor: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
   },
 ];
 
 export const TestimonialsSection = () => {
-  const [activeTab, setActiveTab] = useState(0);
-
-  const nextTestimonial = () => {
-    setActiveTab((prev) => (prev + 1) % TESTIMONIALS.length);
-  };
-
-  const prevTestimonial = () => {
-    setActiveTab((prev) => (prev - 1 + TESTIMONIALS.length) % TESTIMONIALS.length);
-  };
-
   return (
-    <section id="testimonials" className="py-24 bg-bg-surface/60 border-t border-border-subtle relative overflow-hidden">
-      {/* Background Orbs */}
-      <div className="pointer-events-none absolute top-1/3 left-10 w-96 h-96 rounded-full bg-primary-500/10 blur-3xl" />
-
+    <section id="testimonials" className="py-12 bg-transparent relative overflow-hidden">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <SectionTitle
-          badge="Verified Success Stories"
-          badgeIcon={Star}
-          title="Loved by 50,000+ Smart Investors Across"
-          highlightText="India"
-          subtitle="From software engineers and freelancers to doctors and founders — see how AI Wealth OS changes lives."
-          className="mb-16"
-        />
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.6 }}
+          className="text-center max-w-3xl mx-auto mb-10"
+        >
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-[#141418] border border-amber-500/20 text-amber-400 text-xs font-extrabold uppercase tracking-widest mb-4">
+            <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+            <span>Verified Success Stories</span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight font-outfit">
+            Loved by 50,000+ Smart Investors Across India
+          </h2>
+          <p className="mt-4 text-base sm:text-lg text-slate-300">
+            From software engineers and freelancers to doctors and founders — see how AI Wealth OS changes lives.
+          </p>
+        </motion.div>
 
         {/* 6 Cards Responsive Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {TESTIMONIALS.map((t, idx) => (
             <motion.div
               key={t.id}
-              initial={{ opacity: 0, y: 25 }}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-50px' }}
+              viewport={{ once: true, amount: 0.2 }}
               transition={{ duration: 0.5, delay: idx * 0.08 }}
-              whileHover={{ y: -6 }}
-              className="rounded-3xl border border-border-subtle bg-bg-surface p-7 shadow-glass flex flex-col justify-between space-y-5 hover:border-primary-500/40 hover:shadow-2xl transition-all duration-300 relative group"
+              className="rounded-3xl border border-zinc-800 bg-[#09090B] p-7 shadow-[0_10px_30px_rgba(0,0,0,0.85)] transition-all flex flex-col justify-between space-y-5 relative group"
             >
-              {/* Quote Icon Background */}
-              <Quote className="w-10 h-10 text-primary-500/10 absolute top-5 right-5 group-hover:text-primary-500/20 transition-colors" />
-
               <div className="space-y-4 relative z-10">
-                {/* Rating Stars */}
                 <div className="flex items-center space-x-1">
                   {Array.from({ length: t.rating }).map((_, i) => (
                     <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
                   ))}
-                  <span className="text-xs font-bold text-slate-400 ml-2 font-mono">5.0</span>
                 </div>
 
-                {/* Quote text */}
                 <p className="text-xs text-slate-300 leading-relaxed font-normal italic">
                   "{t.quote}"
                 </p>
-              </div>
 
-              <div className="pt-4 border-t border-border-subtle space-y-3 relative z-10">
-                {/* Highlight Badge */}
-                <div className={`inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-gradient-to-r ${t.gradient} text-white text-[10px] font-extrabold uppercase tracking-wider shadow-sm`}>
-                  <CheckCircle2 className="w-3.5 h-3.5" />
+                <div className={`inline-flex items-center space-x-1.5 px-3 py-1 rounded-full border text-[10px] font-bold ${t.badgeColor}`}>
+                  <CheckCircle2 className="w-3 h-3" />
                   <span>{t.highlight}</span>
                 </div>
+              </div>
 
-                {/* User Profile */}
-                <div className="flex items-center space-x-3">
-                  <div className={`w-10 h-10 rounded-2xl bg-gradient-to-tr ${t.gradient} flex items-center justify-center text-white font-extrabold text-sm shadow-md`}>
-                    {t.avatar}
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-extrabold text-slate-900 dark:text-white font-outfit leading-tight">
-                      {t.name}
-                    </h4>
-                    <p className="text-[11px] text-slate-400">
-                      {t.role} · {t.location}
-                    </p>
-                  </div>
+              <div className="pt-4 border-t border-zinc-800/80 flex items-center space-x-3.5 relative z-10">
+                <div className={`w-10 h-10 rounded-2xl bg-gradient-to-br ${t.avatarGradient} text-white flex items-center justify-center font-bold text-xs shadow-md font-outfit`}>
+                  {t.avatar}
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-white font-outfit">{t.name}</h4>
+                  <p className="text-[10px] text-slate-400 font-medium">
+                    {t.role} · {t.location}
+                  </p>
                 </div>
               </div>
             </motion.div>

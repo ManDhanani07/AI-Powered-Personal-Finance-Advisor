@@ -38,10 +38,10 @@ export const ForecastFilters = ({
             <button
               key={opt.value}
               onClick={() => onPeriodChange(opt.value)}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer shrink-0 ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
                 isActive
-                  ? 'bg-gradient-to-r from-primary-500 to-indigo-600 text-white shadow-md shadow-primary-500/20 scale-[1.02]'
-                  : 'bg-bg-elevated/70 text-slate-400 hover:text-white hover:bg-bg-elevated'
+                  ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-extrabold shadow-sm'
+                  : 'bg-[#09090B] text-slate-400 hover:text-white border border-zinc-800'
               }`}
             >
               {opt.label}

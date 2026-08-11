@@ -164,9 +164,9 @@ export const StructuredAiInsightCards = ({
       ];
 
   return (
-    <div className="p-6 md:p-8 rounded-3xl bg-slate-900/95 border border-indigo-500/30 shadow-2xl space-y-6 mt-6 animate-fadeIn text-left">
+    <div className="p-6 md:p-8 rounded-3xl bg-[#09090B] shadow-[0_20px_50px_rgba(0,0,0,0.98)] space-y-6 mt-6 animate-fadeIn text-left">
       {/* HEADER WITH INLINE DETAILS TOGGLE (RULE 13) */}
-      <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+      <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
         <div>
           <h4 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-indigo-400" />
@@ -176,7 +176,7 @@ export const StructuredAiInsightCards = ({
         </div>
         <button
           onClick={() => setShowDetails(!showDetails)}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/30 text-xs font-bold transition-all"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#121216] hover:bg-zinc-800 text-indigo-300 text-xs font-bold transition-all"
         >
           <span>{showDetails ? 'Hide Expanded Breakdown' : 'View Details'}</span>
           {showDetails ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
@@ -189,19 +189,19 @@ export const StructuredAiInsightCards = ({
           1. TOP METRICS
         </span>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/50">
+          <div className="p-4 rounded-2xl bg-[#121216] shadow-md">
             <span className="text-xl font-black text-emerald-400 block mb-0.5">{formatINR(inc)}</span>
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Income</span>
           </div>
-          <div className="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/50">
+          <div className="p-4 rounded-2xl bg-[#121216] shadow-md">
             <span className="text-xl font-black text-rose-400 block mb-0.5">{formatINR(exp)}</span>
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Expenses</span>
           </div>
-          <div className="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/50">
+          <div className="p-4 rounded-2xl bg-[#121216] shadow-md">
             <span className="text-xl font-black text-indigo-300 block mb-0.5">{formatINR(sav)}</span>
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Net Savings</span>
           </div>
-          <div className="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/50">
+          <div className="p-4 rounded-2xl bg-[#121216] shadow-md">
             <span className="text-xl font-black text-cyan-400 block mb-0.5">{savRate}%</span>
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Savings Rate</span>
           </div>
@@ -213,7 +213,7 @@ export const StructuredAiInsightCards = ({
 
       {/* 2. AI SUMMARY */}
       {aiSummary && (
-        <div className="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-200 text-xs md:text-sm font-medium flex items-start gap-3">
+        <div className="p-4 rounded-2xl bg-[#121216] text-slate-200 text-xs md:text-sm font-medium flex items-start gap-3 shadow-md">
           <Sparkles className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5 animate-pulse" />
           <div className="space-y-1">
             <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 block">2. AI Summary</span>

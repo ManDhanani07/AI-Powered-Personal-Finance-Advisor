@@ -19,7 +19,7 @@ const Card = ({ children, className = '' }) => (
       visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
     }}
     whileHover={{ y: -3 }}
-    className={`rounded-3xl border border-border-subtle bg-bg-surface p-6 shadow-glass backdrop-blur-xl hover:border-primary-500/30 hover:shadow-2xl transition-all duration-300 ${className}`}
+    className={`rounded-3xl border border-zinc-800 bg-[#09090B] p-6 shadow-[0_10px_30px_rgba(0,0,0,0.85)] transition-all duration-300 ${className}`}
   >
     {children}
   </motion.div>

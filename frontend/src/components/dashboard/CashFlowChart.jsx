@@ -86,9 +86,8 @@ export const CashFlowChart = memo(({ charts, loading, onSeeded }) => {
   });
 
   const hasData = data.some((d) => Math.abs(d.Net) > 0);
-  const allPositive = data.every((d) => d.Net >= 0);
-  const fillColor = allPositive ? '#10B981' : '#6366F1';
-  const strokeColor = allPositive ? '#34D399' : '#818CF8';
+  const fillColor = '#10B981';
+  const strokeColor = '#34D399';
 
   return (
     <div className="space-y-4">

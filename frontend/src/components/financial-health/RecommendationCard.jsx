@@ -21,8 +21,8 @@ export const RecommendationCard = ({ recommendations = [] }) => {
   };
 
   return (
-    <div className="rounded-3xl border border-border-subtle bg-bg-surface p-6 shadow-glass space-y-5">
-      <div className="flex items-center justify-between border-b border-border-subtle pb-4">
+    <div className="rounded-3xl border border-zinc-800 bg-[#09090B] p-6 shadow-[0_10px_30px_rgba(0,0,0,0.85)] space-y-5">
+      <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
         <div className="flex items-center space-x-2.5">
           <div className="p-2.5 rounded-2xl bg-amber-500/10 text-amber-400">
             <Lightbulb className="w-5 h-5" />
@@ -36,7 +36,7 @@ export const RecommendationCard = ({ recommendations = [] }) => {
             </p>
           </div>
         </div>
-        <span className="px-3 py-1 rounded-full bg-primary-500/10 text-primary-400 border border-primary-500/20 text-xs font-bold font-mono">
+        <span className="px-3 py-1 rounded-full bg-[#121216] text-indigo-400 text-xs font-bold font-mono">
           {recommendations.length} Actions
         </span>
       </div>
@@ -50,7 +50,7 @@ export const RecommendationCard = ({ recommendations = [] }) => {
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.4, delay: idx * 0.08 }}
-              className="p-4 rounded-2xl border border-border-subtle bg-bg-elevated/70 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:border-primary-500/40 transition-all group"
+              className="p-4 rounded-2xl bg-[#121216] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 transition-all group shadow-md"
             >
               <div className="space-y-1 max-w-2xl">
                 <div className="flex items-center space-x-2">
