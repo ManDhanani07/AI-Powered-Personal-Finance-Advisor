@@ -136,7 +136,7 @@ export const Goals = () => {
         </button>
       }
     >
-      <div className="space-y-6 max-w-7xl mx-auto">
+      <div className="space-y-6 max-w-[1920px] w-full mx-auto">
         {/* Summary Stats Cards */}
         <GoalSummary summary={summary} />
 

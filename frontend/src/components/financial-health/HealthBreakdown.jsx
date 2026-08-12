@@ -140,7 +140,7 @@ export const HealthBreakdown = ({ parameters = [] }) => {
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.08)" vertical={false} />
               <XAxis dataKey="parameter" tick={{ fill: '#94a3b8', fontSize: 10 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fill: '#94a3b8', fontSize: 10 }} axisLine={false} tickLine={false} />
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip content={<CustomTooltip />} cursor={false} />
               <Bar dataKey="Earned" fill="#2563EB" radius={[6, 6, 0, 0]} />
               <Bar dataKey="Max" fill="#14B8A6" opacity={0.3} radius={[6, 6, 0, 0]} />
             </BarChart>

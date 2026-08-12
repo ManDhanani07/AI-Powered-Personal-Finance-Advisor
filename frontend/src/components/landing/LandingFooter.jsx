@@ -5,8 +5,8 @@ import { ROUTES, APP_CONSTANTS } from '../../constants/index.js';
 
 export const LandingFooter = () => {
   return (
-    <footer id="contact" className="bg-transparent pt-10 pb-8 text-slate-400 text-xs font-sans">
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+    <footer id="contact" className="bg-[#000000] border-t border-zinc-900 pt-10 pb-8 text-slate-400 text-xs font-sans">
+      <div className="max-w-[1920px] w-full mx-auto px-6 sm:px-10 lg:px-16 xl:px-20">
         <div className="grid grid-cols-1 md:grid-cols-5 gap-10 pb-12 border-b border-zinc-900">
           {/* Logo & Brand Info */}
           <div className="md:col-span-2 space-y-4">

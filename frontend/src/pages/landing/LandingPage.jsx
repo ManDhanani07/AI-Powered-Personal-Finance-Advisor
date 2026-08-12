@@ -5,7 +5,6 @@ import { LandingNavbar } from '../../components/landing/LandingNavbar.jsx';
 import { HeroSection } from '../../components/landing/HeroSection.jsx';
 import { SocialProofMarquee } from '../../components/landing/SocialProofMarquee.jsx';
 import { StatsSection } from '../../components/landing/StatsSection.jsx';
-import { WhatIsThisSection } from '../../components/landing/WhatIsThisSection.jsx';
 import { FeaturesSection } from '../../components/landing/FeaturesSection.jsx';
 import { HowItWorksSection } from '../../components/landing/HowItWorksSection.jsx';
 import { WhyUsSection } from '../../components/landing/WhyUsSection.jsx';
@@ -47,7 +46,7 @@ export const LandingPage = () => {
       <MouseGlow />
 
       {/* Content Layer (ALL TEXT, CARDS, BUTTONS & MOCKUPS RENDER AT Z-10 IN FRONT OF PARTICLES) */}
-      <div className="relative z-10">
+      <div className="relative z-10 space-y-0">
         {/* ─── 1. STICKY NAVIGATION BAR ─────────────────────────────────── */}
         <LandingNavbar onOpenLogin={handleOpenLogin} />
 
@@ -60,31 +59,28 @@ export const LandingPage = () => {
         {/* ─── 3. STATISTICS SECTION ───────────────────────────────────── */}
         <StatsSection />
 
-        {/* ─── 4. WHAT IS THIS SECTION (AI INSIGHTS VISUAL SHOWCASE) ───── */}
-        <WhatIsThisSection />
-
-        {/* ─── 5. FEATURES SECTION ─────────────────────────────────────── */}
+        {/* ─── 4. FEATURES SECTION (INTERACTIVE CORE OS CAPABILITIES) ─── */}
         <FeaturesSection />
 
-        {/* ─── 6. HOW IT WORKS SECTION ─────────────────────────────────── */}
+        {/* ─── 5. HOW IT WORKS SECTION ─────────────────────────────────── */}
         <HowItWorksSection />
 
-        {/* ─── 7. WHY CHOOSE US & SECURITY SECTION ──────────────────────── */}
+        {/* ─── 6. WHY CHOOSE US & SECURITY SECTION ──────────────────────── */}
         <WhyUsSection />
 
-        {/* ─── 8. TESTIMONIALS SECTION ─────────────────────────────────── */}
+        {/* ─── 7. TESTIMONIALS SECTION ─────────────────────────────────── */}
         <TestimonialsSection />
 
-        {/* ─── 9. PRICING SECTION ──────────────────────────────────────── */}
+        {/* ─── 8. PRICING SECTION ──────────────────────────────────────── */}
         <PricingSection />
 
-        {/* ─── 10. FAQ ACCORDION SECTION ────────────────────────────────── */}
+        {/* ─── 9. FAQ ACCORDION SECTION ────────────────────────────────── */}
         <FAQSection />
 
-        {/* ─── 11. CALL TO ACTION BANNER ────────────────────────────────── */}
+        {/* ─── 10. CALL TO ACTION BANNER ────────────────────────────────── */}
         <CTASection onOpenLogin={handleOpenLogin} />
 
-        {/* ─── 12. PROFESSIONAL FOOTER ─────────────────────────────────── */}
+        {/* ─── 11. PROFESSIONAL FOOTER ─────────────────────────────────── */}
         <LandingFooter />
 
         {/* ─── QUICK LOGIN MODAL OVERLAY ───────────────────────────────── */}

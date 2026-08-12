@@ -105,7 +105,7 @@ export const FinancialHealth = () => {
         </button>
       }
     >
-      <div className="space-y-6 max-w-7xl mx-auto">
+      <div className="space-y-6 max-w-[1920px] w-full mx-auto">
         {/* ── 1. Top Row: Overall Score Card & Grade Standing ── */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
           <HealthScoreCard

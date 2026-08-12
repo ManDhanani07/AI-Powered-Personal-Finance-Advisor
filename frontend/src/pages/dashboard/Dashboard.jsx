@@ -43,7 +43,7 @@ export const Dashboard = () => {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="space-y-6 max-w-screen-xl mx-auto"
+      className="space-y-6 max-w-[1920px] w-full mx-auto"
     >
       {/* ── 1. Header: Greeting ── */}
       <DashboardHeader
@@ -53,6 +53,8 @@ export const Dashboard = () => {
       {/* ── 2. Net Worth Executive Summary Banner ── */}
       <FinancialSummary
         summary={data.summary}
+        overview={data.overview}
+        budgetOverview={data.budgetOverview}
         loading={loading}
       />
 

@@ -27,7 +27,7 @@ export const HeroSection = ({ onOpenLogin }) => {
       {/* Subtle Background Radial Gradient Grid */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-900/40 via-transparent to-transparent z-0" />
 
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="max-w-[1920px] w-full mx-auto px-6 sm:px-10 lg:px-16 xl:px-20 relative z-10">
         {/* 2-Column Side-by-Side Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 items-center gap-12 lg:gap-14">
           
@@ -62,7 +62,7 @@ export const HeroSection = ({ onOpenLogin }) => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-base sm:text-lg text-slate-400 font-normal leading-relaxed max-w-xl"
+              className="text-base sm:text-lg text-slate-400 font-normal leading-relaxed max-w-2xl"
             >
               Automate transaction tracking, analyze category budgets, project net worth growth using Meta Prophet ML, and receive real-time financial intelligence.
             </motion.p>

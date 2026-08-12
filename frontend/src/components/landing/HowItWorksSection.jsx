@@ -1,151 +1,81 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
-import {
-  ReceiptText,
-  Bot,
-  Target,
-  HeartPulse,
-  BarChart2,
-  Wallet,
-  Sparkles,
-  Tag,
-  CalendarDays,
-  CreditCard,
-  Bell,
-  TrendingUp,
-  CheckCircle2,
-  Sliders,
-  Clock,
-  MessageCircle,
-  Send,
-  SlidersHorizontal,
-  Activity,
-  ArrowDownLeft,
-  PlusCircle,
-  FolderOpen,
-  Zap,
-} from 'lucide-react';
-import CardSwap, { Card } from './CardSwap.jsx';
+import { Sparkles } from 'lucide-react';
+import Particles from './Particles.jsx';
 
-const NODES = [
+const STEPS = [
   {
     id: 'transactions',
-    icon: ReceiptText,
+    stepNum: '1',
     title: 'Add Transactions',
-    tag: 'Step 1',
-    badge: { text: 'Instant Categorization', color: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' },
-    desc: 'Log every financial event in seconds. Track income, expenses, and transfers with full metadata for a complete picture.',
-    color: 'text-emerald-400',
-    bgColor: 'bg-emerald-500/10 border-emerald-500/20',
-    steps: [
-      { icon: PlusCircle,    label: 'Create an entry',      sub: 'Choose income, expense or transfer',  color: 'text-emerald-400' },
-      { icon: Tag,           label: 'Select category',      sub: 'Food, Travel, Salary, EMI, and more', color: 'text-emerald-400' },
-      { icon: CreditCard,    label: 'Add payment details',  sub: 'Method, merchant, account link',      color: 'text-slate-300' },
-      { icon: MessageCircle, label: 'Write a note',         sub: 'Optional memo for context',           color: 'text-slate-300' },
-      { icon: FolderOpen,    label: 'Filter & search',      sub: 'By date, category, or keyword',       color: 'text-slate-400' },
-      { icon: TrendingUp,    label: 'View category stats',  sub: 'Spending trends per tag',             color: 'text-slate-400' },
-    ],
+    desc: 'Log income, expenses, and transfers in seconds with AI regex merchant auto-categorization and bank aggregator sync.',
+    gradient: 'bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 bg-clip-text text-transparent',
+    dotColor: 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]',
   },
   {
     id: 'budgets',
-    icon: Wallet,
+    stepNum: '2',
     title: 'Budget Tracking',
-    tag: 'Step 2',
-    badge: { text: 'Real-Time Utilization', color: 'bg-teal-500/15 text-teal-400 border-teal-500/30' },
-    desc: 'Set monthly spending limits per category and watch them update live as every transaction flows in automatically.',
-    color: 'text-teal-400',
-    bgColor: 'bg-teal-500/10 border-teal-500/20',
-    steps: [
-      { icon: FolderOpen,       label: 'Create a budget',     sub: 'Pick any spending category',         color: 'text-teal-400' },
-      { icon: Sliders,          label: 'Set monthly limit',   sub: 'Custom cap amount per period',       color: 'text-teal-400' },
-      { icon: TrendingUp,       label: 'Live utilization bar', sub: 'Spend vs limit updates instantly',  color: 'text-slate-300' },
-      { icon: Bell,             label: 'Threshold alerts',    sub: 'Warned at 80% & 100% spend',        color: 'text-slate-300' },
-      { icon: Activity,         label: 'Month-over-month',    sub: 'Compare spending across months',     color: 'text-slate-400' },
-      { icon: CheckCircle2,     label: 'Budget health badge', sub: 'Green / Amber / Red status',        color: 'text-slate-400' },
-    ],
+    desc: 'Set monthly category limits and monitor real-time spend utilization bars, burn rates, and 80% & 100% threshold alerts.',
+    gradient: 'bg-gradient-to-r from-teal-400 via-cyan-300 to-teal-400 bg-clip-text text-transparent',
+    dotColor: 'bg-teal-400 shadow-[0_0_10px_rgba(45,212,191,0.8)]',
   },
   {
     id: 'goals',
-    icon: Target,
+    stepNum: '3',
     title: 'Savings Goals',
-    tag: 'Step 3',
-    badge: { text: 'AI Completion ETA', color: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30' },
-    desc: 'Define saving milestones, contribute regularly, and let the AI forecast exactly when you will hit your target.',
-    color: 'text-cyan-400',
-    bgColor: 'bg-cyan-500/10 border-cyan-500/20',
-    steps: [
-      { icon: PlusCircle,   label: 'Name your goal',         sub: 'Emergency fund, car, vacation…',    color: 'text-cyan-400' },
-      { icon: CalendarDays, label: 'Set deadline & priority', sub: 'High, medium or low urgency',      color: 'text-cyan-400' },
-      { icon: Sliders,      label: 'Define target amount',   sub: 'Enter the total needed',             color: 'text-slate-300' },
-      { icon: CheckCircle2, label: 'Log contributions',      sub: 'Manual top-ups tracked over time',  color: 'text-slate-300' },
-      { icon: TrendingUp,   label: 'Progress ring view',     sub: 'Visualize % complete at a glance',  color: 'text-slate-400' },
-      { icon: Zap,          label: 'AI completion forecast', sub: 'Projected finish date from savings', color: 'text-slate-400' },
-    ],
+    desc: 'Define milestone vaults, log contributions over time, and let AI project exact completion dates and progress rings.',
+    gradient: 'bg-gradient-to-r from-cyan-400 via-sky-300 to-cyan-400 bg-clip-text text-transparent',
+    dotColor: 'bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.8)]',
   },
   {
     id: 'forecast',
-    icon: BarChart2,
-    title: 'Prophet ML Forecasting',
-    tag: 'Step 4',
-    badge: { text: 'Meta Prophet Time-Series', color: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' },
-    desc: "Meta's Prophet engine trains on your real history to project expenses, income, and savings up to 12 months ahead.",
-    color: 'text-emerald-400',
-    bgColor: 'bg-emerald-500/10 border-emerald-500/20',
-    steps: [
-      { icon: SlidersHorizontal, label: 'Choose forecast type',  sub: 'Expense, income, savings or balance', color: 'text-emerald-400' },
-      { icon: Clock,             label: 'Select time horizon',   sub: '30, 90, 180, or 365 days ahead',     color: 'text-emerald-400' },
-      { icon: Activity,          label: 'Prophet ML trains',     sub: 'Learns seasonality from your data',   color: 'text-slate-300' },
-      { icon: TrendingUp,        label: 'View projected curve',  sub: 'Smooth trend line with confidence',   color: 'text-slate-300' },
-      { icon: BarChart2,         label: 'Scenario comparison',   sub: 'Best / Base / Worst case view',       color: 'text-slate-400' },
-      { icon: Zap,               label: 'Anomaly detection',     sub: 'Flags unusual spending patterns',     color: 'text-slate-400' },
-    ],
+    stepNum: '4',
+    title: 'Prophet ML Forecast',
+    desc: 'Train Meta Prophet machine learning time-series models on your history to project cash flow 12 months ahead.',
+    gradient: 'bg-gradient-to-r from-purple-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent',
+    dotColor: 'bg-purple-400 shadow-[0_0_10px_rgba(192,132,252,0.8)]',
   },
   {
     id: 'health',
-    icon: HeartPulse,
-    title: 'Financial Health Score',
-    tag: 'Step 5',
-    badge: { text: 'Composite Score Grade', color: 'bg-teal-500/15 text-teal-400 border-teal-500/30' },
-    desc: 'A single live score calculated from five weighted financial parameters, refreshing after every transaction.',
-    color: 'text-teal-400',
-    bgColor: 'bg-teal-500/10 border-teal-500/20',
-    steps: [
-      { icon: Activity,     label: 'Savings rate scored',    sub: 'What % of income do you save?',      color: 'text-teal-400' },
-      { icon: Wallet,       label: 'Budget adherence',       sub: 'How well you stay within limits',    color: 'text-teal-400' },
-      { icon: Target,       label: 'Goal progress rate',     sub: 'On-track or behind on milestones',   color: 'text-slate-300' },
-      { icon: TrendingUp,   label: 'Spending stability',     sub: 'Variance in month-to-month spend',   color: 'text-slate-300' },
-      { icon: BarChart2,    label: 'Composite grade issued', sub: 'Weighted A to F letter grade',       color: 'text-slate-400' },
-      { icon: CheckCircle2, label: 'Improvement action list', sub: 'Exact steps to raise your grade',  color: 'text-slate-400' },
-    ],
+    stepNum: '5',
+    title: 'Health Score',
+    desc: 'Calculate a composite financial grade from liquidity, savings rate, emergency cushions, and vendor risk matrix.',
+    gradient: 'bg-gradient-to-r from-[#FF5A5F] via-rose-300 to-pink-400 bg-clip-text text-transparent',
+    dotColor: 'bg-[#FF5A5F] shadow-[0_0_10px_rgba(255,90,95,0.8)]',
   },
   {
     id: 'ai',
-    icon: Bot,
+    stepNum: '6',
     title: 'Gemini AI Copilot',
-    tag: 'Step 6',
-    badge: { text: 'Google Gemini 1.5 Pro', color: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' },
-    desc: 'Chat naturally with Gemini. It reads your live transactions, budgets, goals, and health score before every reply.',
-    color: 'text-emerald-400',
-    bgColor: 'bg-emerald-500/10 border-emerald-500/20',
-    steps: [
-      { icon: MessageCircle, label: 'Type in plain language', sub: 'No jargon or commands required',    color: 'text-emerald-400' },
-      { icon: ArrowDownLeft, label: 'Live context loaded',    sub: 'All your data sent with query',     color: 'text-emerald-400' },
-      { icon: Bot,           label: 'Gemini 1.5 reasons',    sub: 'Personalised financial analysis',   color: 'text-slate-300' },
-      { icon: Send,          label: 'Actionable reply given', sub: 'Concrete steps, not generic tips', color: 'text-slate-300' },
-      { icon: Clock,         label: 'History persisted',      sub: 'Full chat thread saved per session', color: 'text-slate-400' },
-    ],
+    desc: 'Chat naturally with Google Gemini 1.5 Pro using live financial context, budgets, and goals for personalized advice.',
+    gradient: 'bg-gradient-to-r from-[#A855F7] via-[#00F2FE] to-[#A855F7] bg-clip-text text-transparent',
+    dotColor: 'bg-[#00F2FE] shadow-[0_0_10px_rgba(0,242,254,0.8)]',
   },
 ];
 
 export const HowItWorksSection = () => {
-  const [activeStep, setActiveStep] = useState(0);
-
   return (
-    <section id="how-it-works" className="py-20 bg-[#000000] relative overflow-hidden">
-      {/* Background Ambient Glow */}
-      <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full bg-emerald-500/5 blur-[180px]" />
+    <section id="how-it-works" className="py-24 bg-transparent relative overflow-hidden">
+      {/* Background Ambient Blur Glows */}
+      <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[850px] rounded-full bg-emerald-500/5 blur-[220px] z-0" />
 
-      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      {/* WebGL Particle Background (Strictly Z-0 Pointer-Events-None Behind Content) */}
+      <div className="absolute inset-0 pointer-events-none z-0 opacity-80 overflow-hidden">
+        <Particles
+          particleColors={["#ffffff", "#10B981", "#00F2FE", "#34D399", "#A855F7"]}
+          particleCount={90}
+          particleSpread={10}
+          speed={0.15}
+          particleBaseSize={120}
+          moveParticlesOnHover={false}
+          alphaParticles={false}
+          disableRotation={false}
+          pixelRatio={typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1}
+        />
+      </div>
+
+      <div className="max-w-[1920px] w-full mx-auto px-6 sm:px-10 lg:px-16 xl:px-20 relative z-10">
         
         {/* Section Header */}
         <motion.div
@@ -153,124 +83,61 @@ export const HowItWorksSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.6 }}
-          className="text-center max-w-3xl mx-auto mb-16"
+          className="text-center max-w-3xl mx-auto mb-20 relative z-10"
         >
-          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-[#09090B] border border-emerald-500/30 text-emerald-400 text-xs font-extrabold uppercase tracking-widest mb-4">
+          <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-[#09090B] border border-emerald-500/30 text-emerald-400 text-xs font-extrabold uppercase tracking-widest mb-4 shadow-sm">
             <Sparkles className="w-4 h-4 text-emerald-400" />
             <span>Sequential Workflow Engine</span>
           </div>
-          <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight font-outfit leading-tight">
-            How Your Financial OS Works
+          <h2 className="text-4xl sm:text-6xl font-black text-white tracking-tight font-outfit leading-tight">
+            How it works?
           </h2>
-          <p className="mt-4 text-base sm:text-lg text-slate-400">
-            A seamless six-step 3D workflow from transaction entry to Gemini AI advisory.
+          <p className="mt-4 text-base sm:text-lg text-slate-300 font-medium">
+            A 6-step automated workflow connecting your transactions, budgets, goals, and AI copilot.
           </p>
         </motion.div>
 
-        {/* Dual Layout: Left Step Navigation + Right 3D CardSwap Deck */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center max-w-6xl mx-auto">
-          
-          {/* Left Column: Interactive Workflow Step List */}
-          <div className="lg:col-span-5 space-y-3">
-            <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-4 px-2">
-              Select Pipeline Stage:
-            </p>
-            {NODES.map((node, i) => {
-              const Icon = node.icon;
-              const isActive = activeStep === i;
-              return (
-                <button
-                  key={node.id}
-                  onClick={() => setActiveStep(i)}
-                  className={`w-full text-left p-4 rounded-2xl border transition-all duration-300 flex items-center justify-between group cursor-pointer ${
-                    isActive
-                      ? 'bg-[#09090B] border-emerald-500/40 text-white shadow-lg'
-                      : 'bg-transparent border-zinc-900 text-slate-400 hover:border-zinc-800 hover:text-slate-200'
-                  }`}
-                >
-                  <div className="flex items-center space-x-3.5 min-w-0">
-                    <div className={`w-9 h-9 rounded-xl border flex items-center justify-center transition-all ${
-                      isActive ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400 scale-105' : 'bg-zinc-900 border-zinc-800 text-slate-400'
-                    }`}>
-                      <Icon className="w-4.5 h-4.5" />
-                    </div>
-                    <div className="truncate">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-[10px] font-mono font-bold uppercase text-slate-500">{node.tag}</span>
-                        <h4 className="text-sm font-bold font-outfit truncate">{node.title}</h4>
-                      </div>
-                      <p className="text-[11px] text-slate-500 truncate mt-0.5">{node.badge.text}</p>
-                    </div>
-                  </div>
+        {/* ── HORIZONTAL PROCESS FLOW (VIBRANT LANDING THEME COLOR NUMBERS) ── */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8 lg:gap-6 relative max-w-full mx-auto z-10">
+          {STEPS.map((step, idx) => {
+            const isLast = idx === STEPS.length - 1;
 
-                  <div className={`w-2 h-2 rounded-full transition-all ${isActive ? 'bg-emerald-400 scale-125 shadow-[0_0_8px_rgba(16,185,129,0.8)]' : 'bg-zinc-800'}`} />
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Right Column: 3D GSAP CardSwap Component Container */}
-          <div className="lg:col-span-7 flex justify-center items-center py-6 min-h-[600px] relative overflow-visible">
-            <div className="w-full h-[560px] relative flex items-center justify-center pt-4">
-              <CardSwap
-                width={420}
-                height={520}
-                cardDistance={20}
-                verticalDistance={20}
-                delay={3500}
-                pauseOnHover={true}
-                skewAmount={2}
-                targetIndex={activeStep}
-                onCardChange={(newIdx) => setActiveStep(newIdx)}
-                onCardClick={(index) => setActiveStep(index % NODES.length)}
+            return (
+              <motion.div
+                key={step.id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.5, delay: idx * 0.1 }}
+                className="flex flex-col items-center text-center relative z-10"
               >
-                {NODES.map((node) => {
-                  const Icon = node.icon;
-                  return (
-                    <Card key={node.id} className="p-5 sm:p-6 overflow-y-auto [scrollbar-width:none] [::-webkit-scrollbar]:hidden flex flex-col justify-between space-y-3">
-                      {/* Card Header */}
-                      <div className="space-y-2.5">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-zinc-900 text-slate-400 border border-zinc-800">
-                            {node.tag}
-                          </span>
-                          <span className={`text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full border ${node.badge.color}`}>
-                            {node.badge.text}
-                          </span>
-                        </div>
+                {/* Horizontal Dotted Connecting Line with Glowing Dot Tracer */}
+                {!isLast && (
+                  <div className="hidden lg:flex items-center absolute top-8 left-[calc(50%+32px)] right-[-calc(50%-32px)] w-[calc(100%-64px)] z-0 pointer-events-none">
+                    <div className="w-full border-t-2 border-dashed border-zinc-800/90" />
+                    <div className={`w-2.5 h-2.5 rounded-full ${step.dotColor} shrink-0`} />
+                  </div>
+                )}
 
-                        <div className="flex items-center space-x-3 pt-0.5">
-                          <div className={`w-10 h-10 rounded-xl border flex items-center justify-center ${node.bgColor} ${node.color}`}>
-                            <Icon className="w-5 h-5" />
-                          </div>
-                          <h3 className="text-lg font-extrabold text-white font-outfit">{node.title}</h3>
-                        </div>
+                {/* Big Vibrant Landing-Page Theme Gradient Number */}
+                <div className="relative mb-3 z-10">
+                  <span className={`text-6xl sm:text-7xl font-black font-outfit ${step.gradient} tracking-tight leading-none filter drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)]`}>
+                    {step.stepNum}
+                  </span>
+                </div>
 
-                        <p className="text-xs text-slate-400 leading-relaxed font-normal">{node.desc}</p>
+                {/* Step Title */}
+                <h3 className="text-xl sm:text-2xl font-black text-white font-outfit tracking-tight mb-2 z-10">
+                  {step.title}
+                </h3>
 
-                        {/* Pipeline Checklist */}
-                        <div className="space-y-1.5 pt-2 border-t border-zinc-800/80">
-                          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Pipeline Flow</p>
-                          {node.steps.map(({ icon: StepIcon, label, sub, color }, i) => (
-                            <div key={i} className="flex items-center space-x-2.5 p-1.5 rounded-xl bg-zinc-900/80 border border-zinc-800/50">
-                              <div className={`p-1 rounded-lg bg-zinc-800 ${color}`}>
-                                <StepIcon className="w-3 h-3" />
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <p className="text-xs font-bold text-slate-200 truncate leading-none">{label}</p>
-                                <p className="text-[10px] text-slate-400 truncate mt-0.5">{sub}</p>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </Card>
-                  );
-                })}
-              </CardSwap>
-            </div>
-          </div>
-
+                {/* Step Description */}
+                <p className="text-sm text-slate-300 font-medium leading-relaxed max-w-[240px] z-10">
+                  {step.desc}
+                </p>
+              </motion.div>
+            );
+          })}
         </div>
 
       </div>

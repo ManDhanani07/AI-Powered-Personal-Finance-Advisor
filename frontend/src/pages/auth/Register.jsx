@@ -1,19 +1,32 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  Orbit, Lock, CheckCircle2, ShieldCheck, Zap,
-  BrainCircuit, LineChart, Building2, ArrowLeft,
+  Orbit, Lock, ShieldCheck, ArrowLeft,
+  BrainCircuit, LineChart, Zap
 } from 'lucide-react';
 import RegisterForm from '../../components/auth/RegisterForm.jsx';
-import { LightPillar } from '../../components/common/LightPillar.jsx';
 import { ROUTES, APP_CONSTANTS } from '../../constants/index.js';
 
-const FEATURES = [
-  { icon: BrainCircuit, title: 'Gemini AI Financial Copilot Engine', color: 'text-emerald-400' },
-  { icon: LineChart,    title: 'Meta Prophet ML 12-Month Forecasting', color: 'text-teal-400'   },
-  { icon: Zap,          title: 'Instant Bank Aggregator (AA Sync)', color: 'text-cyan-400'   },
-  { icon: Building2,    title: 'Multi-Entity Encrypted Wealth Hub', color: 'text-emerald-400'},
+const HIGHLIGHTS = [
+  {
+    icon: BrainCircuit,
+    title: 'Gemini AI Copilot',
+    desc: 'Autonomous transaction auto-tagging & real-time insights.',
+    color: 'text-emerald-400',
+  },
+  {
+    icon: LineChart,
+    title: 'Prophet ML Forecast',
+    desc: '12-month predictive cash flow forecasting & risk matrix.',
+    color: 'text-teal-400',
+  },
+  {
+    icon: Zap,
+    title: 'Instant Bank Aggregator',
+    desc: 'Direct sync across Zerodha, Groww, & RBI-licensed banks.',
+    color: 'text-cyan-400',
+  },
 ];
 
 const STATS = [
@@ -22,160 +35,158 @@ const STATS = [
   { value: '31%', label: 'Avg Spend Reduction' },
 ];
 
-export const Register = () => (
-  <div className="min-h-screen lg:h-screen flex bg-[#000000] overflow-y-auto lg:overflow-hidden [scrollbar-width:none] [::-webkit-scrollbar]:hidden">
+// Flawless, Glitch-Free Live Conic Edge Light Card Wrapper
+const LiveEdgeCard = ({ children, className = '' }) => {
+  const [angle, setAngle] = useState(0);
+  const animRef = useRef(null);
 
-    {/* ── LEFT PANEL (BRANDING & FEATURES) ── */}
-    <div className="relative hidden lg:flex lg:w-[48%] flex-col justify-between p-8 xl:p-10 overflow-y-auto [scrollbar-width:none] [::-webkit-scrollbar]:hidden bg-[#000000] border-r border-zinc-800/40">
-      <div className="pointer-events-none absolute bottom-1/3 -left-20 w-96 h-96 rounded-full bg-teal-500/5 blur-[160px]" />
+  useEffect(() => {
+    let lastTime = performance.now();
+    const animate = (now) => {
+      const delta = now - lastTime;
+      lastTime = now;
+      setAngle((prev) => (prev + delta * 0.08) % 360);
+      animRef.current = requestAnimationFrame(animate);
+    };
+    animRef.current = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animRef.current);
+  }, []);
 
-      {/* Brand */}
-      <div className="relative z-10 shrink-0">
-        <Link to={ROUTES.HOME} className="inline-flex items-center gap-3 group w-fit">
-          <div className="w-9 h-9 rounded-xl bg-emerald-500 flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
-            <Orbit className="w-4.5 h-4.5 text-slate-950" />
-          </div>
-          <span className="font-black text-base text-white tracking-tight font-outfit">
-            FinTech<span className="text-emerald-400">.AI</span>
-          </span>
-        </Link>
+  return (
+    <div
+      className={`relative rounded-3xl p-[2px] transition-all duration-300 shadow-[0_0_40px_rgba(16,185,129,0.3)] ${className}`}
+      style={{
+        background: `conic-gradient(from ${angle}deg, #10B981 0%, #2DD4BF 25%, #00F2FE 50%, #27272A 75%, #10B981 100%)`,
+      }}
+    >
+      <div className="rounded-[22px] bg-[#09090B] p-4 sm:p-6 backdrop-blur-xl">
+        {children}
       </div>
+    </div>
+  );
+};
 
-      {/* Main Content */}
-      <div className="relative z-10 flex flex-col gap-4 xl:gap-5 my-auto max-w-lg">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="flex flex-col gap-2.5"
-        >
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0D0D0D] border border-zinc-800 text-slate-300 text-[11px] font-semibold w-fit">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span>Join 50,000+ Smart Investors</span>
-          </div>
+export const Register = () => (
+  <div className="min-h-screen lg:h-screen flex items-center justify-center bg-[#000000] p-4 sm:p-6 lg:p-8 overflow-hidden">
+    {/* Background Ambient Glow */}
+    <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full bg-emerald-500/5 blur-[200px]" />
 
-          <h1 className="text-3xl xl:text-4xl font-black text-white tracking-tight leading-tight font-outfit">
-            Build Wealth with{' '}
-            <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">
-              Precision &amp; Purpose
-            </span>
-          </h1>
+    {/* ── UNIFIED NO-SCROLL LAYOUT CONTAINER (NO CENTRAL DIVIDER LINE) ── */}
+    <div className="relative z-10 w-full max-w-[1260px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-6 lg:gap-8 h-full max-h-[820px]">
 
-          <p className="text-xs xl:text-sm text-slate-400 leading-relaxed">
-            India's most advanced AI wealth platform. Set up in 60 seconds, automate your cash flow tracking, and grow with confidence.
-          </p>
-        </motion.div>
-
-        {/* Stats Row */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.08 }}
-          className="grid grid-cols-3 gap-2.5"
-        >
-          {STATS.map(({ value, label }) => (
-            <div key={label} className="rounded-xl bg-[#09090B] border border-zinc-800 p-2.5 text-center">
-              <p className="text-base xl:text-lg font-black text-white font-outfit tracking-tight">{value}</p>
-              <p className="text-[11px] text-slate-400 font-medium mt-0.5">{label}</p>
-            </div>
-          ))}
-        </motion.div>
-
-        {/* Key Features */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.4, delay: 0.14 }}
-          className="flex flex-col gap-2"
-        >
-          {FEATURES.map(({ icon: Icon, title, color }) => (
-            <div key={title} className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-[#09090B] border border-zinc-800">
-              <div className="w-6 h-6 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center flex-shrink-0">
-                <Icon className={`w-3.5 h-3.5 ${color}`} />
+      {/* ── LEFT SIDE: SIGNUP FORM CARD WITH LIVE CIRCULATING CONIC EDGE LIGHT ── */}
+      <div className="w-full lg:w-[46%] xl:w-[44%] flex items-center justify-center">
+        <div className="w-full max-w-md">
+          
+          {/* Mobile Header Logo */}
+          <div className="lg:hidden flex items-center justify-between mb-4">
+            <Link to={ROUTES.HOME} className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 font-black">
+                <Orbit className="w-4 h-4" />
               </div>
-              <p className="text-xs font-semibold text-slate-200">{title}</p>
-            </div>
-          ))}
-        </motion.div>
+              <span className="font-outfit font-black text-base text-white">
+                {APP_CONSTANTS.APP_NAME}
+              </span>
+            </Link>
 
-        {/* Security badges */}
-        <div className="flex items-center gap-4 pt-1">
-          <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-medium">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-            <span>No credit card required</span>
+            <Link to={ROUTES.AUTH.LOGIN} className="text-xs font-semibold text-emerald-400 hover:underline">
+              Sign In
+            </Link>
           </div>
-          <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-medium">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-            <span>ISO 27001</span>
-          </div>
-          <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-medium">
-            <Zap className="w-3.5 h-3.5 text-emerald-400" />
-            <span>SOC 2 Type II</span>
-          </div>
+
+          {/* ── SIGNUP FORM CARD (CIRCULATING LIVE CONIC EDGE LIGHT) ── */}
+          <LiveEdgeCard>
+            <RegisterForm />
+          </LiveEdgeCard>
+
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="relative z-10 flex items-center justify-between text-[11px] text-slate-500 pt-4 shrink-0">
-        <span>© 2026 {APP_CONSTANTS.APP_NAME}</span>
-        <span className="flex items-center gap-1.5">
-          <Lock className="w-3.5 h-3.5 text-emerald-500" />
-          <span>256-Bit AES Encrypted</span>
-        </span>
-      </div>
-    </div>
+      {/* ── RIGHT SIDE: BRANDING & FEATURES (FITS 100% IN VIEWPORT, ZERO SCROLL) ── */}
+      <div className="hidden lg:flex lg:w-[54%] xl:w-[56%] flex-col justify-between h-full max-h-[740px] p-4 sm:p-6">
+        
+        {/* Top Header */}
+        <div className="flex items-center justify-between shrink-0 mb-2">
+          <Link to={ROUTES.HOME} className="flex items-center gap-2.5 group">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 font-black shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform">
+              <Orbit className="w-5 h-5" />
+            </div>
+            <span className="font-outfit font-black text-lg text-white tracking-tight">
+              {APP_CONSTANTS.APP_NAME}
+            </span>
+          </Link>
 
-    {/* ── RIGHT PANEL (FORM SECTION WITH LIGHTPILLAR EFFECT) ── */}
-    <div className="relative flex-1 flex flex-col bg-[#000000] overflow-y-auto [scrollbar-width:none] [::-webkit-scrollbar]:hidden">
-      {/* LightPillar Canvas */}
-      <div className="absolute inset-0 pointer-events-none z-0 opacity-100 overflow-hidden">
-        <LightPillar
-          topColor="#10B981"
-          bottomColor="#000000"
-          intensity={1.1}
-          rotationSpeed={0.5}
-          glowAmount={0.008}
-          pillarWidth={2}
-          pillarHeight={0.6}
-          noiseIntensity={2}
-          pillarRotation={-30}
-          interactive={false}
-          mixBlendMode="normal"
-          quality="high"
-        />
-      </div>
+          <Link
+            to={ROUTES.HOME}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-800 text-[11px] font-semibold text-slate-300 hover:text-white transition-colors"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Back to Landing</span>
+          </Link>
+        </div>
 
-      {/* Top bar with Back to Home button */}
-      <div className="flex items-center justify-between px-6 pt-4 flex-shrink-0 relative z-20">
-        <Link to={ROUTES.HOME} className="lg:hidden flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-emerald-500 flex items-center justify-center">
-            <Orbit className="w-4 h-4 text-slate-950" />
+        {/* Compact Hero Content (Zero Scroll Overflow) */}
+        <div className="my-auto space-y-5 max-w-xl">
+          <div className="space-y-2.5">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Bank-Grade 256-Bit Encrypted OS</span>
+            </div>
+
+            <h1 className="text-3xl xl:text-4xl font-outfit font-black text-white leading-tight tracking-tight">
+              Join 50,000+ Investors <br />
+              <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">
+                Automating Their Wealth
+              </span>
+            </h1>
+
+            <p className="text-xs text-slate-400 font-normal leading-relaxed">
+              Create your account in under 60 seconds. Connect transactions, train predictive models, and get AI guidance on budgets & tax optimization.
+            </p>
           </div>
-          <span className="font-black text-sm text-white font-outfit">
-            FinTech<span className="text-emerald-400">.AI</span>
+
+          {/* Compact 3 Highlights */}
+          <div className="space-y-2.5">
+            {HIGHLIGHTS.map((item, i) => {
+              const Icon = item.icon;
+              return (
+                <div
+                  key={i}
+                  className="flex items-center gap-3 p-2.5 rounded-xl bg-[#09090B] border border-zinc-800/80 hover:border-emerald-500/30 transition-all"
+                >
+                  <div className={`p-2 rounded-lg bg-zinc-900 border border-zinc-800 ${item.color} shrink-0`}>
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-white font-outfit">{item.title}</h4>
+                    <p className="text-[11px] text-slate-400 font-medium leading-normal mt-0.5">{item.desc}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Compact Stat Row */}
+          <div className="flex items-center justify-between pt-3 border-t border-zinc-800/60">
+            {STATS.map((stat, i) => (
+              <div key={i}>
+                <p className="text-lg xl:text-xl font-outfit font-black text-white tracking-tight">{stat.value}</p>
+                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Compact Footer */}
+        <div className="flex items-center justify-between text-[11px] text-slate-500 pt-2 shrink-0">
+          <span>© 2026 {APP_CONSTANTS.APP_NAME}</span>
+          <span className="flex items-center gap-1.5">
+            <Lock className="w-3.5 h-3.5 text-emerald-500" />
+            <span>256-Bit AES Encrypted</span>
           </span>
-        </Link>
-        <Link
-          to={ROUTES.HOME}
-          className="ml-auto inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-zinc-800 bg-[#09090B] text-xs font-semibold text-slate-300 hover:text-white hover:border-zinc-700 transition-all"
-        >
-          <ArrowLeft className="w-3.5 h-3.5 text-emerald-400" />
-          <span>Back to Home</span>
-        </Link>
+        </div>
       </div>
 
-      {/* Form Container (Cleanly Centered without Scroll) */}
-      <div className="flex-1 flex flex-col justify-center items-center px-4 py-4 overflow-y-auto [scrollbar-width:none] [::-webkit-scrollbar]:hidden relative z-10">
-        {/* Form Card */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4 }}
-          className="w-full max-w-md my-auto rounded-3xl border border-zinc-800/90 bg-[#09090B]/95 backdrop-blur-xl p-5 sm:p-6 shadow-[0_0_50px_rgba(16,185,129,0.25),0_20px_60px_rgba(0,0,0,0.95)]"
-        >
-          <RegisterForm />
-        </motion.div>
-      </div>
     </div>
   </div>
 );

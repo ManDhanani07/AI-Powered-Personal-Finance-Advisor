@@ -29,7 +29,6 @@ export const ProfileDropdown = () => {
     setIsOpen(false);
     try {
       await logout();
-      toast.info('Signed out successfully.', { icon: '👋' });
     } catch (err) {
       localStorage.clear();
     }

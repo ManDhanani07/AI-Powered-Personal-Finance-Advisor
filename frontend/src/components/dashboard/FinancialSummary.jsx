@@ -38,7 +38,7 @@ const SavingsBar = ({ rate }) => {
   );
 };
 
-export const FinancialSummary = ({ summary, loading }) => {
+export const FinancialSummary = ({ summary, overview, budgetOverview, loading }) => {
   if (loading) {
     return (
       <div className="rounded-3xl bg-[#09090B] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.98)] animate-pulse space-y-4">
@@ -53,12 +53,37 @@ export const FinancialSummary = ({ summary, loading }) => {
     );
   }
 
-  const income = Number(summary?.monthly_income ?? 0);
-  const expense = Number(summary?.monthly_expenses ?? 0);
-  const savings = Number(summary?.net_savings ?? 0);
-  const balance = Number(summary?.total_balance ?? 0);
-  const budgetRem = Number(summary?.budget_remaining ?? 0);
-  const savingsRate = Number(summary?.savings_rate ?? 0);
+  // 1. Dynamic Net Worth (Balance)
+  const balance = Number(
+    summary?.total_balance ?? overview?.total_balance ?? 0
+  );
+
+  // 2. Dynamic Monthly Income
+  const income = Number(
+    summary?.monthly_income ?? overview?.monthly_income ?? 0
+  );
+
+  // 3. Dynamic Monthly Expense
+  const expense = Number(
+    summary?.monthly_expenses ?? overview?.monthly_expenses ?? 0
+  );
+
+  // 4. Dynamic Net Savings / Surplus (Income - Expense)
+  const savings = summary?.net_savings !== undefined && summary?.net_savings !== null
+    ? Number(summary.net_savings)
+    : overview?.net_savings !== undefined && overview?.net_savings !== null
+    ? Number(overview.net_savings)
+    : (income - expense);
+
+  // 5. Dynamic Budget Allocated (Exact User Budget Allocation, e.g. ₹10,000)
+  const budgetAllocated = Number(
+    overview?.current_month_budget_total ?? summary?.budget_total ?? budgetOverview?.total_budget ?? 0
+  );
+
+  // 6. Dynamic Savings Efficiency Rate
+  const savingsRate = income > 0
+    ? ((savings / income) * 100)
+    : Number(summary?.savings_rate ?? overview?.savings_rate ?? 0);
 
   return (
     <motion.div
@@ -86,15 +111,15 @@ export const FinancialSummary = ({ summary, loading }) => {
         </div>
       </div>
 
-      {/* 4 Mini Stat Cards */}
+      {/* 4 Dynamic Mini Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MiniStat label="Monthly Income" value={formatCompactFinancial(income)} icon={TrendingUp} colorClass="text-emerald-400" />
         <MiniStat label="Monthly Expense" value={formatCompactFinancial(expense)} icon={TrendingDown} colorClass="text-rose-400" />
         <MiniStat label="Net Surplus" value={formatCompactFinancial(savings)} icon={PiggyBank} colorClass="text-sky-400" />
-        <MiniStat label="Budget Unallocated" value={formatCompactFinancial(budgetRem)} icon={Wallet} colorClass="text-amber-400" />
+        <MiniStat label="Budget Allocated" value={formatCurrency(budgetAllocated)} icon={Wallet} colorClass="text-emerald-400" />
       </div>
 
-      {/* Savings Efficiency Bar */}
+      {/* Dynamic Savings Efficiency Bar */}
       <SavingsBar rate={savingsRate} />
     </motion.div>
   );

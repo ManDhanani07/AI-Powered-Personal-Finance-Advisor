@@ -52,7 +52,7 @@ export const ForecastPage = () => {
       title="Meta Prophet Financial Forecast Engine"
       description="Enterprise time-series forecasting powered by Meta Prophet trained exclusively on your personal transaction history."
     >
-      <div className="space-y-6 max-w-7xl mx-auto">
+      <div className="space-y-6 max-w-[1920px] w-full mx-auto">
         {/* Top Control Filter Toolbar */}
         <ForecastFilters
           periodDays={periodDays}

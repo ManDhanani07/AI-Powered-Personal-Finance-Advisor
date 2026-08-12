@@ -1,19 +1,69 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ShieldCheck, TrendingUp, CreditCard, Building2, Zap, Landmark } from 'lucide-react';
+import {
+  BrainCircuit,
+  LineChart,
+  PieChart,
+  ShieldCheck,
+  Calculator,
+  Target,
+  Sparkles,
+  Zap,
+} from 'lucide-react';
 
-const INTEGRATIONS = [
-  { name: 'Bank Account Aggregator', badge: 'Secure Licensed', icon: ShieldCheck, color: 'text-[#FF5A5F]' },
-  { name: 'Zerodha Kite API', badge: 'Stocks & Portfolio', icon: TrendingUp, color: 'text-[#00F2FE]' },
-  { name: 'HDFC Bank Sync', badge: 'Direct Open Banking', icon: Landmark, color: 'text-purple-400' },
-  { name: 'CRED Financial', badge: 'Credit Card Sync', icon: CreditCard, color: 'text-rose-400' },
-  { name: 'Stripe India', badge: 'Payment Gateway', icon: Zap, color: 'text-emerald-400' },
-  { name: 'ICICI iMobile', badge: 'Banking API', icon: Building2, color: 'text-[#00F2FE]' },
-  { name: 'Groww Mutual Funds', badge: 'Portfolio Sync', icon: TrendingUp, color: 'text-[#FF5A5F]' },
+const WEBSITE_CAPABILITIES = [
+  {
+    name: 'Gemini 1.5 Pro AI Engine',
+    badge: 'Autonomous Wealth Insights',
+    icon: BrainCircuit,
+    color: 'text-emerald-400',
+  },
+  {
+    name: 'Meta Prophet ML Forecasting',
+    badge: '12-Month Predictive Cash Flow',
+    icon: LineChart,
+    color: 'text-teal-400',
+  },
+  {
+    name: 'Smart Budget Envelopes',
+    badge: 'Real-Time Auto-Categorization',
+    icon: PieChart,
+    color: 'text-cyan-400',
+  },
+  {
+    name: 'Tax Optimizer Assistant',
+    badge: '80C & New Regime Analysis',
+    icon: Calculator,
+    color: 'text-emerald-400',
+  },
+  {
+    name: 'Milestone Goal Tracker',
+    badge: 'Automated Savings Projections',
+    icon: Target,
+    color: 'text-teal-400',
+  },
+  {
+    name: '256-Bit Bank-Grade Vault',
+    badge: 'Zero-Knowledge Data Security',
+    icon: ShieldCheck,
+    color: 'text-cyan-400',
+  },
+  {
+    name: 'Financial Health Matrix',
+    badge: 'Real-Time Wealth Scoring',
+    icon: Sparkles,
+    color: 'text-emerald-400',
+  },
+  {
+    name: 'Instant Ledger Analytics',
+    badge: 'Multi-Asset Portfolio Sync',
+    icon: Zap,
+    color: 'text-teal-400',
+  },
 ];
 
 export const SocialProofMarquee = () => {
-  const marqueeItems = [...INTEGRATIONS, ...INTEGRATIONS, ...INTEGRATIONS];
+  const marqueeItems = [...WEBSITE_CAPABILITIES, ...WEBSITE_CAPABILITIES];
 
   return (
     <motion.section
@@ -23,9 +73,9 @@ export const SocialProofMarquee = () => {
       transition={{ duration: 0.6 }}
       className="py-6 bg-transparent overflow-hidden"
     >
-      <div className="max-w-screen-xl mx-auto px-4 mb-6 text-center">
+      <div className="max-w-screen-xl mx-auto px-4 mb-5 text-center">
         <p className="text-xs font-extrabold uppercase tracking-widest text-slate-400">
-          Seamless Direct Bank Integrations & Bank-Grade Security
+          Powered by Institutional AI & Predictive Financial Models
         </p>
       </div>
 
@@ -38,14 +88,14 @@ export const SocialProofMarquee = () => {
         <motion.div
           animate={{ x: ['0%', '-50%'] }}
           transition={{ duration: 25, ease: 'linear', repeat: Infinity }}
-          className="flex space-x-6 whitespace-nowrap"
+          className="flex space-x-5 whitespace-nowrap"
         >
           {marqueeItems.map((item, index) => {
             const Icon = item.icon;
             return (
               <div
                 key={index}
-                className="inline-flex items-center space-x-3 px-5 py-3 rounded-2xl bg-[#09090B] border border-zinc-800 shadow-[0_8px_25px_rgba(0,0,0,0.8)] flex-shrink-0"
+                className="inline-flex items-center space-x-3 px-4 py-2.5 rounded-2xl bg-[#09090B] border border-zinc-800 shadow-[0_8px_25px_rgba(0,0,0,0.8)] flex-shrink-0 group hover:border-emerald-500/30 transition-colors"
               >
                 <div className={`p-2 rounded-xl bg-[#141418] ${item.color}`}>
                   <Icon className="w-4 h-4" />

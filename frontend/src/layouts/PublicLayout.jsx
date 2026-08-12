@@ -25,7 +25,7 @@ export const PublicLayout = ({ children }) => {
         </div>
       </main>
 
-      <footer className="text-center text-xs text-slate-500 dark:text-slate-400 py-4">
+      <footer className="text-center text-xs text-slate-500 py-4 bg-[#000000] border-t border-zinc-900/60">
         © {new Date().getFullYear()} {APP_CONSTANTS.APP_NAME}. All rights reserved.
       </footer>
     </div>

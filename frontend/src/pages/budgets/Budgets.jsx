@@ -234,7 +234,7 @@ const BudgetsContent = () => {
         </div>
       }
     >
-      <div className="space-y-6 max-w-7xl mx-auto">
+      <div className="space-y-6 max-w-[1920px] w-full mx-auto">
         {/* 1. Premium Budget Analysis Card */}
         {intelligence?.analysis_card && (
           <PremiumBudgetInsightCard analysisData={intelligence.analysis_card} />
