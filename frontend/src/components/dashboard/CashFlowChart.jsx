@@ -12,14 +12,14 @@ const CustomTooltip = ({ active, payload, label }) => {
   const net = Number(payload[0]?.value ?? 0);
   const isPositive = net >= 0;
   return (
-    <div className="rounded-2xl border border-border-strong bg-bg-surface/95 backdrop-blur-xl shadow-2xl p-3.5 text-xs min-w-[160px]">
-      <p className="font-bold text-white font-outfit border-b border-border-subtle pb-1.5 mb-2">{label}</p>
+    <div className="rounded-2xl border border-zinc-800 bg-[#09090B]/95 backdrop-blur-xl shadow-2xl p-3.5 text-xs min-w-[160px] font-sans">
+      <p className="font-bold text-white font-outfit border-b border-zinc-800/80 pb-1.5 mb-2">{label}</p>
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <span className={`h-2.5 w-2.5 rounded-full inline-block shadow-sm ${isPositive ? 'bg-emerald-400' : 'bg-rose-400'}`} />
+          <span className={`h-2.5 w-2.5 rounded-full inline-block shadow-sm ${isPositive ? 'bg-purple-400' : 'bg-rose-400'}`} />
           <span className="text-slate-300 font-medium">Net Surplus:</span>
         </div>
-        <span className={`font-bold font-mono ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
+        <span className={`font-bold font-mono ${isPositive ? 'text-purple-400' : 'text-rose-400'}`}>
           {formatCurrency(net)}
         </span>
       </div>
@@ -43,7 +43,7 @@ const CustomLiveDot = (props) => {
         cy={cy}
         r={isLatest ? 5.5 : 3.5}
         fill={isLatest ? '#FFFFFF' : strokeColor}
-        stroke={isLatest ? strokeColor : '#1E293B'}
+        stroke={isLatest ? strokeColor : '#12131A'}
         strokeWidth={isLatest ? 3 : 2}
       />
     </g>
@@ -52,8 +52,8 @@ const CustomLiveDot = (props) => {
 
 const SkeletonChart = () => (
   <div className="animate-pulse space-y-3">
-    <div className="h-5 bg-slate-800 rounded w-1/3" />
-    <div className="h-60 bg-slate-800/60 rounded-2xl" />
+    <div className="h-5 bg-zinc-800 rounded w-1/3" />
+    <div className="h-60 bg-zinc-800/60 rounded-2xl" />
   </div>
 );
 
@@ -73,35 +73,43 @@ export const CashFlowChart = memo(({ charts, loading, onSeeded }) => {
   if (loading) return <SkeletonChart />;
 
   const rawData = charts?.cash_flow_monthly || [];
+  const monthMap = {
+    jan: '1 Jan',
+    feb: '1 Feb',
+    mar: '1 Mar',
+    apr: '1 Apr',
+    may: '1 May',
+    jun: '1 Jun',
+    jul: '1 Jul',
+    aug: '1 Aug',
+    sep: '1 Sep',
+    oct: '1 Oct',
+    nov: '1 Nov',
+    dec: '1 Dec',
+  };
+
   const data = rawData.map((d) => {
     const rawMonth = d.month || '';
-    const parts = rawMonth.split(' ');
-    const shortLabel = parts.length === 2 ? `${parts[0]} '${parts[1].slice(2)}` : rawMonth;
+    const prefix = rawMonth.trim().slice(0, 3).toLowerCase();
+    const displayLabel = monthMap[prefix] || rawMonth;
 
     return {
-      month: shortLabel,
+      month: displayLabel,
       fullMonth: rawMonth,
       Net: Number(d.net ?? 0),
     };
   });
 
   const hasData = data.some((d) => Math.abs(d.Net) > 0);
-  const fillColor = '#10B981';
-  const strokeColor = '#34D399';
+  const fillColor = '#A855F7';
+  const strokeColor = '#C084FC';
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 font-sans">
       <div className="flex items-start justify-between">
         <div>
-          <h3 className="text-base font-bold text-slate-900 dark:text-white font-outfit flex items-center gap-2">
-            <span>Monthly Net Savings & Surplus</span>
-            <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-extrabold tracking-wider uppercase">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-              </span>
-              <span>{isLiveStreaming ? 'Streaming 24/7' : 'Paused'}</span>
-            </div>
+          <h3 className="text-base font-bold text-white font-outfit">
+            Monthly Net Savings & Surplus
           </h3>
           <p className="text-xs text-slate-400">Net monthly savings and financial surplus continuous timeline</p>
         </div>
@@ -109,10 +117,10 @@ export const CashFlowChart = memo(({ charts, loading, onSeeded }) => {
         {hasData && (
           <button
             onClick={() => setIsLiveStreaming((prev) => !prev)}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-xl border text-xs font-bold transition-all shadow-sm active:scale-95 ${
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-xl border text-xs font-bold font-outfit transition-all shadow-sm active:scale-95 cursor-pointer ${
               isLiveStreaming
-                ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/20'
-                : 'bg-slate-800 border-border-subtle text-slate-400 hover:text-white'
+                ? 'bg-purple-500/10 border-purple-500/40 text-purple-400 hover:bg-purple-500/20'
+                : 'bg-zinc-800 border-zinc-700 text-slate-400 hover:text-white'
             }`}
             title="Toggle continuous live stream looping"
           >
@@ -126,16 +134,16 @@ export const CashFlowChart = memo(({ charts, loading, onSeeded }) => {
         <EmptyLedgerCallout title="Monthly Cash Flow Graph Empty" onSeeded={onSeeded} />
       ) : (
         <ResponsiveContainer width="100%" height={260}>
-          <AreaChart key={animKey} data={data} margin={{ top: 10, right: 10, left: -15, bottom: 25 }}>
+          <AreaChart key={animKey} data={data} margin={{ top: 10, right: 10, left: 0, bottom: 25 }}>
             <defs>
-              <linearGradient id="cashFlowGrad3D" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={fillColor} stopOpacity={0.45} />
-                <stop offset="50%" stopColor={fillColor} stopOpacity={0.15} />
-                <stop offset="100%" stopColor={fillColor} stopOpacity={0.0} />
+              <linearGradient id="cashFlowGradPurePurple" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#A855F7" stopOpacity={0.45} />
+                <stop offset="50%" stopColor="#A855F7" stopOpacity={0.15} />
+                <stop offset="100%" stopColor="#A855F7" stopOpacity={0.0} />
               </linearGradient>
 
-              <filter id="glowLine" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="0" dy="4" stdDeviation="5" floodColor={strokeColor} floodOpacity="0.6" />
+              <filter id="glowPurpleLine" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="4" stdDeviation="5" floodColor="#C084FC" floodOpacity={0.65} />
               </filter>
             </defs>
 
@@ -146,6 +154,7 @@ export const CashFlowChart = memo(({ charts, loading, onSeeded }) => {
               angle={-25}
               textAnchor="end"
               height={45}
+              padding={{ left: 12, right: 12 }}
               tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 600 }}
               axisLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
               tickLine={false}
@@ -162,8 +171,8 @@ export const CashFlowChart = memo(({ charts, loading, onSeeded }) => {
               dataKey="Net"
               stroke={strokeColor}
               strokeWidth={3}
-              fill="url(#cashFlowGrad3D)"
-              filter="url(#glowLine)"
+              fill="url(#cashFlowGradPurePurple)"
+              filter="url(#glowPurpleLine)"
               isAnimationActive={true}
               animationDuration={2200}
               animationEasing="ease-in-out"

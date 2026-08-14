@@ -1,5 +1,18 @@
 import React, { useEffect, useRef } from 'react';
-import { Search, Download, Filter, Calendar, CreditCard, Tag, X, Plus } from 'lucide-react';
+import { Search, Download, X, Plus, ChevronDown } from 'lucide-react';
+
+const SelectFilter = ({ value, onChange, children, minWidth = '140px' }) => (
+  <div className="relative" style={{ minWidth }}>
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="w-full appearance-none rounded-lg border border-zinc-800 bg-zinc-900 hover:bg-zinc-800/80 py-2 pl-3 pr-7 text-xs font-medium text-slate-300 focus:outline-none focus:ring-1 focus:ring-zinc-600 cursor-pointer transition-colors"
+    >
+      {children}
+    </select>
+    <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500" />
+  </div>
+);
 
 export const HeaderControlBar = ({
   searchQuery,
@@ -11,17 +24,22 @@ export const HeaderControlBar = ({
   onDateRangeChange,
   paymentMethod,
   onPaymentMethodChange,
-  onExportCSV,
-  onClearFilters,
   hasActiveFilters,
+  onClearFilters,
+  onExportCSV,
   onAddTransaction,
 }) => {
   const searchInputRef = useRef(null);
 
-  // Keyboard shortcut '/' to focus search input
+  // Keyboard shortcut '/' to focus search
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === '/' && document.activeElement !== searchInputRef.current) {
+      if (
+        e.key === '/' &&
+        document.activeElement !== searchInputRef.current &&
+        document.activeElement.tagName !== 'INPUT' &&
+        document.activeElement.tagName !== 'TEXTAREA'
+      ) {
         e.preventDefault();
         searchInputRef.current?.focus();
       }
@@ -31,117 +49,99 @@ export const HeaderControlBar = ({
   }, []);
 
   return (
-    <div className="space-y-3 bg-bg-surface border border-border-subtle rounded-3xl p-4 sm:p-5 backdrop-blur-xl shadow-glass">
-      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
-        {/* Search Bar with '/' Shortcut Badge */}
-        <div className="relative flex-1 min-w-[240px]">
-          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
-            <Search className="h-4 w-4" />
-          </div>
-          <input
-            ref={searchInputRef}
-            type="text"
-            placeholder="Search merchant, title, or amount... (Press '/' to focus)"
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full rounded-2xl border border-border-strong bg-slate-900/90 dark:bg-bg-elevated py-2.5 pl-10 pr-10 text-xs font-semibold text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all shadow-inner"
-          />
-          {searchQuery ? (
-            <button
-              onClick={() => onSearchChange('')}
-              className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-200"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
-          ) : (
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-              <kbd className="px-1.5 py-0.5 text-[10px] font-semibold text-slate-400 bg-slate-800 border border-slate-700 rounded-md">
-                /
-              </kbd>
-            </div>
-          )}
-        </div>
-
-        {/* Filters & Actions Group */}
-        <div className="flex flex-wrap items-center gap-2.5">
-          {/* Category Dropdown */}
-          <div className="relative min-w-[140px]">
-            <select
-              value={selectedCategory}
-              onChange={(e) => onCategoryChange(e.target.value)}
-              className="w-full rounded-2xl border border-border-strong bg-slate-900/90 dark:bg-bg-elevated py-2.5 px-3.5 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 cursor-pointer shadow-inner appearance-none"
-            >
-              <option value="" className="bg-slate-900 text-white">All Categories</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id} className="bg-slate-900 text-white">
-                  {c.category_name || c.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Date Picker Range Selector */}
-          <div className="relative min-w-[130px]">
-            <select
-              value={dateRange}
-              onChange={(e) => onDateRangeChange(e.target.value)}
-              className="w-full rounded-2xl border border-border-strong bg-slate-900/90 dark:bg-bg-elevated py-2.5 px-3.5 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 cursor-pointer shadow-inner appearance-none"
-            >
-              <option value="ALL" className="bg-slate-900 text-white">All Dates</option>
-              <option value="THIS_MONTH" className="bg-slate-900 text-white">This Month</option>
-              <option value="LAST_30" className="bg-slate-900 text-white">Last 30 Days</option>
-              <option value="LAST_90" className="bg-slate-900 text-white">Last 90 Days</option>
-              <option value="THIS_YEAR" className="bg-slate-900 text-white">This Year</option>
-            </select>
-          </div>
-
-          {/* Payment Method Filter */}
-          <div className="relative min-w-[130px]">
-            <select
-              value={paymentMethod}
-              onChange={(e) => onPaymentMethodChange(e.target.value)}
-              className="w-full rounded-2xl border border-border-strong bg-slate-900/90 dark:bg-bg-elevated py-2.5 px-3.5 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 cursor-pointer shadow-inner appearance-none"
-            >
-              <option value="" className="bg-slate-900 text-white">All Payment Methods</option>
-              <option value="UPI" className="bg-slate-900 text-white">UPI / GPay / PhonePe</option>
-              <option value="CREDIT_CARD" className="bg-slate-900 text-white">Credit Card</option>
-              <option value="DEBIT_CARD" className="bg-slate-900 text-white">Debit Card</option>
-              <option value="NET_BANKING" className="bg-slate-900 text-white">Net Banking</option>
-              <option value="CASH" className="bg-slate-900 text-white">Cash</option>
-            </select>
-          </div>
-
-          {/* Clear Filters */}
-          {hasActiveFilters && (
-            <button
-              onClick={onClearFilters}
-              className="px-3 py-2.5 rounded-2xl border border-rose-500/30 bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
-            >
-              <X className="w-3.5 h-3.5" />
-              <span>Reset</span>
-            </button>
-          )}
-
-          {/* Export CSV Button */}
+    <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-2.5">
+      {/* Search */}
+      <div className="relative flex-1 min-w-0">
+        <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500" />
+        <input
+          ref={searchInputRef}
+          type="text"
+          placeholder="Search transactions…"
+          value={searchQuery}
+          onChange={(e) => onSearchChange(e.target.value)}
+          className="w-full rounded-lg border border-zinc-800 bg-zinc-900 hover:bg-zinc-800/60 py-2 pl-9 pr-9 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-zinc-600 focus:border-zinc-700 transition-colors"
+        />
+        {searchQuery ? (
           <button
-            onClick={onExportCSV}
-            className="px-3.5 py-2.5 rounded-2xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-bold text-xs transition-all flex items-center gap-1.5 cursor-pointer"
+            onClick={() => onSearchChange('')}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded text-slate-500 hover:text-slate-300 transition-colors"
           >
-            <Download className="w-3.5 h-3.5" />
-            <span>Export CSV</span>
+            <X className="h-3.5 w-3.5" />
           </button>
+        ) : (
+          <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2">
+            <kbd className="px-1.5 py-0.5 text-[10px] font-medium text-slate-600 bg-zinc-800 border border-zinc-700 rounded">
+              /
+            </kbd>
+          </div>
+        )}
+      </div>
 
-          {/* + Add Transaction Button */}
-          {onAddTransaction && (
-            <button
-              onClick={onAddTransaction}
-              className="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-950 font-bold text-xs uppercase tracking-wider shadow-md hover:scale-[1.01] active:scale-[0.98] transition-all flex items-center gap-1.5 cursor-pointer"
-            >
-              <Plus className="w-4 h-4 text-slate-950" />
-              <span>+ Add Transaction</span>
-            </button>
-          )}
-        </div>
+      {/* Filters row */}
+      <div className="flex flex-wrap items-center gap-2">
+        {/* Category */}
+        <SelectFilter value={selectedCategory} onChange={onCategoryChange} minWidth="148px">
+          <option value="">All Categories</option>
+          {categories.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.category_name || c.name}
+            </option>
+          ))}
+        </SelectFilter>
+
+        {/* Date Range */}
+        <SelectFilter value={dateRange} onChange={onDateRangeChange} minWidth="130px">
+          <option value="ALL">All Dates</option>
+          <option value="THIS_MONTH">This Month</option>
+          <option value="LAST_30">Last 30 Days</option>
+          <option value="LAST_90">Last 90 Days</option>
+          <option value="THIS_YEAR">This Year</option>
+        </SelectFilter>
+
+        {/* Payment Method */}
+        <SelectFilter value={paymentMethod} onChange={onPaymentMethodChange} minWidth="148px">
+          <option value="">All Methods</option>
+          <option value="UPI">UPI / GPay</option>
+          <option value="CREDIT_CARD">Credit Card</option>
+          <option value="DEBIT_CARD">Debit Card</option>
+          <option value="NET_BANKING">Net Banking</option>
+          <option value="BANK_TRANSFER">Bank Transfer</option>
+          <option value="CASH">Cash</option>
+        </SelectFilter>
+
+        {/* Reset Filters — only when active */}
+        {hasActiveFilters && (
+          <button
+            onClick={onClearFilters}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-rose-500/30 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 text-xs font-medium transition-colors cursor-pointer"
+          >
+            <X className="w-3 h-3" />
+            Reset
+          </button>
+        )}
+
+        {/* Divider */}
+        <div className="h-6 w-px bg-zinc-800 hidden sm:block" />
+
+        {/* Export CSV */}
+        <button
+          onClick={onExportCSV}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-slate-400 hover:text-slate-200 text-xs font-medium transition-colors cursor-pointer"
+        >
+          <Download className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">Export CSV</span>
+        </button>
+
+        {/* Add Transaction */}
+        {onAddTransaction && (
+          <button
+            onClick={onAddTransaction}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-white hover:bg-slate-100 text-slate-950 text-xs font-semibold transition-colors cursor-pointer shadow-sm"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Add Transaction</span>
+          </button>
+        )}
       </div>
     </div>
   );

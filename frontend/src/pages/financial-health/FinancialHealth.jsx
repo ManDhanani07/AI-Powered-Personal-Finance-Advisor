@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Activity, RefreshCw } from 'lucide-react';
-import { toast } from 'react-toastify';
 import { PageContainer } from '../../components/layout/PageContainer.jsx';
 
 import financialHealthService from '../../services/financialHealthService.js';
@@ -76,13 +75,10 @@ export const FinancialHealth = () => {
         description="Rule-based financial health scoring engine evaluating transaction ledger history."
       >
         <div className="space-y-6 max-w-7xl mx-auto animate-pulse">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="h-64 bg-slate-800/60 rounded-3xl" />
-            <div className="h-64 bg-slate-800/60 rounded-3xl lg:col-span-2" />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="h-64 bg-slate-800/40 rounded-2xl" />
+          <div className="space-y-4">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-44 bg-slate-800/60 rounded-3xl" />
+              <div key={i} className="h-16 bg-slate-800/40 rounded-xl" />
             ))}
           </div>
         </div>
@@ -98,16 +94,16 @@ export const FinancialHealth = () => {
         <button
           onClick={loadData}
           disabled={refreshing}
-          className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-primary-500 to-indigo-600 hover:from-primary-600 hover:to-indigo-700 text-white font-bold text-xs uppercase tracking-wider shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center space-x-2 cursor-pointer disabled:opacity-50"
+          className="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-950 font-bold text-xs uppercase tracking-wider shadow-sm transition-all flex items-center space-x-2 cursor-pointer disabled:opacity-50"
         >
           <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
           <span>Recalculate Health Engine</span>
         </button>
       }
     >
-      <div className="space-y-6 max-w-[1920px] w-full mx-auto">
-        {/* ── 1. Top Row: Overall Score Card & Grade Standing ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+      <div className="space-y-8 max-w-[1920px] w-full mx-auto">
+        {/* ── 1. Top Integrated Hero Section (No Card Box) ── */}
+        <div className="pb-6 border-b border-zinc-800/80 grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
           <HealthScoreCard
             score={healthData?.overall_score ?? 0}
             calculatedAt={healthData?.calculated_at}
@@ -122,22 +118,22 @@ export const FinancialHealth = () => {
           </div>
         </div>
 
-        {/* ── 2. Weighted Parameters (7 Core Metrics Grid) ── */}
+        {/* ── 2. Open Linear Parameter Performance Table ── */}
         <div className="space-y-3">
-          <div className="flex items-center space-x-2">
-            <Activity className="w-5 h-5 text-primary-400" />
-            <h3 className="text-xl font-black text-white font-outfit">
-              Weighted Parameter Performance (0–100%)
+          <div className="flex items-center space-x-2 pb-2 border-b border-zinc-800/80">
+            <Activity className="w-5 h-5 text-indigo-400" />
+            <h3 className="text-lg font-black text-white font-outfit">
+              Weighted Parameter Performance
             </h3>
           </div>
           <MetricCard parameters={healthData?.parameters || []} />
         </div>
 
-        {/* ── 3. Rule-Based Recommendations ── */}
+        {/* ── 3. Rule-Based Recommendations Open Feed ── */}
         <RecommendationCard recommendations={healthData?.recommendations || []} />
 
-        {/* ── 4. Parameter Capacity Radar & Score History Trajectory ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+        {/* ── 4. Parameter Breakdown & History Trajectory Open Panels ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch pt-2">
           <HealthBreakdown parameters={healthData?.parameters || []} />
           <HealthHistory history={historyData} />
         </div>

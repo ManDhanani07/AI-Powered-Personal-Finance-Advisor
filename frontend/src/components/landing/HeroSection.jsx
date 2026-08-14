@@ -10,6 +10,8 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { ROUTES } from '../../constants/index.js';
+import { TextGenerateEffect } from '../ui/TextGenerateEffect.jsx';
+import { SparklesCore } from '../ui/SparklesCore.jsx';
 
 export const HeroSection = ({ onOpenLogin }) => {
   const navigate = useNavigate();
@@ -33,7 +35,7 @@ export const HeroSection = ({ onOpenLogin }) => {
       <div className="max-w-[1920px] w-full mx-auto px-6 sm:px-10 lg:px-16 xl:px-20 relative z-10">
         
         {/* Centered High-Impact Executive Hero Container */}
-        <div className="max-w-4xl mx-auto text-center space-y-6 relative z-10">
+        <div className="max-w-4xl mx-auto text-center space-y-7 relative z-10">
           
           {/* Eyebrow Pill Badge */}
           <motion.div
@@ -47,24 +49,46 @@ export const HeroSection = ({ onOpenLogin }) => {
             <Sparkles className="w-3.5 h-3.5 text-emerald-400 ml-1" />
           </motion.div>
 
-          {/* Headline Title */}
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-4xl sm:text-6xl lg:text-7xl font-black text-white tracking-tight leading-[1.08] font-outfit max-w-3xl mx-auto"
+          {/* Headline Title with TextGenerateEffect */}
+          <TextGenerateEffect
+            words="Master Your Wealth with Autonomous AI"
+            className="text-4xl sm:text-6xl lg:text-7xl font-black text-white"
+            highlightWords={["Autonomous", "AI"]}
+            duration={0.6}
+            filter={true}
+          />
+
+          {/* Official Aceternity UI Sparkles Container - Clean Spacing */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="w-[40rem] max-w-full mx-auto h-36 relative flex flex-col items-center justify-center overflow-hidden pointer-events-none mt-2 mb-2"
           >
-            Master Your Wealth with{' '}
-            <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">
-              Autonomous AI
-            </span>
-          </motion.h1>
+            {/* Ambient Glowing Gradient Beams */}
+            <div className="absolute inset-x-20 top-0 bg-gradient-to-r from-transparent via-emerald-500 to-transparent h-[2px] w-3/4 blur-sm z-20" />
+            <div className="absolute inset-x-20 top-0 bg-gradient-to-r from-transparent via-emerald-400 to-transparent h-px w-3/4 z-20" />
+            <div className="absolute inset-x-60 top-0 bg-gradient-to-r from-transparent via-cyan-400 to-transparent h-[5px] w-1/4 blur-sm z-20" />
+            <div className="absolute inset-x-60 top-0 bg-gradient-to-r from-transparent via-cyan-300 to-transparent h-px w-1/4 z-20" />
+
+            {/* Fine Pinprick Star Particle Field */}
+            <SparklesCore
+              id="heroSparkles"
+              background="transparent"
+              minSize={0.3}
+              maxSize={1.0}
+              particleDensity={750}
+              className="w-full h-full z-10"
+              particleColor={["#10B981", "#34D399", "#2DD4BF", "#00F2FE", "#FFFFFF"]}
+              speed={0.8}
+            />
+          </motion.div>
 
           {/* Subtitle */}
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
             className="text-base sm:text-lg lg:text-xl text-slate-400 font-normal leading-relaxed max-w-2xl mx-auto"
           >
             Automate transaction tracking, analyze category budgets, project net worth growth using Meta Prophet ML, and receive real-time financial intelligence.
@@ -74,8 +98,8 @@ export const HeroSection = ({ onOpenLogin }) => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="pt-1 flex flex-col sm:flex-row items-center justify-center gap-3.5"
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3.5"
           >
             <button
               onClick={handleGetStarted}
@@ -98,7 +122,7 @@ export const HeroSection = ({ onOpenLogin }) => {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
             className="pt-5 flex flex-wrap items-center justify-center gap-6 sm:gap-8 text-xs font-semibold text-slate-400 border-t border-zinc-800/40 max-w-xl mx-auto"
           >
             <div className="flex items-center space-x-1.5">

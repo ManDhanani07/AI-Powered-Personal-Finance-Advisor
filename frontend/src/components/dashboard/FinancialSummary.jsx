@@ -106,9 +106,7 @@ export const FinancialSummary = ({ summary, overview, budgetOverview, loading })
           </p>
         </div>
 
-        <div className="self-start sm:self-auto px-4 py-2 rounded-2xl bg-emerald-500/10 text-emerald-400 text-xs font-extrabold uppercase tracking-wider font-outfit">
-          ✓ Bank Synced
-        </div>
+
       </div>
 
       {/* 4 Dynamic Mini Stat Cards */}

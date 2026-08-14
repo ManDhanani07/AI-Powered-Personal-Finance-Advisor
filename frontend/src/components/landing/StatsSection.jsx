@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Users, Receipt, Wallet, Brain, TrendingUp } from 'lucide-react';
+import { SparklesCore } from '../ui/SparklesCore.jsx';
 
 const STATS = [
   {
@@ -39,7 +40,22 @@ const STATS = [
 
 export const StatsSection = () => {
   return (
-    <section id="about" className="py-12 bg-transparent relative overflow-hidden">
+    <section id="about" className="py-16 bg-transparent relative overflow-hidden">
+      {/* Full-Section Sparkling Star Particles Field (Behind Cards Z-0) */}
+      <div className="absolute inset-0 pointer-events-none z-0 opacity-70">
+        <SparklesCore
+          id="statsSectionSparkles"
+          background="transparent"
+          minSize={0.5}
+          maxSize={1.6}
+          particleDensity={220}
+          isFullSection={true}
+          className="w-full h-full"
+          particleColor={["#10B981", "#34D399", "#2DD4BF", "#00F2FE", "#C084FC", "#FFFFFF"]}
+          speed={0.6}
+        />
+      </div>
+
       <div className="max-w-[1920px] w-full mx-auto px-6 sm:px-10 lg:px-16 xl:px-20 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -71,7 +87,7 @@ export const StatsSection = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
                 transition={{ duration: 0.5, delay: idx * 0.1 }}
-                className="rounded-3xl border border-zinc-800 bg-[#09090B] p-6 shadow-[0_10px_30px_rgba(0,0,0,0.85)] transition-all flex flex-col justify-between space-y-5 group"
+                className="rounded-3xl border border-zinc-800 bg-[#09090B] p-6 shadow-[0_10px_30px_rgba(0,0,0,0.85)] transition-all flex flex-col justify-between space-y-5 group relative z-10"
               >
                 <div className="flex items-center justify-between">
                   <div className={`w-12 h-12 rounded-full border flex items-center justify-center ${stat.bgColor} ${stat.color}`}>

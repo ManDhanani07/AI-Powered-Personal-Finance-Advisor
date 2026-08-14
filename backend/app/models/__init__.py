@@ -8,6 +8,13 @@ from app.models.forecast_history import ForecastHistory
 from app.models.financial_health_history import FinancialHealthHistory
 from app.models.chat_history import ChatHistory
 from app.models.notification import Notification
+from app.models.admin_session import AdminSession
+from app.models.audit_log import AuditLog
+from app.models.ai_usage_log import AiUsageLog
+from app.models.login_activity import LoginActivity
+from app.models.system_health_log import SystemHealthLog
+from app.models.admin_notification import AdminNotification
+from app.models.admin_activity_summary import AdminActivitySummary
 
 __all__ = [
     "Base",
@@ -24,4 +31,11 @@ __all__ = [
     "FinancialHealthHistory",
     "ChatHistory",
     "Notification",
+    "AdminSession",
+    "AuditLog",
+    "AiUsageLog",
+    "LoginActivity",
+    "SystemHealthLog",
+    "AdminNotification",
+    "AdminActivitySummary",
 ]

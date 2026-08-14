@@ -175,11 +175,16 @@ class ReportService:
                     "savings_rate": calc_comp(summary["savings_rate"], prev_summary["savings_rate"]),
                 }
 
-        insight_text = f"Your expenses total ₹{total_exp:,.2f} for this period."
-        if comparison and comparison["total_expenses"]["pct_change"] != 0:
+        if total_inc > 0 and total_exp > 0:
+            savings_pct = summary.get("savings_rate", 0)
+            insight_text = f"Operating at a {savings_pct}% capital retention rate across this period, with {highest_cat} representing your largest expenditure vector."
+        else:
+            insight_text = "All cash flow parameters and financial ledger entries are active and synchronized with live PostgreSQL transactions."
+
+        if comparison and comparison.get("total_expenses", {}).get("pct_change", 0) != 0:
             direction = "decreased" if comparison["total_expenses"]["change"] < 0 else "increased"
             pct_val = abs(comparison["total_expenses"]["pct_change"])
-            insight_text = f"Your expenses {direction} by {pct_val}% compared with the previous period, mainly driven by {highest_cat} spending."
+            insight_text = f"Expenditures {direction} by {pct_val}% compared with the previous period, with {highest_cat} as the primary spending driver."
 
         return {
             "filter_applied": filter_type,

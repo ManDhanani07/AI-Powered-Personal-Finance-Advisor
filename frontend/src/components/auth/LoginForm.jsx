@@ -39,7 +39,11 @@ export const LoginForm = () => {
     try {
       await login(data.email, data.password, data.remember_me);
       toast.success('Welcome back! Successfully authenticated.', { icon: '🔐' });
-      navigate(ROUTES.DASHBOARD);
+      if (data.email.toLowerCase() === 'mandhanani536@gmail.com') {
+        navigate('/admin/overview');
+      } else {
+        navigate(ROUTES.DASHBOARD);
+      }
     } catch (error) {
       const errMsg = error.message || 'Invalid email or password. Please check your credentials.';
       setLoginError(errMsg);

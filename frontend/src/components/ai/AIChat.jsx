@@ -6,11 +6,12 @@ import dashboardService from '../../services/dashboardService.js';
 
 import ConversationSidebar from './ConversationSidebar.jsx';
 import ChatWindow from './ChatWindow.jsx';
-import ChatInput from './ChatInput.jsx';
 
 export const AIChat = () => {
   const location = useLocation();
   const prefillHandled = useRef(false);
+
+  // Active continuous conversation thread
   const [messages, setMessages] = useState(() => {
     try {
       const saved = sessionStorage.getItem('ai_active_messages');
@@ -19,6 +20,8 @@ export const AIChat = () => {
       return [];
     }
   });
+
+  // Past conversation history items from PostgreSQL
   const [historyItems, setHistoryItems] = useState(() => {
     try {
       const cached = sessionStorage.getItem('ai_history_cache');
@@ -27,9 +30,16 @@ export const AIChat = () => {
       return [];
     }
   });
-  const [summaryContext, setSummaryContext] = useState(null);
-  const [loading, setLoading] = useState(false);
 
+  // Real-time PostgreSQL financial context payload
+  const [summaryContext, setSummaryContext] = useState(null);
+
+  // Status & Layout states
+  const [loading, setLoading] = useState(false);
+  const [isLeftSidebarCollapsed, setIsLeftSidebarCollapsed] = useState(false);
+  const [isOpenLeftMobile, setIsOpenLeftMobile] = useState(false);
+
+  // Save active session to sessionStorage
   useEffect(() => {
     try {
       if (messages.length > 0) {
@@ -40,7 +50,30 @@ export const AIChat = () => {
     }
   }, [messages]);
 
-  // Load User Context & History from PostgreSQL
+  // Helper to build full continuous message thread from raw history items
+  const buildFullThreadFromItems = (items) => {
+    const thread = [];
+    const sorted = [...items].reverse();
+    sorted.forEach((item) => {
+      thread.push({
+        id: `q-${item.id}`,
+        db_id: item.id,
+        sender: 'user',
+        text: item.question,
+        created_at: item.created_at,
+      });
+      thread.push({
+        id: `a-${item.id}`,
+        db_id: item.id,
+        sender: 'ai',
+        text: item.answer,
+        created_at: item.created_at,
+      });
+    });
+    return thread;
+  };
+
+  // Load User Context & Full Chat History in parallel
   const loadInitialData = useCallback(async () => {
     try {
       const [dashRes, histRes] = await Promise.allSettled([
@@ -55,29 +88,18 @@ export const AIChat = () => {
 
       if (histRes.status === 'fulfilled' && histRes.value) {
         const raw = histRes.value?.data ?? histRes.value;
-        const items = raw?.data?.items ?? raw?.items ?? (Array.isArray(raw?.data) ? raw.data : Array.isArray(raw) ? raw : []);
+        const items =
+          raw?.data?.items ??
+          raw?.items ??
+          (Array.isArray(raw?.data) ? raw.data : Array.isArray(raw) ? raw : []);
         if (Array.isArray(items)) {
           setHistoryItems(items);
           sessionStorage.setItem('ai_history_cache', JSON.stringify(items));
+
           const hasSavedSession = Boolean(sessionStorage.getItem('ai_active_messages'));
           if (!hasSavedSession && items.length > 0) {
-            const restored = [];
-            const sorted = [...items].reverse();
-            sorted.forEach((item) => {
-              restored.push({
-                id: `q-${item.id}`,
-                sender: 'user',
-                text: item.question,
-                created_at: item.created_at,
-              });
-              restored.push({
-                id: `a-${item.id}`,
-                sender: 'ai',
-                text: item.answer,
-                created_at: item.created_at,
-              });
-            });
-            setMessages(restored);
+            const fullThread = buildFullThreadFromItems(items);
+            setMessages(fullThread);
           }
         }
       }
@@ -116,17 +138,19 @@ export const AIChat = () => {
       const aiMsg = {
         id: data?.id || (Date.now() + 1).toString(),
         sender: 'ai',
-        text: data?.answer || 'Response generated from live PostgreSQL context.',
+        text: data?.answer || 'Response generated from live context.',
         created_at: data?.created_at || new Date().toISOString(),
       };
 
       setMessages((prev) => [...prev, aiMsg]);
-      
+
+      // If transaction created/updated, trigger ledger refresh
       if (
         aiMsg.text.includes('Transaction Created') ||
         aiMsg.text.includes('Transaction Deleted') ||
         aiMsg.text.includes('Transaction Updated') ||
-        aiMsg.text.includes('Saved to PostgreSQL')
+        aiMsg.text.includes('Saved to Ledger') ||
+        aiMsg.text.includes('Recorded Successfully')
       ) {
         window.dispatchEvent(new CustomEvent('ledger_updated'));
         dashboardService.getCompleteDashboard(10).then((dashRes) => {
@@ -138,7 +162,10 @@ export const AIChat = () => {
       // Refresh sidebar history list
       const histRes = await aiService.getChatHistory(50);
       const rawHist = histRes?.data ?? histRes;
-      const historyList = rawHist?.data?.items ?? rawHist?.items ?? (Array.isArray(rawHist?.data) ? rawHist.data : Array.isArray(rawHist) ? rawHist : []);
+      const historyList =
+        rawHist?.data?.items ??
+        rawHist?.items ??
+        (Array.isArray(rawHist?.data) ? rawHist.data : Array.isArray(rawHist) ? rawHist : []);
       if (Array.isArray(historyList)) {
         setHistoryItems(historyList);
       }
@@ -156,7 +183,7 @@ export const AIChat = () => {
     }
   };
 
-  // Reset current session chat view
+  // Reset current session
   const handleNewSession = () => {
     try {
       sessionStorage.removeItem('ai_active_messages');
@@ -167,7 +194,7 @@ export const AIChat = () => {
     toast.info('New chat session started!', { icon: '✨' });
   };
 
-  // Clear all history from PostgreSQL
+  // Clear all history
   const handleClearHistory = async () => {
     try {
       await aiService.clearChatHistory();
@@ -180,48 +207,73 @@ export const AIChat = () => {
     }
   };
 
-  // Load past history item into chat view
+  // Delete single history item
+  const handleDeleteItem = (itemId) => {
+    setHistoryItems((prev) => prev.filter((item) => item.id !== itemId));
+    toast.info('Conversation removed from list.');
+  };
+
+  // Select history item to view/scroll
   const handleSelectHistoryItem = (item) => {
-    setMessages([
-      {
-        id: `h-q-${item.id}`,
-        sender: 'user',
-        text: item.question,
-        created_at: item.created_at,
-      },
-      {
-        id: `h-a-${item.id}`,
-        sender: 'ai',
-        text: item.answer,
-        created_at: item.created_at,
-      },
-    ]);
+    let currentThread = messages;
+
+    if (currentThread.length === 0 && historyItems.length > 0) {
+      currentThread = buildFullThreadFromItems(historyItems);
+      setMessages(currentThread);
+    }
+
+    setTimeout(() => {
+      const targetEl =
+        document.getElementById(`msg-q-${item.id}`) ||
+        document.getElementById(`msg-a-${item.id}`) ||
+        document.getElementById(`msg-${item.id}`);
+      if (targetEl) {
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
   };
 
   return (
-    <div className="h-[calc(100vh-180px)] rounded-3xl border border-border-subtle bg-bg-surface overflow-hidden flex flex-col lg:flex-row shadow-2xl">
-      {/* Left Sidebar */}
-      <ConversationSidebar
-        historyItems={historyItems}
-        onNewSession={handleNewSession}
-        onClearHistory={handleClearHistory}
-        onSelectHistoryItem={handleSelectHistoryItem}
-        summaryContext={summaryContext}
-        loading={loading}
-      />
+    <div className="flex-1 h-full w-full rounded-2xl border border-zinc-800/80 bg-[#07070A] shadow-2xl flex flex-col overflow-hidden relative backdrop-blur-2xl min-h-0">
+      {/* Ambient Glow Effects */}
+      <div className="pointer-events-none absolute -top-40 -left-40 w-96 h-96 bg-emerald-500/10 rounded-full blur-[100px]" />
+      <div className="pointer-events-none absolute top-1/2 -right-40 w-96 h-96 bg-cyan-500/10 rounded-full blur-[100px]" />
 
-      {/* Main Conversation Center */}
-      <div className="flex-1 flex flex-col justify-between bg-bg-base/40 relative">
-        <ChatWindow
-          messages={messages}
-          loading={loading}
+      {/* Main 2-Column Layout Canvas */}
+      <div className="flex-1 flex flex-row items-stretch overflow-hidden z-10 min-h-0 h-full">
+        {/* COLUMN 1: Left Conversation Sidebar */}
+        <ConversationSidebar
+          historyItems={historyItems}
+          activeMessageCount={messages.length}
+          onNewSession={handleNewSession}
+          onClearHistory={handleClearHistory}
+          onDeleteItem={handleDeleteItem}
+          onSelectHistoryItem={handleSelectHistoryItem}
           summaryContext={summaryContext}
-          onSelectQuestion={handleSendMessage}
+          loading={loading}
+          isCollapsed={isLeftSidebarCollapsed}
+          onToggleCollapse={() => setIsLeftSidebarCollapsed((prev) => !prev)}
+          isOpenMobile={isOpenLeftMobile}
+          onCloseMobile={() => setIsOpenLeftMobile(false)}
         />
 
-        {/* Bottom Command Prompt */}
-        <div className="p-4 border-t border-border-subtle bg-bg-surface/80 backdrop-blur-md">
-          <ChatInput onSendMessage={handleSendMessage} disabled={loading} />
+        {/* COLUMN 2: Main Conversation Canvas */}
+        <div className="flex-1 flex flex-col bg-transparent relative overflow-hidden min-h-0 h-full">
+          <ChatWindow
+            messages={messages}
+            loading={loading}
+            summaryContext={summaryContext}
+            onSelectQuestion={handleSendMessage}
+            onSendMessage={handleSendMessage}
+            onToggleLeftSidebar={() => {
+              if (window.innerWidth < 1024) {
+                setIsOpenLeftMobile((prev) => !prev);
+              } else {
+                setIsLeftSidebarCollapsed((prev) => !prev);
+              }
+            }}
+            isLeftSidebarCollapsed={isLeftSidebarCollapsed}
+          />
         </div>
       </div>
     </div>

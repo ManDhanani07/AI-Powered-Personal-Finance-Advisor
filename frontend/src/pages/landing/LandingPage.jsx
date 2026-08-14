@@ -15,7 +15,6 @@ import { CTASection } from '../../components/landing/CTASection.jsx';
 import { LandingFooter } from '../../components/landing/LandingFooter.jsx';
 import { LandingLoginModal } from '../../components/landing/LandingLoginModal.jsx';
 import { MouseGlow } from '../../components/landing/ui/MouseGlow.jsx';
-import Particles from '../../components/landing/Particles.jsx';
 
 export const LandingPage = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -26,26 +25,10 @@ export const LandingPage = () => {
   return (
     <div className="min-h-screen bg-[#000000] text-slate-100 font-sans selection:bg-emerald-500/30 selection:text-white relative overflow-x-hidden">
       
-      {/* ─── WebGL Ambient Background Particles (BEHIND EVERYTHING AT Z-0) ─── */}
-      <div className="fixed inset-0 pointer-events-none z-0 opacity-75">
-        <Particles
-          particleColors={["#ffffff", "#10B981", "#00F2FE", "#34D399"]}
-          particleCount={200}
-          particleSpread={12}
-          speed={0.12}
-          particleBaseSize={140}
-          moveParticlesOnHover={true}
-          particleHoverFactor={0.8}
-          alphaParticles={false}
-          disableRotation={false}
-          pixelRatio={typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1}
-        />
-      </div>
-
       {/* Interactive Cursor Mouse Glow */}
       <MouseGlow />
 
-      {/* Content Layer (ALL TEXT, CARDS, BUTTONS & MOCKUPS RENDER AT Z-10 IN FRONT OF PARTICLES) */}
+      {/* Content Layer */}
       <div className="relative z-10 space-y-0">
         {/* ─── 1. STICKY NAVIGATION BAR ─────────────────────────────────── */}
         <LandingNavbar onOpenLogin={handleOpenLogin} />

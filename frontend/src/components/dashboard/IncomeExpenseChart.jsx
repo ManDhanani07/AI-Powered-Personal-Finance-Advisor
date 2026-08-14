@@ -1,16 +1,27 @@
 import React, { memo } from 'react';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-  Legend, ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
 } from 'recharts';
 import { formatCompactFinancial, formatCurrency } from '../../utils/formatters.js';
 import EmptyLedgerCallout from './EmptyLedgerCallout.jsx';
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
+
+  const incomeVal = payload.find((p) => p.dataKey === 'Income')?.value || 0;
+  const expenseVal = payload.find((p) => p.dataKey === 'Expense')?.value || 0;
+  const netMargin = incomeVal - expenseVal;
+
   return (
-    <div className="rounded-2xl bg-[#09090B] border border-zinc-800 shadow-2xl p-3.5 text-xs space-y-2 min-w-[170px]">
-      <p className="font-bold text-white font-outfit border-b border-zinc-800 pb-1.5">{label}</p>
+    <div className="rounded-2xl bg-[#09090B]/95 border border-zinc-800 shadow-2xl p-3.5 text-xs space-y-2 min-w-[190px] backdrop-blur-md font-sans">
+      <p className="font-bold text-white font-outfit border-b border-zinc-800/80 pb-1.5">{label}</p>
       {payload.map((p) => (
         <div key={p.dataKey} className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
@@ -25,6 +36,12 @@ const CustomTooltip = ({ active, payload, label }) => {
           </span>
         </div>
       ))}
+      <div className="border-t border-zinc-800/80 pt-1.5 flex items-center justify-between gap-3">
+        <span className="text-[11px] font-bold text-slate-400 font-outfit">Net Margin:</span>
+        <span className={`font-bold font-mono text-xs ${netMargin >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+          {netMargin >= 0 ? '+' : ''}{formatCurrency(netMargin)}
+        </span>
+      </div>
     </div>
   );
 };
@@ -40,13 +57,28 @@ export const IncomeExpenseChart = memo(({ charts, loading, onSeeded }) => {
   if (loading) return <SkeletonChart />;
 
   const rawData = charts?.income_expense_monthly || [];
+  const monthMap = {
+    jan: '1 Jan',
+    feb: '1 Feb',
+    mar: '1 Mar',
+    apr: '1 Apr',
+    may: '1 May',
+    jun: '1 Jun',
+    jul: '1 Jul',
+    aug: '1 Aug',
+    sep: '1 Sep',
+    oct: '1 Oct',
+    nov: '1 Nov',
+    dec: '1 Dec',
+  };
+
   const data = rawData.map((d) => {
     const rawMonth = d.month || '';
-    const parts = rawMonth.split(' ');
-    const shortLabel = parts.length === 2 ? `${parts[0]} '${parts[1].slice(2)}` : rawMonth;
+    const prefix = rawMonth.trim().slice(0, 3).toLowerCase();
+    const displayLabel = monthMap[prefix] || rawMonth;
 
     return {
-      month: shortLabel,
+      month: displayLabel,
       fullMonth: rawMonth,
       Income: Number(d.income ?? 0),
       Expense: Number(d.expense ?? 0),
@@ -56,13 +88,10 @@ export const IncomeExpenseChart = memo(({ charts, loading, onSeeded }) => {
   const hasData = data.some((d) => d.Income > 0 || d.Expense > 0);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 font-sans">
       <div>
-        <h3 className="text-base font-bold text-white font-outfit flex items-center gap-2">
-          <span>Income vs Expense</span>
-          <span className="text-[10px] uppercase font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-            3D Pro
-          </span>
+        <h3 className="text-base font-bold text-white font-outfit">
+          Income vs Expense
         </h3>
         <p className="text-xs text-slate-400">12-month comparative cash flow breakdown</p>
       </div>
@@ -70,24 +99,7 @@ export const IncomeExpenseChart = memo(({ charts, loading, onSeeded }) => {
         <EmptyLedgerCallout title="Income vs Expense Graph Empty" onSeeded={onSeeded} />
       ) : (
         <ResponsiveContainer width="100%" height={260}>
-          <BarChart data={data} barGap={6} barCategoryGap="25%" margin={{ top: 10, right: 10, left: -15, bottom: 25 }}>
-            <defs>
-              {/* Emerald & Rose 3D Glass Gradients */}
-              <linearGradient id="income3D" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#34D399" stopOpacity={1} />
-                <stop offset="100%" stopColor="#059669" stopOpacity={0.85} />
-              </linearGradient>
-              <linearGradient id="expense3D" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#FB7185" stopOpacity={1} />
-                <stop offset="100%" stopColor="#E11D48" stopOpacity={0.85} />
-              </linearGradient>
-
-              {/* 3D Drop Shadow */}
-              <filter id="barShadow" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="0" dy="6" stdDeviation="4" floodColor="#000000" floodOpacity="0.5" />
-              </filter>
-            </defs>
-
+          <LineChart data={data} margin={{ top: 10, right: 15, left: 0, bottom: 25 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" vertical={false} />
             <XAxis
               dataKey="month"
@@ -95,6 +107,7 @@ export const IncomeExpenseChart = memo(({ charts, loading, onSeeded }) => {
               angle={-25}
               textAnchor="end"
               height={45}
+              padding={{ left: 12, right: 12 }}
               tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 600 }}
               axisLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
               tickLine={false}
@@ -105,30 +118,42 @@ export const IncomeExpenseChart = memo(({ charts, loading, onSeeded }) => {
               tickLine={false}
               tickFormatter={(v) => formatCompactFinancial(v)}
             />
-            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(16,185,129,0.06)', radius: 8 }} />
+            <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.2)', strokeWidth: 1, strokeDasharray: '4 4' }} />
             <Legend
-              wrapperStyle={{ fontSize: 11, paddingTop: 12 }}
+              align="right"
+              verticalAlign="top"
+              wrapperStyle={{ fontSize: 11, paddingBottom: 10 }}
               iconType="circle"
               iconSize={8}
               formatter={(value) => (
-                <span className="text-xs font-bold text-slate-300 capitalize">{value}</span>
+                <span className="text-xs font-bold text-slate-300 capitalize">{value === 'Expense' ? 'Expenses' : value}</span>
               )}
             />
-            <Bar
+
+            {/* Income Pure Vivid Green Line with Circular Point Markers */}
+            <Line
+              type="linear"
               dataKey="Income"
-              fill="url(#income3D)"
-              radius={[6, 6, 0, 0]}
-              filter="url(#barShadow)"
+              name="Income"
+              stroke="#10B981"
+              strokeWidth={3}
+              dot={{ r: 5, fill: '#10B981', stroke: '#FFFFFF', strokeWidth: 1.5 }}
+              activeDot={{ r: 7, fill: '#10B981', stroke: '#FFFFFF', strokeWidth: 2 }}
               animationDuration={1200}
             />
-            <Bar
+
+            {/* Expenses Pure Vivid Red Line with Point Markers */}
+            <Line
+              type="linear"
               dataKey="Expense"
-              fill="url(#expense3D)"
-              radius={[6, 6, 0, 0]}
-              filter="url(#barShadow)"
+              name="Expenses"
+              stroke="#EF4444"
+              strokeWidth={3}
+              dot={{ r: 5, fill: '#EF4444', stroke: '#FFFFFF', strokeWidth: 1.5 }}
+              activeDot={{ r: 7, fill: '#EF4444', stroke: '#FFFFFF', strokeWidth: 2 }}
               animationDuration={1200}
             />
-          </BarChart>
+          </LineChart>
         </ResponsiveContainer>
       )}
     </div>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
-import Particles from './Particles.jsx';
+import { SparklesCore } from '../ui/SparklesCore.jsx';
 
 const STEPS = [
   {
@@ -60,18 +60,18 @@ export const HowItWorksSection = () => {
       {/* Background Ambient Blur Glows */}
       <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[850px] rounded-full bg-emerald-500/5 blur-[220px] z-0" />
 
-      {/* WebGL Particle Background (Strictly Z-0 Pointer-Events-None Behind Content) */}
-      <div className="absolute inset-0 pointer-events-none z-0 opacity-80 overflow-hidden">
-        <Particles
-          particleColors={["#ffffff", "#10B981", "#00F2FE", "#34D399", "#A855F7"]}
-          particleCount={90}
-          particleSpread={10}
-          speed={0.15}
-          particleBaseSize={120}
-          moveParticlesOnHover={false}
-          alphaParticles={false}
-          disableRotation={false}
-          pixelRatio={typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1}
+      {/* Sparkling Star Particle Background */}
+      <div className="absolute inset-0 pointer-events-none z-0 opacity-70 overflow-hidden">
+        <SparklesCore
+          id="howItWorksSectionSparkles"
+          background="transparent"
+          minSize={0.5}
+          maxSize={1.6}
+          particleDensity={200}
+          isFullSection={true}
+          className="w-full h-full"
+          particleColor={["#10B981", "#00F2FE", "#C084FC", "#34D399", "#A855F7", "#FFFFFF"]}
+          speed={0.6}
         />
       </div>
 

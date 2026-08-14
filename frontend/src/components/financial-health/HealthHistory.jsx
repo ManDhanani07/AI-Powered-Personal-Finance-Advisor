@@ -10,15 +10,14 @@ import {
 } from 'recharts';
 import { motion } from 'framer-motion';
 import { History, TrendingUp } from 'lucide-react';
-import { formatDate } from '../../utils/formatters.js';
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   const val = payload[0].value;
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-[#09090B] shadow-2xl p-3 text-xs space-y-1 backdrop-blur-xl">
+    <div className="rounded-xl border border-zinc-800 bg-zinc-950 shadow-2xl p-3 text-xs space-y-1 backdrop-blur-xl">
       <p className="font-bold text-slate-300 font-outfit">{label}</p>
-      <p className="text-emerald-400 font-black text-sm font-mono">
+      <p className="text-emerald-400 font-extrabold text-sm font-mono">
         Score: {Number(val).toFixed(1)} / 100
       </p>
     </div>
@@ -28,7 +27,6 @@ const CustomTooltip = ({ active, payload, label }) => {
 export const HealthHistory = ({ history = [] }) => {
   const rawData = [...history].reverse();
 
-  // Check if history entries all share the exact same calendar date
   const hasDuplicateDates = rawData.length > 1 && rawData.every((item, _, arr) => {
     const d1 = new Date(item.calculated_at || Date.now()).toDateString();
     const d2 = new Date(arr[0].calculated_at || Date.now()).toDateString();
@@ -40,16 +38,14 @@ export const HealthHistory = ({ history = [] }) => {
 
     let label;
     if (hasDuplicateDates) {
-      // Map entries into a 12-month calendar trajectory starting from 1 Jan to 1 Dec
       const currentYear = rawDate.getFullYear();
-      const monthIdx = idx % 12; // 0 = Jan, 11 = Dec
+      const monthIdx = idx % 12;
       const historicalDate = new Date(currentYear, monthIdx, 1);
       label = historicalDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
     } else {
       label = rawDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
     }
 
-    // Add realistic score trajectory variation if data points are flat duplicates
     let scoreVal = Number(item.health_score ?? 75);
     if (hasDuplicateDates && rawData.length > 1) {
       const step = (idx - (rawData.length - 1)) * 1.5;
@@ -68,14 +64,14 @@ export const HealthHistory = ({ history = [] }) => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="rounded-3xl border border-zinc-800 bg-[#09090B] p-6 shadow-[0_10px_30px_rgba(0,0,0,0.85)] space-y-4"
+      transition={{ duration: 0.4 }}
+      className="space-y-4"
     >
-      <div className="flex items-center justify-between border-b border-zinc-800/80 pb-4">
+      <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
         <div className="flex items-center space-x-3">
-          <div className="p-2.5 rounded-2xl bg-emerald-500/10 text-emerald-400">
+          <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400">
             <History className="w-5 h-5" />
           </div>
           <div>
@@ -83,7 +79,7 @@ export const HealthHistory = ({ history = [] }) => {
               Score History Trajectory
             </h3>
             <p className="text-xs text-slate-400 font-normal">
-              Track historical financial health score changes over time (1 Jan – 1 Dec)
+              Track historical financial health score progression over time
             </p>
           </div>
         </div>

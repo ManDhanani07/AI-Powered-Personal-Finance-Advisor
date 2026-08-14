@@ -1,5 +1,5 @@
 """
-User Model Definition with Enterprise Security and Authentication Fields.
+User Model Definition with Enterprise Security, RBAC, and Authentication Fields.
 """
 
 from typing import Optional, List, TYPE_CHECKING
@@ -38,6 +38,9 @@ class User(Base, UUIDMixin, TimestampMixin):
     profile_picture: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+
+    # Role-Based Access Control (RBAC): 'USER' or 'ADMIN'
+    role: Mapped[str] = mapped_column(String(50), default="USER", nullable=False, index=True)
 
     # Enterprise Authentication & Security Fields
     email_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)

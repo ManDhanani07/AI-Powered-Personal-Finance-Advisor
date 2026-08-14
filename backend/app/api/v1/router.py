@@ -17,6 +17,7 @@ from app.api.v1.endpoints import (
     ai,
     reports,
     notifications,
+    admin,
 )
 
 api_router = APIRouter()
@@ -33,3 +34,4 @@ api_router.include_router(forecast.router)
 api_router.include_router(ai.router)
 api_router.include_router(reports.router)
 api_router.include_router(notifications.router)
+api_router.include_router(admin.router)

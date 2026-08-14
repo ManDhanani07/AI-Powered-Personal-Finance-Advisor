@@ -8,6 +8,7 @@ import {
   Radar,
   BarChart,
   Bar,
+  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -16,15 +17,25 @@ import {
 import { motion } from 'framer-motion';
 import { Layers, BarChart2, PieChart } from 'lucide-react';
 
+const PARAMETER_COLORS = [
+  '#6366F1', // Indigo
+  '#10B981', // Emerald
+  '#0EA5E9', // Sky
+  '#F43F5E', // Rose
+  '#8B5CF6', // Violet
+  '#F59E0B', // Amber
+  '#14B8A6', // Teal
+];
+
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-2xl border border-border-strong bg-dark-900 shadow-2xl p-3 text-xs space-y-1">
-      <p className="font-bold text-white mb-1">{label}</p>
+    <div className="rounded-xl border border-zinc-800 bg-zinc-950 shadow-2xl p-3 text-xs space-y-1">
+      <p className="font-bold text-white mb-1 font-outfit">{label}</p>
       {payload.map((p, i) => (
-        <div key={i} className="flex items-center justify-between gap-3">
+        <div key={i} className="flex items-center justify-between gap-3 font-mono">
           <span className="text-slate-400 capitalize">{p.name}:</span>
-          <span className="font-extrabold font-mono text-primary-400">{p.value} pts</span>
+          <span className="font-extrabold text-indigo-400">{p.value} pts</span>
         </div>
       ))}
     </div>
@@ -34,10 +45,11 @@ const CustomTooltip = ({ active, payload, label }) => {
 export const HealthBreakdown = ({ parameters = [] }) => {
   const [viewType, setViewType] = useState('radar'); // 'radar' | 'bar'
 
-  const chartData = parameters.map((p) => ({
+  const chartData = parameters.map((p, i) => ({
     parameter: p.name,
     Earned: p.score,
     Max: p.max_score,
+    color: PARAMETER_COLORS[i % PARAMETER_COLORS.length],
   }));
 
   const totalEarned = parameters.reduce((acc, p) => acc + (p.score || 0), 0);
@@ -45,30 +57,30 @@ export const HealthBreakdown = ({ parameters = [] }) => {
   if (parameters.length === 0 || totalEarned === 0) {
     return (
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="rounded-3xl border border-border-subtle bg-bg-surface p-6 shadow-glass space-y-4"
+        transition={{ duration: 0.4 }}
+        className="space-y-4"
       >
-        <div className="flex items-center space-x-2.5 border-b border-border-subtle pb-4">
-          <div className="p-2.5 rounded-2xl bg-accent-500/10 text-accent-400">
+        <div className="flex items-center space-x-2.5 border-b border-zinc-800 pb-3">
+          <div className="p-2 rounded-xl bg-violet-500/10 text-violet-400">
             <Layers className="w-5 h-5" />
           </div>
           <div>
             <h3 className="text-base font-extrabold text-white font-outfit">
-              Parameter Score Capacity Breakdown
+              Parameter Capacity Breakdown
             </h3>
             <p className="text-xs text-slate-400">
-              Visual evaluation of 7 weighted parameters vs maximum capacity
+              Visual evaluation of weighted parameter scores vs max capacity
             </p>
           </div>
         </div>
 
         <div className="flex flex-col items-center justify-center h-48 text-center space-y-2">
-          <PieChart className="w-8 h-8 text-slate-500" />
+          <PieChart className="w-8 h-8 text-slate-600" />
           <p className="text-xs font-bold text-slate-300">No Ledger History Logged</p>
           <p className="text-[11px] text-slate-400 max-w-xs">
-            Log your income and expense transactions to calculate parameter capacity distribution.
+            Log transactions to calculate parameter capacity breakdown.
           </p>
         </div>
       </motion.div>
@@ -77,19 +89,19 @@ export const HealthBreakdown = ({ parameters = [] }) => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="rounded-3xl border border-border-subtle bg-bg-surface p-6 shadow-glass space-y-4"
+      transition={{ duration: 0.4 }}
+      className="space-y-4"
     >
-      <div className="flex items-center justify-between border-b border-border-subtle pb-4">
+      <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
         <div className="flex items-center space-x-2.5">
-          <div className="p-2.5 rounded-2xl bg-accent-500/10 text-accent-400">
+          <div className="p-2 rounded-xl bg-violet-500/10 text-violet-400">
             <Layers className="w-5 h-5" />
           </div>
           <div>
             <h3 className="text-base font-extrabold text-white font-outfit">
-              Parameter Score Capacity Breakdown
+              Parameter Capacity Breakdown
             </h3>
             <p className="text-xs text-slate-400">
               Visual evaluation of 7 weighted parameters vs maximum capacity
@@ -98,12 +110,12 @@ export const HealthBreakdown = ({ parameters = [] }) => {
         </div>
 
         {/* View Toggle */}
-        <div className="flex bg-bg-elevated p-1 rounded-xl border border-border-subtle">
+        <div className="flex bg-zinc-900 p-1 rounded-xl border border-zinc-800">
           <button
             onClick={() => setViewType('radar')}
             className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center space-x-1 cursor-pointer ${
               viewType === 'radar'
-                ? 'bg-primary-500 text-white shadow-md'
+                ? 'bg-white text-slate-950 shadow-sm'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -114,7 +126,7 @@ export const HealthBreakdown = ({ parameters = [] }) => {
             onClick={() => setViewType('bar')}
             className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center space-x-1 cursor-pointer ${
               viewType === 'bar'
-                ? 'bg-primary-500 text-white shadow-md'
+                ? 'bg-white text-slate-950 shadow-sm'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -128,21 +140,25 @@ export const HealthBreakdown = ({ parameters = [] }) => {
         <ResponsiveContainer width="100%" height="100%">
           {viewType === 'radar' ? (
             <RadarChart cx="50%" cy="50%" outerRadius="75%" data={chartData}>
-              <PolarGrid stroke="rgba(255, 255, 255, 0.12)" />
-              <PolarAngleAxis dataKey="parameter" tick={{ fill: '#94a3b8', fontSize: 10 }} />
+              <PolarGrid stroke="rgba(255, 255, 255, 0.08)" />
+              <PolarAngleAxis dataKey="parameter" tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 600 }} />
               <PolarRadiusAxis angle={30} domain={[0, 20]} tick={{ fill: '#64748b', fontSize: 9 }} />
-              <Radar name="Points Earned" dataKey="Earned" stroke="#2563EB" fill="#2563EB" fillOpacity={0.4} />
-              <Radar name="Max Points" dataKey="Max" stroke="#14B8A6" fill="#14B8A6" fillOpacity={0.15} />
+              <Radar name="Points Earned" dataKey="Earned" stroke="#6366F1" fill="#6366F1" fillOpacity={0.45} />
+              <Radar name="Max Points" dataKey="Max" stroke="#10B981" fill="#10B981" fillOpacity={0.15} />
               <Tooltip content={<CustomTooltip />} />
             </RadarChart>
           ) : (
             <BarChart data={chartData} barGap={4}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.08)" vertical={false} />
-              <XAxis dataKey="parameter" tick={{ fill: '#94a3b8', fontSize: 10 }} axisLine={false} tickLine={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.06)" vertical={false} />
+              <XAxis dataKey="parameter" tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 600 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fill: '#94a3b8', fontSize: 10 }} axisLine={false} tickLine={false} />
               <Tooltip content={<CustomTooltip />} cursor={false} />
-              <Bar dataKey="Earned" fill="#2563EB" radius={[6, 6, 0, 0]} />
-              <Bar dataKey="Max" fill="#14B8A6" opacity={0.3} radius={[6, 6, 0, 0]} />
+              <Bar dataKey="Earned" radius={[6, 6, 0, 0]}>
+                {chartData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Bar>
+              <Bar dataKey="Max" fill="#ffffff" opacity={0.08} radius={[6, 6, 0, 0]} />
             </BarChart>
           )}
         </ResponsiveContainer>

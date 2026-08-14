@@ -12,98 +12,165 @@ import {
   AlertCircle,
 } from 'lucide-react';
 
-const PARAMETER_ICONS = {
-  savings_rate: { icon: PiggyBank, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-  budget_discipline: { icon: PieChart, color: 'text-teal-400', bg: 'bg-teal-500/10' },
-  income_stability: { icon: TrendingUp, color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
-  expense_stability: { icon: TrendingDown, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-  goal_progress: { icon: Target, color: 'text-teal-400', bg: 'bg-teal-500/10' },
-  emergency_fund: { icon: ShieldCheck, color: 'text-amber-400', bg: 'bg-amber-500/10' },
-  debt_ratio: { icon: CreditCard, color: 'text-rose-400', bg: 'bg-rose-500/10' },
+const PARAMETER_CONFIG = {
+  savings_rate: {
+    icon: PiggyBank,
+    name: 'Savings Rate',
+    color: '#6366F1',
+    text: 'text-indigo-400',
+    bg: 'bg-indigo-500/10',
+    border: 'border-indigo-500/30',
+    bar: 'bg-indigo-500',
+    badge: 'bg-indigo-500/15 text-indigo-300 border-indigo-500/30',
+  },
+  budget_discipline: {
+    icon: PieChart,
+    name: 'Budget Discipline',
+    color: '#10B981',
+    text: 'text-emerald-400',
+    bg: 'bg-emerald-500/10',
+    border: 'border-emerald-500/30',
+    bar: 'bg-emerald-500',
+    badge: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
+  },
+  income_stability: {
+    icon: TrendingUp,
+    name: 'Income Stability',
+    color: '#0EA5E9',
+    text: 'text-sky-400',
+    bg: 'bg-sky-500/10',
+    border: 'border-sky-500/30',
+    bar: 'bg-sky-500',
+    badge: 'bg-sky-500/15 text-sky-300 border-sky-500/30',
+  },
+  expense_stability: {
+    icon: TrendingDown,
+    name: 'Expense Control',
+    color: '#F43F5E',
+    text: 'text-rose-400',
+    bg: 'bg-rose-500/10',
+    border: 'border-rose-500/30',
+    bar: 'bg-rose-500',
+    badge: 'bg-rose-500/15 text-rose-300 border-rose-500/30',
+  },
+  goal_progress: {
+    icon: Target,
+    name: 'Goal Velocity',
+    color: '#8B5CF6',
+    text: 'text-violet-400',
+    bg: 'bg-violet-500/10',
+    border: 'border-violet-500/30',
+    bar: 'bg-violet-500',
+    badge: 'bg-violet-500/15 text-violet-300 border-violet-500/30',
+  },
+  emergency_fund: {
+    icon: ShieldCheck,
+    name: 'Emergency Buffer',
+    color: '#F59E0B',
+    text: 'text-amber-400',
+    bg: 'bg-amber-500/10',
+    border: 'border-amber-500/30',
+    bar: 'bg-amber-500',
+    badge: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
+  },
+  debt_ratio: {
+    icon: CreditCard,
+    name: 'Debt Load Ratio',
+    color: '#14B8A6',
+    text: 'text-teal-400',
+    bg: 'bg-teal-500/10',
+    border: 'border-teal-500/30',
+    bar: 'bg-teal-500',
+    badge: 'bg-teal-500/15 text-teal-300 border-teal-500/30',
+  },
 };
 
-const STATUS_STYLES = {
-  EXCELLENT: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-  GOOD: 'bg-teal-500/10 text-teal-400 border-teal-500/20',
-  FAIR: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  POOR: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+const FALLBACK_PALETTES = [
+  PARAMETER_CONFIG.savings_rate,
+  PARAMETER_CONFIG.budget_discipline,
+  PARAMETER_CONFIG.income_stability,
+  PARAMETER_CONFIG.expense_stability,
+  PARAMETER_CONFIG.goal_progress,
+  PARAMETER_CONFIG.emergency_fund,
+  PARAMETER_CONFIG.debt_ratio,
+];
+
+const STATUS_BADGES = {
+  EXCELLENT: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
+  GOOD: 'bg-sky-500/15 text-sky-400 border-sky-500/30',
+  FAIR: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
+  POOR: 'bg-rose-500/15 text-rose-400 border-rose-500/30',
 };
 
 export const MetricCard = ({ parameters = [] }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+    <div className="divide-y divide-zinc-800/80">
       {parameters.map((param, idx) => {
-        const iconConfig = PARAMETER_ICONS[param.key] || {
-          icon: CheckCircle2,
-          color: 'text-emerald-400',
-          bg: 'bg-emerald-500/10',
-        };
-        const Icon = iconConfig.icon;
-        const statusStyle = STATUS_STYLES[param.status] || STATUS_STYLES['GOOD'];
+        const palette = PARAMETER_CONFIG[param.key] || FALLBACK_PALETTES[idx % FALLBACK_PALETTES.length];
+        const Icon = palette.icon || CheckCircle2;
+        const statusBadge = STATUS_BADGES[param.status] || STATUS_BADGES['GOOD'];
         const scorePct = Math.min(100, Math.max(0, (param.score / param.max_score) * 100));
 
         return (
           <motion.div
             key={param.key || idx}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: idx * 0.08 }}
-            whileHover={{ y: -3 }}
-            className="rounded-2xl border border-zinc-800 bg-[#09090B] p-5 shadow-sm transition-all duration-300 flex flex-col justify-between space-y-4 group"
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3, delay: idx * 0.05 }}
+            className="py-4 hover:bg-zinc-900/40 transition-colors px-2 rounded-lg"
           >
-            <div className="space-y-3">
-              {/* Header */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className={`p-2.5 rounded-xl ${iconConfig.bg} ${iconConfig.color} group-hover:scale-105 transition-transform border border-zinc-800`}>
-                    <Icon className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-black text-white font-outfit">
+            {/* Linear Row Layout */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              {/* Parameter Icon & Name */}
+              <div className="flex items-center space-x-3.5 min-w-[220px]">
+                <div className={`p-2 rounded-xl ${palette.bg} ${palette.text} border ${palette.border} flex-shrink-0`}>
+                  <Icon className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h4 className="text-sm font-extrabold text-white font-outfit">
                       {param.name}
                     </h4>
-                    <span className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">
-                      Weight: {param.weight_pct}%
+                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase border ${statusBadge}`}>
+                      {param.status}
                     </span>
                   </div>
+                  <span className="text-[10px] font-mono text-slate-500">
+                    Weight: {param.weight_pct}%
+                  </span>
                 </div>
-
-                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase border ${statusStyle}`}>
-                  {param.status}
-                </span>
               </div>
 
-              {/* Value and Score */}
-              <div className="flex items-baseline justify-between pt-1">
-                <span className="text-2xl font-black text-white font-outfit">
+              {/* Metric Value */}
+              <div className="min-w-[120px]">
+                <span className={`text-xl font-black font-outfit ${palette.text}`}>
                   {param.value_text}
                 </span>
-                <span className="text-xs font-mono font-bold text-emerald-400">
-                  {param.score} / {param.max_score} pts
-                </span>
               </div>
 
-              {/* Progress Bar */}
-              <div className="h-2 rounded-full bg-zinc-900 overflow-hidden p-0.5 border border-zinc-800">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${scorePct}%` }}
-                  transition={{ duration: 0.8, delay: idx * 0.05 }}
-                  className={`h-full rounded-full ${
-                    scorePct >= 80
-                      ? 'bg-emerald-400'
-                      : scorePct >= 50
-                      ? 'bg-teal-400'
-                      : 'bg-rose-500'
-                  }`}
-                />
+              {/* Progress Bar Track */}
+              <div className="flex-1 min-w-[180px] max-w-md space-y-1">
+                <div className="flex justify-between text-[11px] font-mono">
+                  <span className="text-slate-400 font-semibold">{scorePct.toFixed(0)}% score capacity</span>
+                  <span className="text-slate-300 font-bold">
+                    <span className={palette.text}>{param.score}</span> / {param.max_score} pts
+                  </span>
+                </div>
+                <div className="h-2 rounded-full bg-zinc-900 overflow-hidden border border-zinc-800/80">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${scorePct}%` }}
+                    transition={{ duration: 0.8, delay: idx * 0.05 }}
+                    className={`h-full rounded-full ${palette.bar}`}
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Generated Rule Insight */}
-            <div className="pt-3 border-t border-zinc-800 flex items-start space-x-2 text-xs text-slate-400">
-              <AlertCircle className="w-3.5 h-3.5 text-slate-500 flex-shrink-0 mt-0.5" />
-              <p className="leading-tight font-normal">{param.insight}</p>
+            {/* Sub-Insight Line */}
+            <div className="mt-2.5 pl-12 flex items-center space-x-2 text-xs text-slate-400">
+              <AlertCircle className={`w-3.5 h-3.5 ${palette.text} flex-shrink-0`} />
+              <p className="leading-tight text-slate-400 font-normal">{param.insight}</p>
             </div>
           </motion.div>
         );

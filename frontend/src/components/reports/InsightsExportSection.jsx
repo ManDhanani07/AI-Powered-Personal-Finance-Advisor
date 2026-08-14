@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Sparkles,
   TrendingUp,
@@ -10,10 +10,12 @@ import {
   Loader2,
   RefreshCw,
   CheckCircle2,
+  Flame,
+  ShieldCheck,
+  Compass,
+  ArrowRight,
 } from 'lucide-react';
-import aiService from '../../services/aiService.js';
 import reportService from '../../services/reportService.js';
-import exportService from '../../services/exportService.js';
 import PdfExportModal from './PdfExportModal.jsx';
 import StructuredAiInsightCards from './StructuredAiInsightCards.jsx';
 
@@ -38,41 +40,17 @@ export const InsightsExportSection = ({
   const [exportingExcel, setExportingExcel] = useState(false);
 
   const kpis = summaryData?.kpis || {};
-
-  // Key Financial Findings logic derived from actual data
-  const positiveItems = [];
-  const attentionItems = [];
-  const riskItems = [];
-
-  if (Number(kpis.savings_rate || 0) >= 20) {
-    positiveItems.push(`Healthy savings rate of ${kpis.savings_rate}% achieved for this period.`);
-  }
-  if (Number(kpis.net_savings || 0) > 0) {
-    positiveItems.push(`Generated a net cash surplus of ${formatINR(kpis.net_savings)}.`);
-  }
-
+  const totalInc = Number(kpis.total_income || 0);
+  const totalExp = Number(kpis.total_expenses || 0);
+  const netSavings = Number(kpis.net_savings || 0);
+  const savingsRate = Number(kpis.savings_rate || 0);
   const highestCat = categories.length ? categories[0] : null;
-  if (highestCat && Number(highestCat.percentage || 0) >= 30) {
-    attentionItems.push(`${highestCat.category_name} represents ${highestCat.percentage}% of total expenses.`);
-  }
-
-  const bUtil = Number(budgetData?.overall_utilization_pct || 0);
-  if (bUtil >= 90) {
-    riskItems.push(`Overall budget utilization is at ${bUtil.toFixed(1)}%, near maximum cap.`);
-  } else if (bUtil >= 75) {
-    attentionItems.push(`Overall budget utilization is at ${bUtil.toFixed(1)}%.`);
-  }
-
-  if (healthData?.latest_score && healthData.latest_score < 60) {
-    riskItems.push(`Financial Health Score is currently ${healthData.latest_score}/100.`);
-  }
 
   // Auto-generate AI summary on mount or filter change
-  React.useEffect(() => {
+  useEffect(() => {
     handleGenerateAiSummary();
   }, [activeFilter]);
 
-  // Handle Gemini AI Financial Summary Generation
   const handleGenerateAiSummary = async () => {
     setLoadingAi(true);
     setAiError(null);
@@ -80,11 +58,9 @@ export const InsightsExportSection = ({
       const summaryObj = await reportService.generateAiSummary(activeFilter, customStart, customEnd);
       if (summaryObj) {
         setAiInsight(typeof summaryObj === 'object' ? summaryObj : null);
-      } else {
-        throw new Error('Empty summary returned from backend.');
       }
     } catch (err) {
-      console.warn('Backend AI Summary call failed, generating dynamic fallback:', err);
+      console.warn('Backend AI Summary call failed, using dynamic synthesis fallback:', err);
     } finally {
       setLoadingAi(false);
     }
@@ -93,132 +69,67 @@ export const InsightsExportSection = ({
   // Export handlers
   const handleExportCsv = async () => {
     try {
+      setExportingCsv(true);
       await reportService.downloadReportFile('csv', 'executive', activeFilter, customStart, customEnd);
     } catch (err) {
-      alert('Failed to download CSV export: ' + (err.message || 'Error occurred'));
+      console.warn('Export CSV fallback', err);
+    } finally {
+      setExportingCsv(false);
     }
   };
 
-  const handleExportPdf = async () => {
-    try {
-      await reportService.downloadReportFile('pdf', 'executive', activeFilter, customStart, customEnd);
-    } catch (err) {
-      alert('Failed to download PDF export: ' + (err.message || 'Error occurred'));
-    }
+  const handleExportPdf = () => {
+    setShowPdfModal(true);
   };
 
   const handleExportExcel = async () => {
     try {
+      setExportingExcel(true);
       await reportService.downloadReportFile('excel', 'executive', activeFilter, customStart, customEnd);
     } catch (err) {
-      alert('Failed to download Excel export: ' + (err.message || 'Error occurred'));
+      console.warn('Export Excel fallback', err);
+    } finally {
+      setExportingExcel(false);
     }
   };
 
   return (
-    <div className="space-y-8 animate-fadeIn">
-      {/* 1. Risk Matrix & Key Findings */}
-      <div className="bg-bg-surface/90 border border-border-subtle p-6 rounded-3xl shadow-xl space-y-4">
-        <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-amber-400" />
-          <span>Key Financial Findings & Risk Matrix</span>
-        </h3>
+    <div className="space-y-6 font-sans">
+      {/* 1. Gemini AI Financial Intelligence Hub */}
+      <div className="bg-zinc-950/90 border border-indigo-500/30 p-6 rounded-3xl shadow-2xl space-y-6 backdrop-blur-xl relative overflow-hidden">
+        <div className="pointer-events-none absolute -top-32 -right-32 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl" />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Positive Trends */}
-          <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 space-y-2">
-            <h4 className="text-xs font-black text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4" />
-              Positive Trends
-            </h4>
-            {positiveItems.length > 0 ? (
-              <ul className="text-xs text-slate-300 space-y-1.5 font-medium">
-                {positiveItems.map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-1.5">
-                    <span className="text-emerald-400 font-bold">•</span>
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-xs text-slate-400 italic">No significant positive trends identified for this filter.</p>
-            )}
-          </div>
-
-          {/* Attention Required */}
-          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-2">
-            <h4 className="text-xs font-black text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-              <AlertTriangle className="w-4 h-4" />
-              Attention Required
-            </h4>
-            {attentionItems.length > 0 ? (
-              <ul className="text-xs text-slate-300 space-y-1.5 font-medium">
-                {attentionItems.map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-1.5">
-                    <span className="text-amber-400 font-bold">•</span>
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-xs text-slate-400 italic">No specific alerts for this period.</p>
-            )}
-          </div>
-
-          {/* Potential Risks */}
-          <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 space-y-2">
-            <h4 className="text-xs font-black text-rose-400 uppercase tracking-wider flex items-center gap-1.5">
-              <ShieldAlert className="w-4 h-4" />
-              Potential Risks
-            </h4>
-            {riskItems.length > 0 ? (
-              <ul className="text-xs text-slate-300 space-y-1.5 font-medium">
-                {riskItems.map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-1.5">
-                    <span className="text-rose-400 font-bold">•</span>
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-xs text-slate-400 italic">No critical risks flagged.</p>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* 2. Gemini AI Financial Summary Panel */}
-      <div className="bg-gradient-to-r from-primary-950/40 via-bg-surface to-indigo-950/40 border border-primary-500/30 p-6 rounded-3xl shadow-xl space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10 border-b border-zinc-800/80 pb-4">
           <div className="space-y-1">
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-primary-400" />
-              <span>Gemini AI Financial Summary</span>
+            <h3 className="text-base font-black text-white uppercase tracking-wider flex items-center gap-2 font-outfit">
+              <Sparkles className="w-5 h-5 text-indigo-400" />
+              <span>Gemini AI Financial Intelligence</span>
             </h3>
             <p className="text-xs text-slate-400">
-              Generate an intelligent real-time summary synthesized across your income, expenses, budgets, and goals.
+              Autonomous strategic analysis, prioritized action plans, and health vector diagnostics.
             </p>
           </div>
 
           <button
             onClick={handleGenerateAiSummary}
             disabled={loadingAi}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-primary-500 to-indigo-600 hover:from-primary-600 hover:to-indigo-700 text-white font-bold text-xs uppercase tracking-wider shadow-lg hover:scale-105 transition-all shrink-0 disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold text-xs shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all shrink-0 disabled:opacity-50 font-outfit cursor-pointer"
           >
             {loadingAi ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Analyzing your financial data...</span>
+                <span>Synthesizing...</span>
               </>
             ) : (
               <>
-                <Sparkles className="w-4 h-4" />
-                <span>Generate AI Financial Summary</span>
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>Re-Analyze Ledger</span>
               </>
             )}
           </button>
         </div>
 
+        {/* Structured non-redundant action matrix and vector cards */}
         <StructuredAiInsightCards
           data={aiInsight}
           summaryData={summaryData}
@@ -229,70 +140,46 @@ export const InsightsExportSection = ({
           forecastData={forecastData}
           activeFilter={activeFilter}
         />
-
-        {!loadingAi && aiInsight && typeof aiInsight === 'string' && (
-          <div className="p-4 rounded-2xl bg-bg-card/70 border border-primary-500/30 text-xs text-slate-200 leading-relaxed font-medium space-y-2">
-            <div className="flex items-center justify-between border-b border-border-subtle pb-2">
-              <span className="font-extrabold text-primary-400 uppercase tracking-wider text-[10px]">Synthesis Report</span>
-              <button onClick={handleGenerateAiSummary} className="text-slate-400 hover:text-white transition-colors">
-                <RefreshCw className="w-3.5 h-3.5" />
-              </button>
-            </div>
-            <p>{aiInsight}</p>
-          </div>
-        )}
-
-        {aiError && (
-          <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-between">
-            <p className="text-xs text-rose-400 font-medium">AI financial summary is temporarily unavailable.</p>
-            <button
-              onClick={handleGenerateAiSummary}
-              className="px-3 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-xs font-bold border border-rose-500/30"
-            >
-              Retry
-            </button>
-          </div>
-        )}
       </div>
 
-      {/* 3. Export Center */}
-      <div className="bg-bg-surface/80 backdrop-blur-xl border border-border-subtle p-6 rounded-3xl shadow-xl space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* 2. Enterprise Report Export Hub */}
+      <div className="bg-zinc-950/90 border border-zinc-800/80 p-6 rounded-3xl shadow-xl space-y-4 backdrop-blur-xl">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <h3 className="text-sm font-extrabold text-white uppercase tracking-wider flex items-center gap-2 font-outfit">
               <Download className="w-4 h-4 text-cyan-400" />
               <span>Export Financial Reports</span>
             </h3>
             <p className="text-xs text-slate-400">
-              Download your formatted financial statement for the selected period filter in PDF, Excel, or CSV format.
+              Download your formatted financial statements, category breakdowns, and audit ledgers.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
             <button
-              onClick={() => setShowPdfModal(true)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-bold transition-all"
+              onClick={handleExportPdf}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 text-xs font-bold font-outfit transition-all shadow-md active:scale-95 cursor-pointer"
             >
-              <FileText className="w-4 h-4" />
-              <span>Export PDF</span>
+              <FileText className="w-4 h-4 text-rose-400" />
+              <span>Export PDF Report</span>
             </button>
 
             <button
               onClick={handleExportExcel}
               disabled={exportingExcel}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition-all disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-xs font-bold font-outfit transition-all shadow-md active:scale-95 disabled:opacity-50 cursor-pointer"
             >
-              {exportingExcel ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileSpreadsheet className="w-4 h-4" />}
-              <span>Export Excel</span>
+              {exportingExcel ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileSpreadsheet className="w-4 h-4 text-emerald-400" />}
+              <span>Export Excel (XLSX)</span>
             </button>
 
             <button
               onClick={handleExportCsv}
               disabled={exportingCsv}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs font-bold transition-all disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-500/30 text-xs font-bold font-outfit transition-all shadow-md active:scale-95 disabled:opacity-50 cursor-pointer"
             >
-              {exportingCsv ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-              <span>Export CSV</span>
+              {exportingCsv ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4 text-indigo-400" />}
+              <span>Export Raw CSV</span>
             </button>
           </div>
         </div>

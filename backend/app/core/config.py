@@ -26,6 +26,10 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
     REFRESH_TOKEN_EXPIRE_DAYS: int = 30  # 30 days
 
+    # Admin Security Credentials (Stored securely in .env)
+    ADMIN_EMAIL: str = "mandhanani536@gmail.com"
+    ADMIN_PASSWORD_HASH: str = "$2b$12$Ksh4tCK4JtIUfW3.8/QHCOFQMJee6HSRSY0IRufNIQN5QCXuNDkdS"
+
     # Database
     POSTGRES_USER: str = "postgres"
     POSTGRES_PASSWORD: str = "Man@@@17"

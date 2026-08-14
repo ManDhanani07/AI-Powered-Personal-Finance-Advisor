@@ -9,39 +9,53 @@ export const HealthScoreCard = ({ score = 0, calculatedAt, refreshing, onRefresh
     ? formatDate(calculatedAt, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
     : 'Just now';
 
+  const getScoreTheme = (val) => {
+    if (val >= 85) return { text: 'text-emerald-400', badge: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400', label: 'Prime Standing' };
+    if (val >= 70) return { text: 'text-sky-400', badge: 'bg-sky-500/10 border-sky-500/30 text-sky-400', label: 'Healthy Standing' };
+    if (val >= 50) return { text: 'text-amber-400', badge: 'bg-amber-500/10 border-amber-500/30 text-amber-400', label: 'Fair Standing' };
+    return { text: 'text-rose-400', badge: 'bg-rose-500/10 border-rose-500/30 text-rose-400', label: 'Needs Attention' };
+  };
+
+  const theme = getScoreTheme(score);
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="rounded-3xl border border-zinc-800 bg-[#09090B] p-6 shadow-[0_10px_30px_rgba(0,0,0,0.85)] flex flex-col items-center text-center relative overflow-hidden"
+      transition={{ duration: 0.4 }}
+      className="flex flex-col items-center justify-center text-center p-4 relative"
     >
-      {/* Top Header Pill */}
-      <div className="flex items-center justify-between w-full mb-4 z-10">
-        <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-[#121216] text-indigo-400 text-xs font-extrabold uppercase tracking-widest font-outfit">
+      {/* Top Header Pill & Refresh */}
+      <div className="flex items-center justify-between w-full mb-2">
+        <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[11px] font-extrabold uppercase tracking-wider font-outfit">
           <Activity className="w-3.5 h-3.5 animate-pulse text-indigo-400" />
-          <span>Financial Health Index</span>
+          <span>Health Gauge</span>
         </div>
 
         <button
           onClick={onRefresh}
           disabled={refreshing}
-          className="p-2 rounded-xl bg-[#121216] text-slate-300 hover:text-white transition-all cursor-pointer disabled:opacity-50"
+          className="p-1.5 rounded-lg border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-slate-300 transition-all cursor-pointer disabled:opacity-50"
           title="Recalculate Score"
         >
-          <RefreshCw className={`w-4 h-4 text-indigo-400 ${refreshing ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`w-3.5 h-3.5 text-indigo-400 ${refreshing ? 'animate-spin' : ''}`} />
         </button>
       </div>
 
-      {/* Radial Score Gauge */}
-      <div className="my-2 z-10">
+      {/* Radial Score Arc */}
+      <div className="my-1">
         <ScoreGauge score={score} />
       </div>
 
-      {/* Bottom Footer Meta */}
-      <p className="text-xs text-slate-400 mt-2 font-medium z-10">
-        Last calculated from database: <span className="text-slate-200 font-semibold">{formattedDate}</span>
-      </p>
+      {/* Status Pill & Timestamp */}
+      <div className="space-y-1">
+        <span className={`inline-block px-3 py-0.5 rounded-full text-[11px] font-extrabold uppercase border ${theme.badge}`}>
+          {theme.label}
+        </span>
+        <p className="text-[11px] text-slate-500 font-medium">
+          Calculated: <span className="text-slate-300 font-semibold">{formattedDate}</span>
+        </p>
+      </div>
     </motion.div>
   );
 };

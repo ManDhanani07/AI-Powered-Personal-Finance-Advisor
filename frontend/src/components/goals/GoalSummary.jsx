@@ -1,71 +1,67 @@
 import React from 'react';
-import { Target, PiggyBank, PieChart, Award } from 'lucide-react';
+import { Target, PiggyBank, TrendingDown, Trophy } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters.js';
+
+const StatCard = ({ label, value, icon: Icon, valueColor, iconBg, iconBorder, iconColor }) => (
+  <div className="rounded-2xl border border-zinc-800 bg-[#09090B] p-5 flex items-center justify-between shadow-sm">
+    <div>
+      <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">{label}</p>
+      <h3 className={`text-xl font-extrabold mt-1 font-outfit ${valueColor}`}>{value}</h3>
+    </div>
+    <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${iconBg} ${iconBorder} ${iconColor}`}>
+      <Icon className="h-5 w-5" />
+    </div>
+  </div>
+);
 
 export const GoalSummary = ({ summary }) => {
   if (!summary) return null;
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-      {/* Total Target */}
-      <div className="rounded-2xl border border-zinc-800 bg-[#09090B] p-5 flex items-center justify-between shadow-sm">
-        <div>
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-            Total Target Amount
-          </p>
-          <h3 className="text-xl font-extrabold text-white mt-1 font-outfit">
-            {formatCurrency(summary.total_target_amount)}
-          </h3>
-        </div>
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-900 border border-zinc-800 text-slate-300">
-          <Target className="h-5 w-5" />
-        </div>
-      </div>
+      {/* 1 — Total Target: Indigo */}
+      <StatCard
+        label="Total Target Amount"
+        value={formatCurrency(summary.total_target_amount)}
+        icon={Target}
+        valueColor="text-indigo-400"
+        iconBg="bg-indigo-500/10"
+        iconBorder="border border-indigo-500/20"
+        iconColor="text-indigo-400"
+      />
 
-      {/* Total Saved */}
-      <div className="rounded-2xl border border-zinc-800 bg-[#09090B] p-5 flex items-center justify-between shadow-sm">
-        <div>
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-            Total Saved Amount
-          </p>
-          <h3 className="text-xl font-extrabold text-emerald-400 mt-1 font-outfit">
-            {formatCurrency(summary.total_saved_amount)}
-          </h3>
-        </div>
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-          <PiggyBank className="h-5 w-5" />
-        </div>
-      </div>
+      {/* 2 — Total Saved: Emerald */}
+      <StatCard
+        label="Total Saved Amount"
+        value={formatCurrency(summary.total_saved_amount)}
+        icon={PiggyBank}
+        valueColor="text-emerald-400"
+        iconBg="bg-emerald-500/10"
+        iconBorder="border border-emerald-500/20"
+        iconColor="text-emerald-400"
+      />
 
-      {/* Remaining Target */}
-      <div className="rounded-2xl border border-zinc-800 bg-[#09090B] p-5 flex items-center justify-between shadow-sm">
-        <div>
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-            Remaining Target
-          </p>
-          <h3 className="text-xl font-extrabold text-teal-400 mt-1 font-outfit">
-            {formatCurrency(summary.total_remaining_amount)}
-          </h3>
-        </div>
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-500/10 border border-teal-500/20 text-teal-400">
-          <PieChart className="h-5 w-5" />
-        </div>
-      </div>
+      {/* 3 — Remaining Target: Amber */}
+      <StatCard
+        label="Remaining Target"
+        value={formatCurrency(summary.total_remaining_amount)}
+        icon={TrendingDown}
+        valueColor="text-amber-400"
+        iconBg="bg-amber-500/10"
+        iconBorder="border border-amber-500/20"
+        iconColor="text-amber-400"
+      />
 
-      {/* Completion */}
-      <div className="rounded-2xl border border-zinc-800 bg-[#09090B] p-5 flex items-center justify-between shadow-sm">
-        <div>
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-            Overall Completion
-          </p>
-          <h3 className="text-xl font-extrabold text-cyan-400 mt-1 font-outfit">
-            {summary.overall_completion_pct}%
-          </h3>
-        </div>
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
-          <Award className="h-5 w-5" />
-        </div>
-      </div>
+      {/* 4 — Overall Completion: Violet */}
+      <StatCard
+        label="Overall Completion"
+        value={`${summary.overall_completion_pct ?? 0}%`}
+        icon={Trophy}
+        valueColor="text-violet-400"
+        iconBg="bg-violet-500/10"
+        iconBorder="border border-violet-500/20"
+        iconColor="text-violet-400"
+      />
     </div>
   );
 };

@@ -8,6 +8,7 @@ import {
   CheckCircle2,
   Lock,
 } from 'lucide-react';
+import { SparklesCore } from '../ui/SparklesCore.jsx';
 
 const VALUE_PROPOSITIONS = [
   {
@@ -54,7 +55,22 @@ const VALUE_PROPOSITIONS = [
 
 export const WhyUsSection = () => {
   return (
-    <section id="why-us" className="py-12 bg-transparent relative overflow-hidden">
+    <section id="why-us" className="py-16 bg-transparent relative overflow-hidden">
+      {/* Full-Section Sparkling Star Particles Field (Behind Cards Z-0) */}
+      <div className="absolute inset-0 pointer-events-none z-0 opacity-70">
+        <SparklesCore
+          id="whyUsSectionSparkles"
+          background="transparent"
+          minSize={0.5}
+          maxSize={1.6}
+          particleDensity={220}
+          isFullSection={true}
+          className="w-full h-full"
+          particleColor={["#10B981", "#34D399", "#2DD4BF", "#00F2FE", "#C084FC", "#FFFFFF"]}
+          speed={0.6}
+        />
+      </div>
+
       <div className="max-w-[1920px] w-full mx-auto px-6 sm:px-10 lg:px-16 xl:px-20 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -86,7 +102,7 @@ export const WhyUsSection = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
                 transition={{ duration: 0.5, delay: idx * 0.1 }}
-                className="rounded-3xl border border-zinc-800 bg-[#09090B] p-7 shadow-[0_10px_30px_rgba(0,0,0,0.85)] transition-all space-y-4 flex flex-col justify-between"
+                className="rounded-3xl border border-zinc-800 bg-[#09090B] p-7 shadow-[0_10px_30px_rgba(0,0,0,0.85)] transition-all space-y-4 flex flex-col justify-between relative z-10"
               >
                 <div className="space-y-4">
                   <div className="flex items-center space-x-3">

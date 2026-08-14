@@ -8,14 +8,14 @@ import { ROUTES } from '../../constants/index.js';
 
 export const Navbar = ({ onToggleSidebar }) => {
   return (
-    <header className="sticky top-0 z-40 h-[72px] bg-[#000000] border-b border-zinc-900 transition-colors duration-200">
+    <header className="shrink-0 z-40 h-[72px] bg-[#000000] border-b border-zinc-900 transition-colors duration-200">
       <div className="h-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
         {/* Left: Brand & Mobile Sidebar Toggle */}
         <div className="flex items-center space-x-3">
           {onToggleSidebar && (
             <button
               onClick={onToggleSidebar}
-              className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-[#09090B] border border-transparent hover:border-zinc-800 transition-all"
+              className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-[#09090B] border border-transparent hover:border-zinc-800 transition-all cursor-pointer"
               aria-label="Toggle navigation menu"
             >
               <Menu className="w-5 h-5" />

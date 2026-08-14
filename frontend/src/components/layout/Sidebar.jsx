@@ -12,8 +12,12 @@ import {
   Bell,
   Bot,
   Settings,
+  ShieldCheck,
 } from 'lucide-react';
 import { ROUTES } from '../../constants/index.js';
+import useAuth from '../../hooks/useAuth.js';
+
+const ADMIN_EMAIL = 'mandhanani536@gmail.com';
 
 const NAV_ITEMS = [
   { label: 'Dashboard', path: ROUTES.DASHBOARD, icon: LayoutDashboard },
@@ -37,6 +41,9 @@ const MOBILE_NAV_ITEMS = [
 ];
 
 export const Sidebar = ({ isCollapsed, onToggleCollapse }) => {
+  const { user } = useAuth();
+  const isAdmin = user?.email && user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+
   return (
     <>
       {/* Desktop & Tablet Sidebar (≥ 768px) */}
@@ -47,6 +54,27 @@ export const Sidebar = ({ isCollapsed, onToggleCollapse }) => {
       >
         {/* Navigation Item List */}
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+          {isAdmin && (
+            <NavLink
+              to="/admin/overview"
+              className={({ isActive }) =>
+                `group relative flex items-center px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 ${
+                  isActive
+                    ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 shadow-sm'
+                    : 'text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20'
+                }`
+              }
+            >
+              <ShieldCheck className={`w-4.5 h-4.5 flex-shrink-0 text-indigo-400 ${isCollapsed ? 'mx-auto' : 'mr-3'}`} />
+              {!isCollapsed && <span className="truncate">Admin Portal</span>}
+              {isCollapsed && (
+                <div className="absolute left-full ml-3 hidden group-hover:block z-50 px-2.5 py-1 rounded-lg bg-[#09090B] border border-zinc-800 text-indigo-300 text-xs font-semibold whitespace-nowrap shadow-lg">
+                  Admin Portal
+                </div>
+              )}
+            </NavLink>
+          )}
+
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             return (
@@ -81,6 +109,20 @@ export const Sidebar = ({ isCollapsed, onToggleCollapse }) => {
 
       {/* Mobile Bottom Navigation Bar (< 768px) */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-[#000000] border-t border-zinc-900 z-40 flex items-center justify-around px-2 shadow-2xl">
+        {isAdmin && (
+          <NavLink
+            to="/admin/overview"
+            className={({ isActive }) =>
+              `flex flex-col items-center justify-center w-14 py-1 rounded-xl transition-all ${
+                isActive ? 'text-indigo-400 font-bold scale-105' : 'text-indigo-400/80 hover:text-indigo-300'
+              }`
+            }
+          >
+            <ShieldCheck className="w-5 h-5 mb-0.5" />
+            <span className="text-[10px] truncate max-w-full font-bold">Admin</span>
+          </NavLink>
+        )}
+
         {MOBILE_NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           return (

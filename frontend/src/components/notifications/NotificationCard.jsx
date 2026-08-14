@@ -13,31 +13,30 @@ import {
   Sparkles,
   Zap,
 } from 'lucide-react';
-import { showToast } from '../common/ToastProvider.jsx';
 
-const PRIORITY_STYLES = {
+const PRIORITY_THEMES = {
   CRITICAL: {
-    bg: 'bg-rose-500/10 border-rose-500/30 hover:border-rose-500/50',
-    iconBg: 'bg-rose-500/20 text-rose-400',
-    badge: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
+    borderLeft: 'border-l-rose-500',
+    iconBg: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+    badge: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
     icon: AlertTriangle,
   },
   HIGH: {
-    bg: 'bg-amber-500/10 border-amber-500/30 hover:border-amber-500/50',
-    iconBg: 'bg-amber-500/20 text-amber-400',
-    badge: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+    borderLeft: 'border-l-amber-500',
+    iconBg: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+    badge: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
     icon: AlertCircle,
   },
   MEDIUM: {
-    bg: 'bg-indigo-500/10 border-indigo-500/30 hover:border-indigo-500/50',
-    iconBg: 'bg-indigo-500/20 text-indigo-400',
-    badge: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40',
+    borderLeft: 'border-l-indigo-500',
+    iconBg: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
+    badge: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
     icon: Info,
   },
   LOW: {
-    bg: 'bg-slate-800/40 border-border-subtle hover:border-border-strong',
-    iconBg: 'bg-slate-700/50 text-slate-300',
-    badge: 'bg-slate-700/50 text-slate-400 border-slate-600/40',
+    borderLeft: 'border-l-zinc-700',
+    iconBg: 'bg-zinc-800 text-slate-400 border-zinc-700',
+    badge: 'bg-zinc-800 text-slate-400 border-zinc-700',
     icon: CheckCircle2,
   },
 };
@@ -51,68 +50,79 @@ const CATEGORY_ICONS = {
   AI: Zap,
 };
 
+const formatTimeAgo = (dateStr) => {
+  if (!dateStr) return 'Just now';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return 'Just now';
+
+  const now = new Date();
+  const diffSec = Math.floor((now - d) / 1000);
+
+  if (diffSec < 60) return 'Just now';
+  if (diffSec < 3600) return `${Math.floor(diffSec / 60)}m ago`;
+  if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}h ago`;
+  if (diffSec < 172800) return 'Yesterday';
+
+  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+};
+
 export const NotificationCard = ({ notification, onMarkRead, onDelete }) => {
   if (!notification) return null;
 
   const priorityKey = (notification.priority || 'LOW').toUpperCase();
-  const style = PRIORITY_STYLES[priorityKey] || PRIORITY_STYLES.LOW;
-  const CategoryIcon = CATEGORY_ICONS[notification.category?.toUpperCase()] || style.icon;
+  const theme = PRIORITY_THEMES[priorityKey] || PRIORITY_THEMES.LOW;
+  const CategoryIcon = CATEGORY_ICONS[notification.category?.toUpperCase()] || theme.icon;
 
-  const formattedDate = notification.created_at
-    ? new Date(notification.created_at).toLocaleString('en-IN', {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-      })
-    : 'Just now';
+  const isUnread = !notification.is_read;
 
   return (
     <div
-      className={`p-5 rounded-3xl backdrop-blur-xl border transition-all duration-200 shadow-md relative overflow-hidden group ${style.bg} ${
-        !notification.is_read ? 'shadow-primary-500/5 ring-1 ring-primary-500/20' : 'opacity-85'
+      className={`p-4 rounded-xl border-y border-r border-zinc-800/80 border-l-4 ${theme.borderLeft} bg-[#09090B] transition-all duration-200 hover:bg-zinc-900/60 relative group ${
+        isUnread ? 'bg-zinc-900/40' : 'opacity-80'
       }`}
     >
       <div className="flex items-start justify-between gap-4">
-        {/* Left Icon & Content */}
+        {/* Left Icon & Message Body */}
         <div className="flex items-start space-x-3.5 flex-1 min-w-0">
-          <div className={`p-3 rounded-2xl shrink-0 ${style.iconBg} border border-white/10 shadow-sm`}>
-            <CategoryIcon className="w-5 h-5" />
+          <div className={`p-2.5 rounded-xl shrink-0 ${theme.iconBg} border flex items-center justify-center`}>
+            <CategoryIcon className="w-4 h-4" />
           </div>
 
           <div className="space-y-1 flex-1 min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border uppercase tracking-wider ${style.badge}`}>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h4 className="text-sm font-bold text-white tracking-tight">
+                {notification.title}
+              </h4>
+
+              {isUnread && (
+                <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse shrink-0" title="Unread" />
+              )}
+
+              <span className={`px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase border ${theme.badge}`}>
                 {notification.priority}
               </span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800/60 text-slate-400 border border-slate-700/50 uppercase tracking-wider font-mono">
+              <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-zinc-900 text-slate-400 border border-zinc-800 uppercase">
                 {notification.category}
               </span>
-              {!notification.is_read && (
-                <span className="flex h-2 w-2 relative">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary-500" />
-                </span>
-              )}
             </div>
 
-            <h4 className="text-sm font-bold text-white tracking-tight leading-snug">
-              {notification.title}
-            </h4>
-            <p className="text-xs text-slate-300 font-sans leading-relaxed">
+            <p className="text-xs text-slate-300 leading-relaxed font-normal">
               {notification.message}
             </p>
-            <p className="text-[10px] text-slate-400 font-mono pt-1">
-              {formattedDate}
+
+            <p className="text-[11px] text-slate-500 font-mono pt-0.5">
+              {formatTimeAgo(notification.created_at)}
             </p>
           </div>
         </div>
 
-        {/* Right Actions */}
-        <div className="flex items-center space-x-1 shrink-0 opacity-90 group-hover:opacity-100 transition-opacity">
-          {!notification.is_read && onMarkRead && (
+        {/* Action Buttons (Mark Read & Delete) */}
+        <div className="flex items-center space-x-1 shrink-0 opacity-80 group-hover:opacity-100 transition-opacity">
+          {isUnread && onMarkRead && (
             <button
               onClick={() => onMarkRead(notification.id)}
               title="Mark as Read"
-              className="p-2 rounded-xl text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 border border-transparent hover:border-emerald-500/20 transition-all"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors"
             >
               <Check className="w-4 h-4" />
             </button>
@@ -122,7 +132,7 @@ export const NotificationCard = ({ notification, onMarkRead, onDelete }) => {
             <button
               onClick={() => onDelete(notification.id)}
               title="Delete Notification"
-              className="p-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition-all"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
             >
               <Trash2 className="w-4 h-4" />
             </button>

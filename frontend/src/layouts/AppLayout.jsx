@@ -4,7 +4,6 @@ import { Navbar } from '../components/layout/Navbar.jsx';
 import { Sidebar } from '../components/layout/Sidebar.jsx';
 import { ContentWrapper } from '../components/layout/ContentWrapper.jsx';
 import { CommandPalette } from '../components/layout/CommandPalette.jsx';
-import { Footer } from '../components/layout/Footer.jsx';
 
 export const AppLayout = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -23,8 +22,8 @@ export const AppLayout = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#000000] text-slate-100 font-sans transition-colors duration-200">
-      {/* Top Navigation Header (72px height) */}
+    <div className="h-screen max-h-screen flex flex-col bg-[#000000] text-slate-100 font-sans overflow-hidden">
+      {/* Top Navigation Header (72px shrink-0) */}
       <Navbar
         onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
         onToggleSidebar={() => setIsSidebarCollapsed((prev) => !prev)}
@@ -32,19 +31,18 @@ export const AppLayout = () => {
       />
 
       {/* Main Body Area: Sidebar + Content Canvas */}
-      <div className="flex flex-1 w-full">
-        {/* Responsive Sidebar (260px expanded / 80px collapsed / Mobile Bottom Bar) */}
+      <div className="flex flex-1 w-full overflow-hidden min-h-0">
+        {/* Responsive Sidebar */}
         <Sidebar
           isCollapsed={isSidebarCollapsed}
           onToggleCollapse={() => setIsSidebarCollapsed((prev) => !prev)}
         />
 
         {/* Dynamic Content Canvas */}
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden min-h-0">
           <ContentWrapper>
             <Outlet />
           </ContentWrapper>
-          <Footer />
         </div>
       </div>
 

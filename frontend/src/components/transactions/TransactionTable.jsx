@@ -1,257 +1,375 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
-  ArrowUpRight,
-  ArrowDownLeft,
-  RefreshCw,
+  ArrowUpDown,
+  MoreHorizontal,
   Eye,
   Edit3,
   Copy,
   Trash2,
-  RotateCcw,
-  ArrowUpDown,
-  MoreVertical,
-  Scissors,
-  CheckSquare,
-  Square,
-  Building2,
-  Calendar,
-  CreditCard,
-  Tag,
+  ArrowUpRight,
+  ArrowDownLeft,
+  ArrowLeftRight,
+  Loader2,
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '../../utils/formatters.js';
 
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+const formatDisplayDate = (dateStr) => {
+  if (!dateStr) return '—';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return '—';
+  const day = d.getDate();
+  const month = d.toLocaleString('en-IN', { month: 'short' });
+  const year = d.getFullYear();
+  return `${day} ${month} ${year}`;
+};
+
+const formatPaymentMethod = (raw) => {
+  if (!raw) return 'Unknown';
+  return raw
+    .replace(/_/g, ' ')
+    .toLowerCase()
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+};
+
+const formatAccountType = (raw) => {
+  if (!raw) return 'Account';
+  return raw
+    .replace(/_/g, ' ')
+    .toLowerCase()
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+};
+
+const CATEGORY_COLOR_MAP = {
+  'food': '#F43F5E',
+  'food & dining': '#F43F5E',
+  'dining': '#F43F5E',
+  'shopping': '#A855F7',
+  'savings': '#10B981',
+  'investment': '#10B981',
+  'transport': '#3B82F6',
+  'transportation': '#3B82F6',
+  'travel': '#3B82F6',
+  'utilities': '#06B6D4',
+  'bills': '#06B6D4',
+  'bills & utilities': '#06B6D4',
+  'entertainment': '#EC4899',
+  'healthcare': '#F59E0B',
+  'medical': '#F59E0B',
+};
+
+const getCategoryColor = (categoryName, dbColor) => {
+  if (dbColor && dbColor !== '#94A3B8' && dbColor !== '#64748b') return dbColor;
+  if (!categoryName) return '#94a3b8';
+  const key = categoryName.toLowerCase().trim();
+  return CATEGORY_COLOR_MAP[key] || dbColor || '#94a3b8';
+};
+
+// ── Sort Header Button ────────────────────────────────────────────────────────
+
+const SortHeader = ({ label, field, sortField, sortOrder, onSort }) => {
+  const isActive = sortField === field;
+  return (
+    <button
+      type="button"
+      onClick={() => onSort(field)}
+      className={`flex items-center gap-1 transition-colors ${
+        isActive ? 'text-white' : 'text-slate-500 hover:text-slate-300'
+      }`}
+    >
+      <span>{label}</span>
+      <ArrowUpDown className={`h-3 w-3 ${isActive ? 'text-indigo-400' : ''}`} />
+    </button>
+  );
+};
+
+// ── Row Context Menu ──────────────────────────────────────────────────────────
+
+const RowMenu = ({ tx, onView, onEdit, onDuplicate, onDelete }) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative" onClick={(e) => e.stopPropagation()}>
+      <button
+        type="button"
+        onClick={() => setOpen((p) => !p)}
+        className="p-1.5 rounded-md text-slate-600 hover:text-slate-300 hover:bg-zinc-800 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+        title="Actions"
+      >
+        <MoreHorizontal className="w-4 h-4" />
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-full mt-1 w-40 rounded-xl border border-zinc-800 bg-zinc-950 shadow-2xl z-50 py-1">
+          <MenuItem icon={Eye} label="View Details" onClick={() => { onView(tx); setOpen(false); }} />
+          <MenuItem icon={Edit3} label="Edit" onClick={() => { onEdit(tx); setOpen(false); }} />
+          <MenuItem icon={Copy} label="Duplicate" onClick={() => { onDuplicate(tx); setOpen(false); }} />
+          <div className="my-1 border-t border-zinc-800" />
+          <MenuItem
+            icon={Trash2}
+            label="Delete"
+            danger
+            onClick={() => { onDelete(tx); setOpen(false); }}
+          />
+        </div>
+      )}
+    </div>
+  );
+};
+
+const MenuItem = ({ icon: Icon, label, onClick, danger }) => (
+  <button
+    onClick={onClick}
+    className={`w-full flex items-center gap-2.5 px-3 py-1.5 text-xs font-medium transition-colors ${
+      danger
+        ? 'text-rose-400 hover:bg-rose-500/10 hover:text-rose-300'
+        : 'text-slate-300 hover:bg-zinc-800 hover:text-white'
+    }`}
+  >
+    <Icon className="w-3.5 h-3.5 flex-shrink-0" />
+    {label}
+  </button>
+);
+
+// ── Avatar ────────────────────────────────────────────────────────────────────
+
+const TxAvatar = ({ tx }) => {
+  const isIncome = tx.transaction_type === 'INCOME';
+  const isTransfer = tx.transaction_type === 'TRANSFER';
+  const letter = (tx.merchant || tx.title || '?').charAt(0).toUpperCase();
+
+  let ring = 'border-zinc-700';
+  let bg = 'bg-zinc-800';
+  let text = 'text-slate-300';
+  if (isIncome) { ring = 'border-emerald-500/30'; bg = 'bg-emerald-500/10'; text = 'text-emerald-400'; }
+  if (isTransfer) { ring = 'border-indigo-500/30'; bg = 'bg-indigo-500/10'; text = 'text-indigo-400'; }
+
+  return (
+    <div className={`w-8 h-8 rounded-xl border flex items-center justify-center font-bold text-xs flex-shrink-0 ${ring} ${bg} ${text}`}>
+      {letter}
+    </div>
+  );
+};
+
+// ── Status Dot ────────────────────────────────────────────────────────────────
+
+const StatusDot = ({ tx }) => {
+  if (tx.is_deleted) {
+    return (
+      <span className="flex items-center gap-1.5 text-xs font-medium text-rose-400">
+        <span className="w-1.5 h-1.5 rounded-full bg-rose-500 flex-shrink-0" />
+        Deleted
+      </span>
+    );
+  }
+  const status = tx.status || 'COMPLETED';
+  const map = {
+    COMPLETED: { dot: 'bg-emerald-500', text: 'text-emerald-400', label: 'Completed' },
+    PENDING:   { dot: 'bg-amber-400',   text: 'text-amber-400',   label: 'Pending'   },
+    FAILED:    { dot: 'bg-rose-500',    text: 'text-rose-400',    label: 'Failed'    },
+    CANCELLED: { dot: 'bg-rose-400/60', text: 'text-rose-400/70', label: 'Cancelled' },
+  };
+  const s = map[status] || map.COMPLETED;
+  return (
+    <span className={`flex items-center gap-1.5 text-xs font-medium ${s.text}`}>
+      <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${s.dot}`} />
+      {s.label}
+    </span>
+  );
+};
+
+// ── Empty / Loading States ────────────────────────────────────────────────────
+
+const EmptyState = () => (
+  <div className="py-20 flex flex-col items-center justify-center gap-3">
+    <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center">
+      <ArrowLeftRight className="w-5 h-5 text-slate-600" />
+    </div>
+    <p className="text-sm font-medium text-slate-400">No transactions found</p>
+    <p className="text-xs text-slate-600">Try adjusting your filters or add a new transaction.</p>
+  </div>
+);
+
+const LoadingState = () => (
+  <div className="py-20 flex flex-col items-center justify-center gap-3">
+    <Loader2 className="w-6 h-6 text-slate-500 animate-spin" />
+    <p className="text-xs text-slate-500">Loading transactions…</p>
+  </div>
+);
+
+// ── Main Table ────────────────────────────────────────────────────────────────
+
 export const TransactionTable = ({
   transactions = [],
+  loading = false,
   sortField,
   sortOrder,
-  onSort,
-  onView,
+  onSortChange,
+  onRowClick,
   onEdit,
   onDuplicate,
   onDelete,
-  onRestore,
-  selectedIds = [],
-  onToggleSelectRow,
-  onToggleSelectAll,
-  allSelected = false,
 }) => {
-  const [activeMenuId, setActiveMenuId] = useState(null);
+  if (loading) {
+    return (
+      <div className="rounded-xl border border-zinc-800 bg-zinc-950 overflow-hidden">
+        <LoadingState />
+      </div>
+    );
+  }
 
-  if (!transactions.length) return null;
+  if (!transactions.length) {
+    return (
+      <div className="rounded-xl border border-zinc-800 bg-zinc-950 overflow-hidden">
+        <EmptyState />
+      </div>
+    );
+  }
 
   return (
-    <div className="overflow-x-auto rounded-3xl border border-zinc-800 bg-[#09090B] shadow-[0_10px_30px_rgba(0,0,0,0.85)] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-      <table className="w-full text-left text-xs border-collapse">
-        {/* Table Header */}
-        <thead className="bg-bg-elevated/90 text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-border-subtle sticky top-0 backdrop-blur-md z-10">
-          <tr>
-            {/* Merchant & Title */}
-            <th scope="col" className="py-3 px-4">
-              <button
-                type="button"
-                onClick={() => onSort('title')}
-                className="flex items-center gap-1.5 hover:text-white transition-colors"
-              >
-                <span>Merchant / Transaction</span>
-                <ArrowUpDown className="h-3 w-3" />
-              </button>
+    <div className="rounded-xl border border-zinc-800 bg-zinc-950 overflow-hidden overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      <table className="w-full min-w-[760px] text-left border-collapse">
+        {/* ── Head ── */}
+        <thead>
+          <tr className="border-b border-zinc-800">
+            {/* Transaction */}
+            <th className="py-3 px-3 text-[11px] font-semibold uppercase tracking-wider">
+              <SortHeader label="Transaction" field="title" sortField={sortField} sortOrder={sortOrder} onSort={onSortChange} />
             </th>
-
             {/* Category */}
-            <th scope="col" className="py-3 px-3">
-              <button
-                type="button"
-                onClick={() => onSort('category_id')}
-                className="flex items-center gap-1.5 hover:text-white transition-colors"
-              >
-                <Tag className="h-3 w-3 text-primary-500" />
-                <span>Category</span>
-              </button>
+            <th className="py-3 px-3 text-[11px] font-semibold uppercase tracking-wider">
+              <SortHeader label="Category" field="category_id" sortField={sortField} sortOrder={sortOrder} onSort={onSortChange} />
             </th>
-
-            {/* Date / Time */}
-            <th scope="col" className="py-3 px-3">
-              <button
-                type="button"
-                onClick={() => onSort('transaction_date')}
-                className="flex items-center gap-1.5 hover:text-white transition-colors"
-              >
-                <Calendar className="h-3 w-3 text-primary-500" />
-                <span>Date & Time</span>
-              </button>
+            {/* Date */}
+            <th className="py-3 px-3 text-[11px] font-semibold uppercase tracking-wider">
+              <SortHeader label="Date" field="transaction_date" sortField={sortField} sortOrder={sortOrder} onSort={onSortChange} />
             </th>
-
-            {/* Source Account / Payment Method */}
-            <th scope="col" className="py-3 px-3">
-              <span className="flex items-center gap-1.5">
-                <CreditCard className="h-3 w-3 text-primary-500" />
-                <span>Source Account</span>
-              </span>
+            {/* Account */}
+            <th className="py-3 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+              Account
             </th>
-
-            {/* Status Badge */}
-            <th scope="col" className="py-3 px-3">
-              <span>Status</span>
+            {/* Status */}
+            <th className="py-3 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+              Status
             </th>
-
             {/* Amount */}
-            <th scope="col" className="py-3 px-3 text-right">
-              <button
-                type="button"
-                onClick={() => onSort('amount')}
-                className="flex items-center gap-1.5 ml-auto hover:text-white transition-colors"
-              >
-                <span>Amount</span>
-                <ArrowUpDown className="h-3 w-3" />
-              </button>
+            <th className="py-3 px-3 pr-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500 text-right">
+              <SortHeader label="Amount" field="amount" sortField={sortField} sortOrder={sortOrder} onSort={onSortChange} />
             </th>
-
-            {/* Context Menu Trigger */}
-            <th scope="col" className="py-3 px-3 text-center w-12">
-              <span>Actions</span>
-            </th>
+            {/* Actions */}
+            <th className="py-3 px-3 w-10" />
           </tr>
         </thead>
 
-        {/* Table Body */}
-        <tbody className="divide-y divide-border-subtle font-medium">
+        {/* ── Body ── */}
+        <tbody className="divide-y divide-zinc-900">
           {transactions.map((tx) => {
             const isIncome = tx.transaction_type === 'INCOME';
             const isTransfer = tx.transaction_type === 'TRANSFER';
-            const isDeleted = tx.is_deleted;
-            const isSelected = selectedIds.includes(tx.id);
-
-            const merchantName = tx.merchant || tx.title || 'Merchant';
-            const initialLetter = merchantName.charAt(0).toUpperCase();
+            const merchantName = tx.merchant || '';
 
             return (
               <tr
                 key={tx.id}
-                onClick={() => onView(tx)}
-                className={`group cursor-pointer transition-all duration-200 hover:translate-x-[2px] hover:bg-bg-elevated/70 ${
-                  isSelected ? 'bg-primary-500/10' : isDeleted ? 'bg-rose-500/5 opacity-70' : ''
-                }`}
+                onClick={() => onRowClick(tx)}
+                className="group cursor-pointer transition-colors duration-100 hover:bg-zinc-900/80"
               >
-                {/* Merchant Info + Logo Avatar */}
-                <td className="py-3 px-4">
-                  <div className="flex items-center gap-3">
-                    {/* Logo Avatar */}
-                    <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-primary-500/20 to-accent-500/10 border border-primary-500/20 flex items-center justify-center font-bold text-primary-400 text-xs shadow-sm flex-shrink-0">
-                      {initialLetter}
-                    </div>
+
+                {/* Transaction: avatar + title + merchant */}
+                <td className="py-3.5 px-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <TxAvatar tx={tx} />
                     <div className="min-w-0">
-                      <p className="font-bold text-slate-900 dark:text-white text-xs truncate max-w-[200px]">
+                      <p className="text-sm font-semibold text-white truncate max-w-[200px] leading-tight">
                         {tx.title}
                       </p>
-                      <p className="text-[11px] text-slate-400 truncate max-w-[180px]">
-                        {tx.merchant || 'General Merchant'}
-                      </p>
+                      {merchantName && (
+                        <p className="text-xs text-slate-500 truncate max-w-[180px] leading-tight mt-0.5">
+                          {merchantName}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </td>
 
-                {/* Category Name (No border, no dot) */}
-                <td className="py-3 px-3">
+                {/* Category */}
+                <td className="py-3.5 px-3">
                   <span
-                    className="text-xs font-semibold"
-                    style={{ color: tx.category?.color || '#94A3B8' }}
+                    className="text-xs font-medium"
+                    style={{ color: getCategoryColor(tx.category?.category_name, tx.category?.color) }}
                   >
                     {tx.category?.category_name || 'Uncategorized'}
                   </span>
                 </td>
 
-                {/* Date / Time */}
-                <td className="py-3 px-3 text-slate-600 dark:text-slate-400 text-[11px] whitespace-nowrap">
-                  {formatDate(tx.transaction_date, 'DD MMM YYYY, hh:mm A')}
-                </td>
-
-                {/* Source Account */}
-                <td className="py-3 px-3 whitespace-nowrap">
-                  <span className="px-2 py-0.5 rounded-lg border border-border-subtle bg-bg-elevated text-[10px] font-bold text-slate-600 dark:text-slate-300">
-                    {tx.payment_method || 'UPI'} • {tx.account_type || 'Savings'}
+                {/* Date */}
+                <td className="py-3.5 px-3">
+                  <span className="text-xs text-slate-400 whitespace-nowrap">
+                    {formatDisplayDate(tx.transaction_date)}
                   </span>
                 </td>
 
-                {/* Status Badge */}
-                <td className="py-3 px-3">
-                  {isDeleted ? (
-                    <span className="px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-500 font-bold text-[10px]">
-                      Deleted
-                    </span>
-                  ) : (
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 font-bold text-[10px]">
-                      Completed
-                    </span>
-                  )}
+                {/* Account + Payment Method */}
+                <td className="py-3.5 px-3">
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium text-slate-300 leading-tight">
+                      {formatAccountType(tx.account_type)}
+                    </p>
+                    <p className="text-[11px] text-slate-500 leading-tight mt-0.5">
+                      {formatPaymentMethod(tx.payment_method)}
+                    </p>
+                  </div>
                 </td>
 
-                {/* Amount (Color coded green for INCOME, white for EXPENSE) */}
-                <td className="py-3 px-3 text-right whitespace-nowrap">
-                  <span
-                    className={`font-black text-xs ${
-                      isIncome ? 'text-emerald-500 dark:text-emerald-400' : 'text-slate-900 dark:text-white'
-                    }`}
-                  >
-                    {isIncome ? '+' : '-'}{formatCurrency(tx.amount)}
-                  </span>
+                {/* Status */}
+                <td className="py-3.5 px-3 whitespace-nowrap">
+                  <StatusDot tx={tx} />
                 </td>
 
-                {/* Row Context Menu Trigger (...) */}
-                <td className="py-3 px-3 text-center relative" onClick={(e) => e.stopPropagation()}>
-                  <button
-                    type="button"
-                    onClick={() => setActiveMenuId(activeMenuId === tx.id ? null : tx.id)}
-                    className="p-1.5 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-bg-elevated transition-colors"
-                    title="Actions Menu"
-                  >
-                    <MoreVertical className="w-4 h-4" />
-                  </button>
+                {/* Amount */}
+                <td className="py-3.5 px-3 pr-4 text-right whitespace-nowrap">
+                  <div className="flex items-center justify-end gap-1.5">
+                    {isIncome ? (
+                      <ArrowUpRight className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
+                    ) : isTransfer ? (
+                      <ArrowLeftRight className="w-3.5 h-3.5 text-indigo-400 flex-shrink-0" />
+                    ) : (
+                      <ArrowDownLeft className="w-3.5 h-3.5 text-rose-400 flex-shrink-0" />
+                    )}
+                    <span
+                      className={`text-sm font-bold ${
+                        isIncome
+                          ? 'text-emerald-400'
+                          : isTransfer
+                          ? 'text-indigo-300'
+                          : 'text-rose-300'
+                      }`}
+                    >
+                      {isIncome ? '+' : '−'}{formatCurrency(tx.amount)}
+                    </span>
+                  </div>
+                </td>
 
-                  {/* Context Menu Dropdown */}
-                  {activeMenuId === tx.id && (
-                    <div className="absolute right-4 mt-1 w-36 rounded-2xl bg-bg-surface border border-border-strong shadow-2xl z-50 p-1 space-y-0.5 text-left">
-                      <button
-                        onClick={() => {
-                          onView(tx);
-                          setActiveMenuId(null);
-                        }}
-                        className="w-full flex items-center space-x-2 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:bg-bg-elevated"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                        <span>View Details</span>
-                      </button>
-                      <button
-                        onClick={() => {
-                          onEdit(tx);
-                          setActiveMenuId(null);
-                        }}
-                        className="w-full flex items-center space-x-2 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:bg-bg-elevated"
-                      >
-                        <Edit3 className="w-3.5 h-3.5" />
-                        <span>Edit</span>
-                      </button>
-                      <button
-                        onClick={() => {
-                          onDuplicate(tx.id);
-                          setActiveMenuId(null);
-                        }}
-                        className="w-full flex items-center space-x-2 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:bg-bg-elevated"
-                      >
-                        <Copy className="w-3.5 h-3.5" />
-                        <span>Duplicate</span>
-                      </button>
-                      <button
-                        onClick={() => {
-                          onDelete(tx);
-                          setActiveMenuId(null);
-                        }}
-                        className="w-full flex items-center space-x-2 px-3 py-1.5 rounded-xl text-xs font-semibold text-rose-500 hover:bg-rose-500/10"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        <span>Delete</span>
-                      </button>
-                    </div>
-                  )}
+                {/* Actions */}
+                <td className="py-3.5 px-3 text-right">
+                  <RowMenu
+                    tx={tx}
+                    onView={onRowClick}
+                    onEdit={onEdit}
+                    onDuplicate={onDuplicate}
+                    onDelete={onDelete}
+                  />
                 </td>
               </tr>
             );

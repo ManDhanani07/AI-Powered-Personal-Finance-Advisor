@@ -1,10 +1,23 @@
+import React from 'react';
+import { Navigate } from 'react-router-dom';
 import { AppLayout } from './AppLayout.jsx';
+import useAuth from '../hooks/useAuth.js';
+
+const ADMIN_EMAIL = 'mandhanani536@gmail.com';
 
 /**
  * Protected Layout Guard Component
- * Validates session token / authentication state before rendering main app shell
+ * Redirects admin account (mandhanani536@gmail.com) directly to /admin/overview.
+ * Standard users continue to user AppLayout.
  */
 export const ProtectedLayout = () => {
+  const { user } = useAuth();
+  const isAdmin = user?.email && user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+
+  if (isAdmin) {
+    return <Navigate to="/admin/overview" replace />;
+  }
+
   return <AppLayout />;
 };
 

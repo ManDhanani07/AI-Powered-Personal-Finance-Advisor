@@ -2,9 +2,9 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
 import ProtectedRoute from '../components/routes/ProtectedRoute.jsx';
+import AdminProtectedRoute from '../components/routes/AdminProtectedRoute.jsx';
 import GuestRoute from '../components/routes/GuestRoute.jsx';
 import { ProtectedLayout } from '../layouts/ProtectedLayout.jsx';
-import { PageContainer } from '../components/layout/PageContainer.jsx';
 import { NotFoundScreen } from '../components/common/NotFoundScreen.jsx';
 import { ROUTES } from '../constants/index.js';
 
@@ -33,6 +33,19 @@ import ReportsPage from '../pages/reports/ReportsPage.jsx';
 import AiAdvisorPage from '../pages/ai/AiAdvisorPage.jsx';
 import NotificationsPage from '../pages/notifications/NotificationsPage.jsx';
 
+// Admin Portal Pages
+import AdminLayout from '../pages/admin/AdminLayout.jsx';
+import AdminOverview from '../pages/admin/AdminOverview.jsx';
+import AdminUsers from '../pages/admin/AdminUsers.jsx';
+import AdminTransactions from '../pages/admin/AdminTransactions.jsx';
+import AdminFinancialActivity from '../pages/admin/AdminFinancialActivity.jsx';
+import AdminAiUsage from '../pages/admin/AdminAiUsage.jsx';
+import AdminBudgetsGoals from '../pages/admin/AdminBudgetsGoals.jsx';
+import AdminSystemHealth from '../pages/admin/AdminSystemHealth.jsx';
+import AdminAuditLogs from '../pages/admin/AdminAuditLogs.jsx';
+import AdminReports from '../pages/admin/AdminReports.jsx';
+import AdminSettings from '../pages/admin/AdminSettings.jsx';
+
 // Landing Page
 import LandingPage from '../pages/landing/LandingPage.jsx';
 
@@ -41,6 +54,7 @@ export const AppRoutes = () => {
     <Routes>
       {/* Public Marketing Landing Page */}
       <Route path={ROUTES.HOME} element={<LandingPage />} />
+
       {/* Guest Authentication Routes */}
       <Route
         path={ROUTES.AUTH.LOGIN}
@@ -75,6 +89,28 @@ export const AppRoutes = () => {
         }
       />
 
+      {/* Admin Portal Protected Routes (Restricted strictly to mandhanani536@gmail.com) */}
+      <Route
+        path="/admin"
+        element={
+          <AdminProtectedRoute>
+            <AdminLayout />
+          </AdminProtectedRoute>
+        }
+      >
+        <Route index element={<Navigate to="/admin/overview" replace />} />
+        <Route path="overview" element={<AdminOverview />} />
+        <Route path="users" element={<AdminUsers />} />
+        <Route path="transactions" element={<AdminTransactions />} />
+        <Route path="financial-activity" element={<AdminFinancialActivity />} />
+        <Route path="ai-usage" element={<AdminAiUsage />} />
+        <Route path="budgets-goals" element={<AdminBudgetsGoals />} />
+        <Route path="system-health" element={<AdminSystemHealth />} />
+        <Route path="audit-logs" element={<AdminAuditLogs />} />
+        <Route path="reports" element={<AdminReports />} />
+        <Route path="settings" element={<AdminSettings />} />
+      </Route>
+
       {/* Protected Main Routes */}
       <Route
         element={
@@ -83,35 +119,17 @@ export const AppRoutes = () => {
           </ProtectedRoute>
         }
       >
-        <Route
-          path={ROUTES.DASHBOARD}
-          element={<Dashboard />}
-        />
-        
-        {/* Transaction Ledger Route */}
+        <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
         <Route path={ROUTES.TRANSACTIONS} element={<Transactions />} />
-
-        {/* Category Management Route */}
         <Route path={ROUTES.CATEGORIES} element={<Categories />} />
-
-        {/* Budget Management Route */}
         <Route path={ROUTES.BUDGETS} element={<Budgets />} />
-
-        {/* Savings Goals Route */}
         <Route path={ROUTES.GOALS} element={<Goals />} />
-
-        {/* Financial Health Score Engine Route */}
         <Route path={ROUTES.FINANCIAL_HEALTH} element={<FinancialHealth />} />
-
-        {/* Analytics & Executive Tax Planning Route */}
         <Route path={ROUTES.REPORTS} element={<ReportsPage />} />
-        {/* Predictive Cash Flow & Scenario Engine Route */}
         <Route path={ROUTES.FORECAST} element={<ForecastPage />} />
-        {/* AI Wealth Copilot Workspace Route */}
         <Route path={ROUTES.AI_ADVISOR} element={<AiAdvisorPage />} />
-        {/* Smart Notifications & Alerts Route */}
         <Route path={ROUTES.NOTIFICATIONS} element={<NotificationsPage />} />
-        
+
         {/* Profile & Account Routes */}
         <Route path={ROUTES.PROFILE} element={<Profile />} />
         <Route path={`${ROUTES.PROFILE}/edit`} element={<EditProfile />} />
