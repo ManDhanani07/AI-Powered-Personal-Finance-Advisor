@@ -171,3 +171,11 @@ def get_gemini_service(db: AsyncSession = Depends(get_db)) -> GeminiService:
         health_service=health_svc,
     )
 
+
+from app.services.csv_import_service import CsvImportService
+
+
+def get_csv_import_service(db: AsyncSession = Depends(get_db)) -> CsvImportService:
+    return CsvImportService(db)
+
+

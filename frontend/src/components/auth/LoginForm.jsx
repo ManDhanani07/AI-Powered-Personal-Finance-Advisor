@@ -46,13 +46,6 @@ export const LoginForm = () => {
       }
     } catch (error) {
       const errMsg = error.message || 'Invalid email or password. Please check your credentials.';
-      if (errMsg.includes('EMAIL_NOT_VERIFIED') || errMsg.includes('verify your email')) {
-        toast.info('Please verify your email to activate your account.', { icon: '✉️' });
-        navigate(ROUTES.AUTH.VERIFY_EMAIL, {
-          state: { email: data.email, purpose: 'SIGNUP' },
-        });
-        return;
-      }
       setLoginError(errMsg);
       toast.error(errMsg);
     } finally {

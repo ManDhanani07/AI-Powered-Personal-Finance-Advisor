@@ -12,6 +12,7 @@ import TransactionDetailDrawer from '../../components/transactions/TransactionDe
 import PaginationToolbar from '../../components/transactions/PaginationToolbar.jsx';
 import TransactionForm from '../../components/transactions/TransactionForm.jsx';
 import DeleteTransactionModal from '../../components/transactions/DeleteTransactionModal.jsx';
+import CsvImportModal from '../../components/transactions/CsvImportModal.jsx';
 
 export const Transactions = () => {
   const [transactions, setTransactions] = useState(() => {
@@ -63,6 +64,8 @@ export const Transactions = () => {
 
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deletingTransaction, setDeletingTransaction] = useState(null);
+
+  const [isImportOpen, setIsImportOpen] = useState(false);
 
   // Fetch Categories on mount
   useEffect(() => {
@@ -287,6 +290,7 @@ export const Transactions = () => {
           setPage(1);
         }}
         onExportCSV={handleExportCSV}
+        onImportCSV={() => setIsImportOpen(true)}
         onAddTransaction={handleCreateNew}
       />
 
@@ -385,6 +389,16 @@ export const Transactions = () => {
         onClose={() => setIsDeleteOpen(false)}
         onConfirm={handleDeleteConfirm}
         transaction={deletingTransaction}
+      />
+
+      <CsvImportModal
+        isOpen={isImportOpen}
+        onClose={() => setIsImportOpen(false)}
+        onImportSuccess={() => {
+          loadTransactions();
+          loadSummary();
+        }}
+        categories={categories}
       />
     </div>
   );

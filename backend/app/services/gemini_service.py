@@ -614,9 +614,9 @@ class GeminiService:
         if current_month_key not in monthly_income_map and monthly_income_map:
             current_month_key = list(monthly_income_map.keys())[0]
 
-        this_month_income = monthly_income_map.get(current_month_key, total_income if total_income > 0 else 325000.0)
-        this_month_income_count = monthly_map.get(current_month_key, {}).get("income_count", len(income_txs) if income_txs else 1)
-        this_month_avg_tx = round(this_month_income / (this_month_income_count or 1), 2)
+        this_month_income = monthly_income_map.get(current_month_key, total_income)
+        this_month_income_count = monthly_map.get(current_month_key, {}).get("income_count", len(income_txs))
+        this_month_avg_tx = round(this_month_income / (this_month_income_count or 1), 2) if this_month_income_count > 0 else 0.0
 
         first_day_curr = now_local.replace(day=1)
         prev_month_last_day = first_day_curr - timedelta(days=1)
@@ -627,7 +627,7 @@ class GeminiService:
         last_month_income = monthly_income_map.get(prev_month_key, None)
         last_month_expenses = monthly_expense_map.get(prev_month_key, None)
 
-        this_month_expenses = monthly_expense_map.get(current_month_key, total_expenses if total_expenses > 0 else 304769.76)
+        this_month_expenses = monthly_expense_map.get(current_month_key, total_expenses)
         actual_days_elapsed = max(1, now_local.day)
         exact_daily_spending = round(this_month_expenses / actual_days_elapsed, 2)
 
@@ -636,7 +636,7 @@ class GeminiService:
 
         # Savings Metrics
         this_month_savings = max(0.0, this_month_income - this_month_expenses)
-        this_month_savings_rate = round((this_month_savings / (this_month_income or 1)) * 100, 2) if this_month_income > 0 else 6.22
+        this_month_savings_rate = round((this_month_savings / (this_month_income or 1)) * 100, 2) if this_month_income > 0 else 0.0
         last_month_savings = max(0.0, (last_month_income or 0.0) - (last_month_expenses or 0.0)) if has_prev_month else None
         last_month_savings_rate = round((last_month_savings / (last_month_income or 1)) * 100, 2) if (has_prev_month and last_month_income) else None
         savings_mom_diff = round(this_month_savings - (last_month_savings or 0.0), 2) if has_prev_month else 0.0
@@ -673,26 +673,24 @@ class GeminiService:
             for idx, (c, amt) in enumerate(sorted_cats)
         ]
 
-        top_cat = categories_summary[0] if categories_summary else {"category": "Shopping", "name": "Shopping", "amount": 213000.0, "percentage": 70.58, "transaction_count": 14}
-        second_cat = categories_summary[1] if len(categories_summary) > 1 else {"category": "Education", "name": "Education", "amount": 77999.76, "percentage": 25.85, "transaction_count": 1}
+        top_cat = categories_summary[0] if categories_summary else None
+        second_cat = categories_summary[1] if len(categories_summary) > 1 else None
 
         def find_cat(term):
             return next((c for c in categories_summary if term in c["category"].lower()), None)
 
-        shopping_cat = find_cat("shop") or {"category": "Shopping", "name": "Shopping", "amount": 213000.0, "percentage": 70.58, "transaction_count": 14, "avg_transaction": 15214.28}
-        food_cat = find_cat("food") or find_cat("dine") or {"category": "Food & Dining", "name": "Food & Dining", "amount": 5790.0, "percentage": 1.92, "transaction_count": 8, "avg_transaction": 723.75}
-        transport_cat = find_cat("trans") or find_cat("travel") or {"category": "Transportation", "name": "Transportation", "amount": 500.0, "percentage": 0.17, "transaction_count": 2, "avg_transaction": 250.0}
-        edu_cat = find_cat("edu") or {"category": "Education", "name": "Education", "amount": 77999.76, "percentage": 25.85, "transaction_count": 1, "avg_transaction": 77999.76}
-        util_cat = find_cat("util") or {"category": "Utilities", "name": "Utilities", "amount": 4250.0, "percentage": 1.41, "transaction_count": 3, "avg_transaction": 1416.67}
+        shopping_cat = find_cat("shop")
+        food_cat = find_cat("food") or find_cat("dine")
+        transport_cat = find_cat("trans") or find_cat("travel")
+        edu_cat = find_cat("edu")
+        util_cat = find_cat("util")
 
         # Filtered Transactions from PostgreSQL
         shopping_txs = [t for t in recent_txs if "shop" in t["category"].lower() and t["type"] == "EXPENSE"]
         food_txs = [t for t in recent_txs if ("food" in t["category"].lower() or "dine" in t["category"].lower()) and t["type"] == "EXPENSE"]
         above_10k_txs = [t for t in recent_txs if t["amount"] >= 10000 and t["type"] == "EXPENSE"]
 
-        biggest_exp_tx = max((t for t in recent_txs if t["type"] == "EXPENSE"), key=lambda x: x["amount"], default={
-            "amount": 25000.0, "merchant": "University", "category": "Education", "date_formatted": "11 August 2026", "payment_method": "UPI"
-        })
+        biggest_exp_tx = max((t for t in recent_txs if t["type"] == "EXPENSE"), key=lambda x: x["amount"], default=None)
 
         # 2. Budgets Analytics (Strict Thresholds & Diagnostics)
         budget_res = await self.budget_repo.get_by_user(user_id, page_size=100)
@@ -719,18 +717,10 @@ class GeminiService:
                 "daily_allowance": b_daily,
             })
 
-        if not budgets_summary:
-            budgets_summary = [
-                {"category": "Shopping", "name": "Shopping", "limit": 10000.0, "budget": 10000.0, "spent": 12500.0, "remaining": 0.0, "utilization_pct": 125.0, "percentage": 125.0, "status_label": "🔴 Over", "daily_allowance": 0.0},
-                {"category": "Food & Dining", "name": "Food & Dining", "limit": 10000.0, "budget": 10000.0, "spent": 5790.0, "remaining": 4210.0, "utilization_pct": 57.9, "percentage": 57.9, "status_label": "🟢 Under", "daily_allowance": 300.71},
-                {"category": "Utilities", "name": "Utilities", "limit": 7000.0, "budget": 7000.0, "spent": 4800.0, "remaining": 2200.0, "utilization_pct": 68.6, "percentage": 68.6, "status_label": "🟢 Under", "daily_allowance": 157.14},
-                {"category": "Transportation", "name": "Transportation", "limit": 5000.0, "budget": 5000.0, "spent": 2100.0, "remaining": 2900.0, "utilization_pct": 42.0, "percentage": 42.0, "status_label": "🟢 Under", "daily_allowance": 207.14}
-            ]
-
         total_budget_limit = sum(b["limit"] for b in budgets_summary)
         total_budget_spent = sum(b["spent"] for b in budgets_summary)
         total_budget_remaining = max(0.0, total_budget_limit - total_budget_spent)
-        overall_budget_utilization = round((total_budget_spent / total_budget_limit * 100), 1) if total_budget_limit > 0 else 64.9
+        overall_budget_utilization = round((total_budget_spent / total_budget_limit * 100), 1) if total_budget_limit > 0 else 0.0
 
         # 3. Goals Analytics
         goal_res = await self.goal_repo.get_by_user(user_id, page_size=100)
@@ -752,13 +742,7 @@ class GeminiService:
                 "status": "🟢 On Track",
             })
 
-        if not goals_summary:
-            goals_summary = [
-                {"name": "Emergency Fund", "target": 100000.0, "saved": 65000.0, "remaining": 35000.0, "progress_pct": 65.0, "percentage": 65.0, "monthly_contrib": 8000.0, "status": "🟢 On Track"},
-                {"name": "New Laptop", "target": 80000.0, "saved": 25600.0, "remaining": 54400.0, "progress_pct": 32.0, "percentage": 32.0, "monthly_contrib": 3000.0, "status": "🟡 In Progress"},
-            ]
-
-        primary_goal = goals_summary[0]
+        primary_goal = goals_summary[0] if goals_summary else None
         second_goal = goals_summary[1] if len(goals_summary) > 1 else None
 
         # Time-Specific Analytics (Daily, Weekly, Monthly) dynamically computed from database records
@@ -871,7 +855,7 @@ class GeminiService:
 
         # 5. Forecast Summary
         exp_fc_m1 = round(this_month_expenses * 1.04, 2)
-        inc_fc_m1 = round(this_month_income * 1.032, 2) if this_month_income > 0 else 325000.0
+        inc_fc_m1 = round(this_month_income * 1.032, 2) if this_month_income > 0 else 0.0
         sav_fc_m1 = max(0.0, inc_fc_m1 - exp_fc_m1)
 
         forecast_summary = {
@@ -889,8 +873,11 @@ class GeminiService:
             "expense_range_lower_lakh": round((this_month_expenses * 1.00) / 100000, 2),
             "expense_range_upper_lakh": round((this_month_expenses * 1.08) / 100000, 2),
             "expected_savings": sav_fc_m1,
-            "expected_savings_rate": round((sav_fc_m1 / (inc_fc_m1 or 1)) * 100, 2),
+            "expected_savings_rate": round((sav_fc_m1 / (inc_fc_m1 or 1)) * 100, 2) if inc_fc_m1 > 0 else 0.0,
         }
+
+        shop_amt = shopping_cat["amount"] if shopping_cat else 0.0
+        food_amt = food_cat["amount"] if food_cat else 0.0
 
         return {
             "user_name": user_name,
@@ -910,20 +897,20 @@ class GeminiService:
                 "overall_budget_utilization": overall_budget_utilization,
             },
             "income_analytics": {
-                "this_month_income": this_month_income if this_month_income > 0 else 325000.0,
+                "this_month_income": this_month_income,
                 "last_month_income": last_month_income,
                 "month_over_month_diff": inc_diff,
                 "month_over_month_pct": inc_diff_pct,
-                "avg_monthly_income": this_month_income if this_month_income > 0 else 325000.0,
+                "avg_monthly_income": this_month_income,
                 "income_count": this_month_income_count,
                 "avg_tx": this_month_avg_tx,
                 "highest_month": "August 2026",
-                "highest_month_amount": this_month_income if this_month_income > 0 else 325000.0,
+                "highest_month_amount": this_month_income,
                 "lowest_month": "July 2026",
                 "lowest_month_amount": last_month_income,
             },
             "expense_analytics": {
-                "this_month_expenses": this_month_expenses if this_month_expenses > 0 else 304769.76,
+                "this_month_expenses": this_month_expenses,
                 "last_month_expenses": last_month_expenses,
                 "month_over_month_diff": exp_diff,
                 "month_over_month_pct": exp_diff_pct,
@@ -972,31 +959,31 @@ class GeminiService:
                 "last_month_name": "July 2026",
                 "this_month_name": "August 2026",
                 "last_income": last_month_income,
-                "this_income": this_month_income if this_month_income > 0 else 325000.0,
+                "this_income": this_month_income,
                 "income_diff": inc_diff,
                 "income_pct": inc_diff_pct,
                 "last_expenses": last_month_expenses,
-                "this_expenses": this_month_expenses if this_month_expenses > 0 else 304769.76,
+                "this_expenses": this_month_expenses,
                 "expenses_diff": exp_diff,
                 "expenses_pct": exp_diff_pct,
                 "last_savings": last_month_savings,
-                "this_savings": this_month_savings if this_month_savings > 0 else 20230.24,
+                "this_savings": this_month_savings,
                 "savings_diff": savings_mom_diff,
                 "savings_pct": savings_mom_pct,
                 "last_savings_rate": last_month_savings_rate,
-                "this_savings_rate": this_month_savings_rate if this_month_savings_rate > 0 else 6.22,
+                "this_savings_rate": this_month_savings_rate,
                 "savings_rate_diff_pp": savings_rate_diff_pp,
-                "shopping_vs_food_diff": shopping_cat["amount"] - food_cat["amount"],
-                "shopping_vs_food_ratio": round(shopping_cat["amount"] / (food_cat["amount"] or 1), 1),
+                "shopping_vs_food_diff": shop_amt - food_amt,
+                "shopping_vs_food_ratio": round(shop_amt / (food_amt or 1), 1) if food_amt > 0 else 0.0,
                 "primary_goal": primary_goal,
                 "second_goal": second_goal,
-                "goal_diff_pp": round(primary_goal["progress_pct"] - (second_goal["progress_pct"] if second_goal else 0.0), 1),
+                "goal_diff_pp": round(primary_goal["progress_pct"] - (second_goal["progress_pct"] if second_goal else 0.0), 1) if (primary_goal and second_goal) else 0.0,
             },
             "savings_analytics": {
-                "this_month_savings": this_month_savings if this_month_savings > 0 else 20230.24,
-                "this_month_savings_rate": this_month_savings_rate if this_month_savings_rate > 0 else 6.22,
+                "this_month_savings": this_month_savings,
+                "this_month_savings_rate": this_month_savings_rate,
                 "last_month_savings": last_month_savings,
-                "avg_monthly_savings": this_month_savings if this_month_savings > 0 else 20230.24,
+                "avg_monthly_savings": this_month_savings,
             },
             "budget_analytics": {
                 "budgets": budgets_summary,
@@ -1063,9 +1050,11 @@ class GeminiService:
                         "   - Users may write broken English, bad grammar, incomplete phrases, or informal slang (e.g., 'me save fast how', 'food much high why', 'how much left money', 'can i buy bike decembr').\n"
                         "   - ALWAYS deduce what the user REALLY wants beneath their typos or imperfect grammar.\n"
                         "   - NEVER correct or point out their grammar/spelling errors. Always respond respectfully, warmly, clearly, and directly to their intended question in their language.\n\n"
-                        "3. STRICT DATA ACCURACY:\n"
-                        "   - Never invent or fabricate transactions or alter totals. Use the EXACT numbers from the LIVE CONTEXT (Income, Expenses, Surplus, Category breakdown, Goals, Health Score).\n"
-                        "   - When answering, calculate the exact figures based on the live context provided.\n\n"
+                        "3. STRICT DATA ACCURACY & ZERO-DATA HANDLING (NEVER INVENT DATA):\n"
+                        "   - Never invent, extrapolate, or fabricate transactions, budgets, goals, or alter totals. Use the EXACT numbers from the LIVE CONTEXT.\n"
+                        "   - If the user has 0 budgets in the context (`budgets: []` or `total_budget_limit: 0`), accurately tell the user they have not created any budget envelopes yet. DO NOT claim the system has 'default baseline budgets' or make up numbers.\n"
+                        "   - If the user has 0 goals in the context (`goals: []`), tell the user they have not created any goals yet.\n"
+                        "   - If the user has 0 transactions or 0 income/expenses (`total_income: 0.0, total_expenses: 0.0`), accurately report that their ledger currently has 0 transactions.\n\n"
                         "4. CURRENCY & FORMATTING:\n"
                         "   - Format all amounts cleanly in Indian Rupees (**₹3,25,000.00**).\n"
                         "   - Use bold numbers, bullet points, clean markdown tables, and emojis to make answers easy to read.\n\n"
@@ -1177,83 +1166,83 @@ class GeminiService:
         daily_a = ctx.get("daily_analytics", {})
         weekly_a = ctx.get("weekly_analytics", {})
         
-        inc = float(inc_a.get("this_month_income", ov.get("total_income", 325000.0)))
-        exp = float(exp_a.get("this_month_expenses", ov.get("total_expenses", 304769.76)))
-        surplus = float(sav_a.get("this_month_savings", ov.get("net_surplus", 20230.24)))
-        sav_rate = float(sav_a.get("this_month_savings_rate", ov.get("savings_rate", 6.22)))
+        inc = float(inc_a.get("this_month_income", ov.get("total_income", 0.0)))
+        exp = float(exp_a.get("this_month_expenses", ov.get("total_expenses", 0.0)))
+        surplus = float(sav_a.get("this_month_savings", ov.get("net_surplus", 0.0)))
+        sav_rate = float(sav_a.get("this_month_savings_rate", ov.get("savings_rate", 0.0)))
         user_name = ctx["user_name"]
         categories = ctx.get("categories", [])
         budgets = bud_a.get("budgets", ctx.get("budgets", []))
         goals = goal_a.get("goals", ctx.get("goals", []))
 
-        top_cat = exp_a.get("top_category", {"category": "Shopping", "amount": 213000.0, "percentage": 70.58})
-        second_cat = exp_a.get("second_top_category", categories[1] if len(categories) > 1 else {"category": "Education", "amount": 77999.76, "percentage": 25.85})
-        shopping_cat = exp_a.get("shopping_cat", {"category": "Shopping", "amount": 213000.0, "percentage": 70.58})
-        food_cat = exp_a.get("food_cat", {"category": "Food & Dining", "amount": 5790.0, "percentage": 1.92})
-        edu_cat = exp_a.get("education_cat", {"category": "Education", "amount": 77999.76, "percentage": 25.85})
-        util_cat = exp_a.get("utilities_cat", {"category": "Utilities", "amount": 4250.0, "percentage": 1.41})
-        transport_cat = exp_a.get("transport_cat", {"category": "Transportation", "amount": 500.0, "percentage": 0.17})
-        biggest_exp = exp_a.get("biggest_expense_tx", {"amount": 25000.0, "merchant": "University", "category": "Education", "date_formatted": "11 August 2026", "payment_method": "UPI"})
-        total_budget_limit = float(bud_a.get("total_budget_limit", ov.get("total_budget_limit", sum(b["limit"] for b in budgets) if budgets else 10000.0)))
-        total_budget_spent = float(bud_a.get("total_budget_spent", ov.get("total_budget_spent", sum(b["spent"] for b in budgets) if budgets else 7640.0)))
+        top_cat = exp_a.get("top_category") or (categories[0] if categories else None)
+        second_cat = exp_a.get("second_top_category") or (categories[1] if len(categories) > 1 else None)
+        shopping_cat = exp_a.get("shopping_cat") or {"category": "Shopping", "amount": 0.0, "percentage": 0.0}
+        food_cat = exp_a.get("food_cat") or {"category": "Food & Dining", "amount": 0.0, "percentage": 0.0}
+        edu_cat = exp_a.get("education_cat") or {"category": "Education", "amount": 0.0, "percentage": 0.0}
+        util_cat = exp_a.get("utilities_cat") or {"category": "Utilities", "amount": 0.0, "percentage": 0.0}
+        transport_cat = exp_a.get("transport_cat") or {"category": "Transportation", "amount": 0.0, "percentage": 0.0}
+        biggest_exp = exp_a.get("biggest_expense_tx")
+        total_budget_limit = float(bud_a.get("total_budget_limit", ov.get("total_budget_limit", sum(b["limit"] for b in budgets) if budgets else 0.0)))
+        total_budget_spent = float(bud_a.get("total_budget_spent", ov.get("total_budget_spent", sum(b["spent"] for b in budgets) if budgets else 0.0)))
         total_budget_remaining = max(0.0, total_budget_limit - total_budget_spent)
-        overall_budget_utilization = float(bud_a.get("overall_budget_utilization", ov.get("overall_budget_utilization", round((total_budget_spent / total_budget_limit * 100), 1) if total_budget_limit > 0 else 76.4)))
+        overall_budget_utilization = float(bud_a.get("overall_budget_utilization", ov.get("overall_budget_utilization", round((total_budget_spent / total_budget_limit * 100), 1) if total_budget_limit > 0 else 0.0)))
         over_budgets = [b for b in budgets if float(b.get("utilization_pct", b.get("percentage", 0))) >= 100.0]
         warning_budgets = [b for b in budgets if 70.0 <= float(b.get("utilization_pct", b.get("percentage", 0))) < 100.0]
-        daily_avg = float(exp_a.get("daily_average", daily_a.get("daily_spent", exp / 14)))
+        daily_avg = float(exp_a.get("daily_average", daily_a.get("daily_spent", 0.0)))
 
         # Search items
         shop_txs = srch_a.get("shopping_txs", [])
         food_txs = srch_a.get("food_txs", [])
         above_10k_txs = srch_a.get("above_10k_txs", [])
         amazon_s = srch_a.get("amazon_stat", {"amount": 0.0, "count": 0, "avg": 0.0, "max": 0.0})
-        flipkart_s = srch_a.get("flipkart_stat", {"amount": 86500.0, "count": 2, "avg": 43250.0, "max": 81500.0})
-        zomato_s = srch_a.get("zomato_stat", {"amount": 900.0, "count": 1, "avg": 900.0, "max": 900.0})
-        nike_s = srch_a.get("nike_stat", {"amount": 1500.0, "count": 1, "avg": 1500.0, "max": 1500.0})
-        myntra_s = srch_a.get("myntra_stat", {"amount": 10000.0, "count": 1, "avg": 10000.0, "max": 10000.0})
-        upi_spend = float(srch_a.get("upi_spend", 105899.76))
-        upi_count = int(srch_a.get("upi_count", 11))
-        upi_avg = float(srch_a.get("upi_avg", 9627.25))
-        upi_pct = float(srch_a.get("upi_pct", 41.1))
-        debit_spend = float(srch_a.get("debit_spend", 900.0))
-        debit_count = int(srch_a.get("debit_count", 1))
-        debit_avg = float(srch_a.get("debit_avg", 900.0))
-        debit_pct = float(srch_a.get("debit_pct", 0.35))
-        cash_spend = float(srch_a.get("cash_spend", 83470.0))
-        cash_count = int(srch_a.get("cash_count", 6))
-        cash_avg = float(srch_a.get("cash_avg", 13911.67))
-        cash_pct = float(srch_a.get("cash_pct", 32.4))
-        transfer_spend = float(srch_a.get("transfer_spend", 67500.0))
-        transfer_count = int(srch_a.get("transfer_count", 7))
-        transfer_avg = float(srch_a.get("transfer_avg", 9642.86))
-        transfer_pct = float(srch_a.get("transfer_pct", 26.2))
-        total_tx_count = int(ov.get("transaction_count", len(ctx.get("recent_transactions", [])) or 27))
-        inc_tx_count = int(ov.get("income_transactions_count", 2))
-        exp_tx_count = int(ov.get("expense_transactions_count", 25))
+        flipkart_s = srch_a.get("flipkart_stat", {"amount": 0.0, "count": 0, "avg": 0.0, "max": 0.0})
+        zomato_s = srch_a.get("zomato_stat", {"amount": 0.0, "count": 0, "avg": 0.0, "max": 0.0})
+        nike_s = srch_a.get("nike_stat", {"amount": 0.0, "count": 0, "avg": 0.0, "max": 0.0})
+        myntra_s = srch_a.get("myntra_stat", {"amount": 0.0, "count": 0, "avg": 0.0, "max": 0.0})
+        upi_spend = float(srch_a.get("upi_spend", 0.0))
+        upi_count = int(srch_a.get("upi_count", 0))
+        upi_avg = float(srch_a.get("upi_avg", 0.0))
+        upi_pct = float(srch_a.get("upi_pct", 0.0))
+        debit_spend = float(srch_a.get("debit_spend", 0.0))
+        debit_count = int(srch_a.get("debit_count", 0))
+        debit_avg = float(srch_a.get("debit_avg", 0.0))
+        debit_pct = float(srch_a.get("debit_pct", 0.0))
+        cash_spend = float(srch_a.get("cash_spend", 0.0))
+        cash_count = int(srch_a.get("cash_count", 0))
+        cash_avg = float(srch_a.get("cash_avg", 0.0))
+        cash_pct = float(srch_a.get("cash_pct", 0.0))
+        transfer_spend = float(srch_a.get("transfer_spend", 0.0))
+        transfer_count = int(srch_a.get("transfer_count", 0))
+        transfer_avg = float(srch_a.get("transfer_avg", 0.0))
+        transfer_pct = float(srch_a.get("transfer_pct", 0.0))
+        total_tx_count = int(ov.get("transaction_count", len(ctx.get("recent_transactions", []))))
+        inc_tx_count = int(ov.get("income_transactions_count", 0))
+        exp_tx_count = int(ov.get("expense_transactions_count", 0))
 
         # Comparison items
         c_last_m = comp_a.get("last_month_name", "July")
         c_this_m = comp_a.get("this_month_name", "August")
-        c_last_inc = comp_a.get("last_income", 300000.0)
-        c_this_inc = comp_a.get("this_income", 325000.0)
-        c_inc_pct = comp_a.get("income_pct", 8.3)
-        c_last_exp = comp_a.get("last_expenses", 270000.0)
-        c_this_exp = comp_a.get("this_expenses", 304769.76)
-        c_exp_pct = comp_a.get("expenses_pct", 12.9)
-        c_last_sav = comp_a.get("last_savings", 30000.0)
-        c_this_sav = comp_a.get("this_savings", 20230.24)
-        c_sav_pct = comp_a.get("savings_pct", 32.6)
-        c_last_sav_rate = comp_a.get("last_savings_rate", 10.0)
-        c_this_sav_rate = comp_a.get("this_savings_rate", 6.22)
-        c_sav_pp = comp_a.get("savings_rate_diff_pp", -3.78)
-        c_p_goal = goals[0] if goals else goal_a.get("primary_goal", comp_a.get("primary_goal", {"name": "Emergency Fund", "target": 100000.0, "saved": 33500.0, "remaining": 66500.0, "progress_pct": 33.5}))
-        c_s_goal = goals[1] if len(goals) > 1 else comp_a.get("second_goal", None)
-        p_name = c_p_goal.get("name", "Emergency Fund")
-        p_target = float(c_p_goal.get("target", 100000.0))
-        p_saved = float(c_p_goal.get("saved", c_p_goal.get("current", 33500.0)))
-        p_rem = float(c_p_goal.get("remaining", max(0.0, p_target - p_saved)))
-        p_pct = float(c_p_goal.get("progress_pct", c_p_goal.get("percentage", round((p_saved / p_target * 100), 1) if p_target > 0 else 33.5)))
-        p_target_date = c_p_goal.get("target_date", "31 January 2027")
+        c_last_inc = comp_a.get("last_income", None)
+        c_this_inc = comp_a.get("this_income", inc)
+        c_inc_pct = comp_a.get("income_pct", 0.0)
+        c_last_exp = comp_a.get("last_expenses", None)
+        c_this_exp = comp_a.get("this_expenses", exp)
+        c_exp_pct = comp_a.get("expenses_pct", 0.0)
+        c_last_sav = comp_a.get("last_savings", None)
+        c_this_sav = comp_a.get("this_savings", surplus)
+        c_sav_pct = comp_a.get("savings_pct", 0.0)
+        c_last_sav_rate = comp_a.get("last_savings_rate", None)
+        c_this_sav_rate = comp_a.get("this_savings_rate", sav_rate)
+        c_sav_pp = comp_a.get("savings_rate_diff_pp", 0.0)
+        c_p_goal = goals[0] if goals else None
+        c_s_goal = goals[1] if len(goals) > 1 else None
+        p_name = c_p_goal.get("name", "Goal") if c_p_goal else "None"
+        p_target = float(c_p_goal.get("target", 0.0)) if c_p_goal else 0.0
+        p_saved = float(c_p_goal.get("saved", c_p_goal.get("current", 0.0))) if c_p_goal else 0.0
+        p_rem = float(c_p_goal.get("remaining", max(0.0, p_target - p_saved))) if c_p_goal else 0.0
+        p_pct = float(c_p_goal.get("progress_pct", c_p_goal.get("percentage", round((p_saved / p_target * 100), 1) if p_target > 0 else 0.0))) if c_p_goal else 0.0
+        p_target_date = c_p_goal.get("target_date", "N/A") if c_p_goal else "N/A"
         has_prev_month = comp_a.get("last_income") is not None or inc_a.get("last_month_income") is not None
 
         # =====================================================================
@@ -1768,6 +1757,29 @@ class GeminiService:
             )
 
         # "What percentage of my goal is complete?"
+        # =====================================================================
+        # 5. 🎯 GOAL QUESTIONS (1 to 10)
+        # =====================================================================
+
+        # Check if goals are empty for any goal inquiry
+        if any(k in q_lower for k in ["goal", "emergency fund", "vault", "milestone", "save monthly to reach"]):
+            if not goals:
+                return (
+                    "🎯 **No Savings Goals Found**\n\n"
+                    "You have not created any savings goal vaults yet. Head over to the **Goals** tab to set up target vaults (such as an Emergency Fund, Travel, or New Device) and track your savings progress."
+                )
+
+        # "How much have I saved toward my Emergency Fund?" / "saved for goal"
+        if any(k in q_lower for k in ["saved toward my emergency fund", "emergency fund saved", "saved for my goal", "saved toward my goal", "saved in my goal", "emergency fund balance"]):
+            return (
+                f"🎯 **You have saved ₹{p_saved:,.2f} toward your ₹{p_target:,.2f} {p_name} goal.**\n\n"
+                f"• **Saved**: **₹{p_saved:,.2f}**\n"
+                f"• **Target**: **₹{p_target:,.2f}**\n"
+                f"• **Remaining**: **₹{p_rem:,.2f}**\n\n"
+                f"You have already built **{p_pct}% of your target**, leaving **₹{p_rem:,.2f}** to complete the goal."
+            )
+
+        # "What percentage of my goal is complete?"
         if any(k in q_lower for k in ["percentage of my goal is complete", "goal percentage", "goal is complete", "how much percentage of my goal", "percent of goal"]):
             rem_pct = round(max(0.0, 100.0 - p_pct), 1)
             return (
@@ -1782,7 +1794,8 @@ class GeminiService:
             m_target = int(match_m.group(1)) if match_m else 3
             needed_monthly = round(p_rem / max(1, m_target), 2)
             can_comfortably_afford = surplus >= needed_monthly
-            afford_note = f"Since your current monthly surplus is **₹{surplus:,.2f}**, allocating ₹{needed_monthly:,.2f}/month is **well within your reach**!" if can_comfortably_afford else f"Your current monthly surplus is **₹{surplus:,.2f}**. Trimming discretionary spending in {top_cat['category']} would help free up the required ₹{needed_monthly:,.2f}/month."
+            top_cat_name = top_cat['category'] if top_cat else "discretionary spending"
+            afford_note = f"Since your current monthly surplus is **₹{surplus:,.2f}**, allocating ₹{needed_monthly:,.2f}/month is **well within your reach**!" if can_comfortably_afford else f"Your current monthly surplus is **₹{surplus:,.2f}**. Trimming discretionary spending in {top_cat_name} would help free up the required ₹{needed_monthly:,.2f}/month."
             return (
                 f"⏱️ **To reach your {p_name} target of ₹{p_target:,.2f} in {m_target} month(s):**\n\n"
                 f"• **Current Saved**: **₹{p_saved:,.2f}** ({p_pct}% complete)\n"
@@ -1820,7 +1833,7 @@ class GeminiService:
         # "When will I reach my goal?" / "How many months remaining?"
         if any(k in q_lower for k in ["when will i reach my goal", "months remaining for emergency fund", "how long to reach goal", "months remaining for goal"]):
             monthly_est = max(5000.0, surplus * 0.3)
-            est_months = round(p_rem / monthly_est, 1)
+            est_months = round(p_rem / monthly_est, 1) if monthly_est > 0 else 0
             return (
                 f"⏱️ **At an estimated monthly contribution of ₹{monthly_est:,.2f}/month, you will reach your {p_name} goal in approximately {est_months} months.**\n\n"
                 f"• **Saved**: **₹{p_saved:,.2f}**\n"
@@ -1850,6 +1863,14 @@ class GeminiService:
         # 6. 📊 BUDGET & 7. OVERSPENDING QUESTIONS
         # =====================================================================
 
+        # Zero budget guard for all budget queries
+        if any(k in q_lower for k in ["budget", "envelope", "over budget", "under control", "exceeded budget", "remaining in my"]):
+            if not budgets:
+                return (
+                    "🛡️ **No Active Budget Envelopes Configured**\n\n"
+                    "You have not created any category envelope budgets yet. You can create your first budget in the **Budgets** section to set monthly limits, track spending progress, and receive overspending alerts."
+                )
+
         # "Show all budgets" / "My budgets"
         if any(k in q_lower for k in [
             "show all budgets", "show my budgets", "my budgets", "all budgets", "list budgets",
@@ -1864,14 +1885,15 @@ class GeminiService:
                 f"• **{b['name']}**: **₹{b['spent']:,.2f} / ₹{b['limit']:,.2f}** ({b['utilization_pct']}% used, **₹{b['remaining']:,.2f} remaining**) — {b['status_label']}"
                 for b in budgets
             ])
+            top_cat_tip = f"\n\n💡 **Tip**: Consider setting a budget envelope for **{top_cat['category']}** (currently unbudgeted at ₹{top_cat['amount']:,.2f}) to control your largest monthly outflow." if top_cat else ""
             return (
-                f"🛡️ **Your Active Budget Envelopes — August 2026**\n\n"
+                f"🛡️ **Your Active Budget Envelopes**\n\n"
                 f"• **Total Allocated Budget**: **₹{total_budget_limit:,.2f}**\n"
                 f"• **Total Spent**: **₹{total_budget_spent:,.2f}** ({overall_budget_utilization}% overall utilization)\n"
                 f"• **Total Remaining**: **₹{total_budget_remaining:,.2f}**\n\n"
                 f"### 📋 Active Envelopes:\n"
-                f"{env_lines}\n\n"
-                f"💡 **Tip**: Consider setting a budget envelope for **{top_cat['category']}** (currently unbudgeted at ₹{top_cat['amount']:,.2f}) to control your largest monthly outflow.\n\n"
+                f"{env_lines}"
+                f"{top_cat_tip}\n\n"
                 f"```chart\n{chart_json}\n```"
             )
 

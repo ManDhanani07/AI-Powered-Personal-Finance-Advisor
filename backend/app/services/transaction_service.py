@@ -18,64 +18,481 @@ from app.services.base import BaseService
 from app.exceptions.custom_exceptions import BadRequestException, NotFoundException
 
 MERCHANT_CATEGORY_RULES = {
-    # Food & Dining
+
+    # ============================================================
+    # FOOD & DINING
+    # ============================================================
     "mcdonald": "Food & Dining",
+    "mcd": "Food & Dining",
     "starbucks": "Food & Dining",
     "domino": "Food & Dining",
+    "dominos": "Food & Dining",
     "zomato": "Food & Dining",
     "swiggy": "Food & Dining",
     "kfc": "Food & Dining",
     "burger king": "Food & Dining",
     "subway": "Food & Dining",
+    "pizza hut": "Food & Dining",
+    "pizzahut": "Food & Dining",
+    "taco bell": "Food & Dining",
+    "wendys": "Food & Dining",
+    "dunkin": "Food & Dining",
+    "barista": "Food & Dining",
+    "cafe": "Food & Dining",
+    "coffee": "Food & Dining",
     "restaurant": "Food & Dining",
-    # Transportation
-    "uber": "Transportation",
-    "ola": "Transportation",
-    "rapido": "Transportation",
-    "shell": "Transportation",
-    "fuel": "Transportation",
-    "petrol": "Transportation",
-    "hpcl": "Transportation",
-    "bpcl": "Transportation",
-    # Shopping
+    "dining": "Food & Dining",
+    "food court": "Food & Dining",
+    "food delivery": "Food & Dining",
+    "eatery": "Food & Dining",
+    "bakery": "Food & Dining",
+    "dhaba": "Food & Dining",
+    "hotel restaurant": "Food & Dining",
+    "biryani": "Food & Dining",
+    "chai": "Food & Dining",
+    "tea": "Food & Dining",
+    "juice": "Food & Dining",
+
+    # ============================================================
+    # GROCERIES
+    # ============================================================
+    "zepto": "Groceries",
+    "blinkit": "Groceries",
+    "blink-it": "Groceries",
+    "instamart": "Groceries",
+    "swiggy instamart": "Groceries",
+    "bigbasket": "Groceries",
+    "big basket": "Groceries",
+    "dmart": "Groceries",
+    "d mart": "Groceries",
+    "reliance fresh": "Groceries",
+    "reliance smart": "Groceries",
+    "more supermarket": "Groceries",
+    "spencers": "Groceries",
+    "spencer's": "Groceries",
+    "star bazaar": "Groceries",
+    "supermarket": "Groceries",
+    "grocery": "Groceries",
+    "groceries": "Groceries",
+    "vegetables": "Groceries",
+    "fruits": "Groceries",
+    "milk": "Groceries",
+    "dairy": "Groceries",
+    "ration": "Groceries",
+
+    # ============================================================
+    # SHOPPING
+    # ============================================================
     "amazon": "Shopping",
+    "amazon india": "Shopping",
     "flipkart": "Shopping",
     "myntra": "Shopping",
-    "zara": "Shopping",
-    "shoppers stop": "Shopping",
     "ajio": "Shopping",
-    # Healthcare
+    "meesho": "Shopping",
+    "nykaa": "Shopping",
+    "tata cliq": "Shopping",
+    "tatacliq": "Shopping",
+    "zara": "Shopping",
+    "h&m": "Shopping",
+    "hm": "Shopping",
+    "uniqlo": "Shopping",
+    "nike": "Shopping",
+    "adidas": "Shopping",
+    "puma": "Shopping",
+    "reebok": "Shopping",
+    "skechers": "Shopping",
+    "decathlon": "Shopping",
+    "shoppers stop": "Shopping",
+    "lifestyle": "Shopping",
+    "pantaloons": "Shopping",
+    "westside": "Shopping",
+    "reliance trends": "Shopping",
+    "max fashion": "Shopping",
+    "fashion": "Shopping",
+    "clothing": "Shopping",
+    "apparel": "Shopping",
+    "electronics": "Shopping",
+    "croma": "Shopping",
+    "reliance digital": "Shopping",
+    "vijay sales": "Shopping",
+    "retail": "Shopping",
+
+    # ============================================================
+    # TRANSPORTATION
+    # ============================================================
+    "uber": "Transportation",
+    "uber india": "Transportation",
+    "ola": "Transportation",
+    "ola cabs": "Transportation",
+    "rapido": "Transportation",
+    "namma yatri": "Transportation",
+    "auto": "Transportation",
+    "cab": "Transportation",
+    "taxi": "Transportation",
+    "metro": "Transportation",
+    "delhi metro": "Transportation",
+    "dmrc": "Transportation",
+    "mumbai metro": "Transportation",
+    "bus": "Transportation",
+    "redbus": "Transportation",
+    "red bus": "Transportation",
+    "irctc": "Transportation",
+    "railway": "Transportation",
+    "indian railways": "Transportation",
+    "train": "Transportation",
+    "parking": "Transportation",
+    "toll": "Transportation",
+    "fastag": "Transportation",
+
+    # Fuel
+    "shell": "Transportation",
+    "hpcl": "Transportation",
+    "bpcl": "Transportation",
+    "bharat petroleum": "Transportation",
+    "hindustan petroleum": "Transportation",
+    "indian oil": "Transportation",
+    "iocl": "Transportation",
+    "reliance petrol": "Transportation",
+    "petrol": "Transportation",
+    "diesel": "Transportation",
+    "fuel": "Transportation",
+    "gas station": "Transportation",
+
+    # ============================================================
+    # TRAVEL
+    # ============================================================
+    "makemytrip": "Travel",
+    "make my trip": "Travel",
+    "mmt": "Travel",
+    "goibibo": "Travel",
+    "booking.com": "Travel",
+    "booking": "Travel",
+    "airbnb": "Travel",
+    "agoda": "Travel",
+    "expedia": "Travel",
+    "cleartrip": "Travel",
+    "yatra": "Travel",
+    "easemytrip": "Travel",
+    "ease my trip": "Travel",
+    "ixigo": "Travel",
+    "air india": "Travel",
+    "indigo": "Travel",
+    "vistara": "Travel",
+    "spicejet": "Travel",
+    "akasa": "Travel",
+    "flight": "Travel",
+    "airport": "Travel",
+    "hotel booking": "Travel",
+    "resort": "Travel",
+    "vacation": "Travel",
+    "trip": "Travel",
+
+    # ============================================================
+    # HEALTHCARE
+    # ============================================================
     "apollo": "Healthcare",
+    "apollo pharmacy": "Healthcare",
     "medplus": "Healthcare",
-    "pharmacy": "Healthcare",
+    "pharmeasy": "Healthcare",
+    "pharm easy": "Healthcare",
+    "netmeds": "Healthcare",
+    "1mg": "Healthcare",
+    "tata 1mg": "Healthcare",
+    "practo": "Healthcare",
     "hospital": "Healthcare",
     "clinic": "Healthcare",
     "doctor": "Healthcare",
-    # Utilities
-    "electricity": "Utilities",
-    "water bill": "Utilities",
-    "gas bill": "Utilities",
-    "airtel": "Utilities",
-    "jio": "Utilities",
-    "bescom": "Utilities",
-    # Entertainment
+    "medical": "Healthcare",
+    "pharmacy": "Healthcare",
+    "medicine": "Healthcare",
+    "medicines": "Healthcare",
+    "diagnostic": "Healthcare",
+    "diagnostics": "Healthcare",
+    "pathology": "Healthcare",
+    "healthcare": "Healthcare",
+    "dentist": "Healthcare",
+    "dental": "Healthcare",
+    "eye hospital": "Healthcare",
+    "optical": "Healthcare",
+    "laboratory": "Healthcare",
+
+    # ============================================================
+    # ENTERTAINMENT
+    # ============================================================
     "netflix": "Entertainment",
     "spotify": "Entertainment",
-    "prime": "Entertainment",
-    "cinema": "Entertainment",
+    "youtube premium": "Entertainment",
+    "youtube music": "Entertainment",
+    "prime video": "Entertainment",
+    "hotstar": "Entertainment",
+    "disney": "Entertainment",
+    "disney+": "Entertainment",
+    "jio cinema": "Entertainment",
+    "jiocinema": "Entertainment",
+    "sony liv": "Entertainment",
+    "sonyliv": "Entertainment",
+    "zee5": "Entertainment",
     "pvr": "Entertainment",
+    "inox": "Entertainment",
+    "cinema": "Entertainment",
+    "movie": "Entertainment",
     "bookmyshow": "Entertainment",
-    # Salary / Income
+    "gaming": "Entertainment",
+    "steam": "Entertainment",
+    "playstation": "Entertainment",
+    "xbox": "Entertainment",
+    "nintendo": "Entertainment",
+    "concert": "Entertainment",
+    "event": "Entertainment",
+
+    # ============================================================
+    # SUBSCRIPTIONS
+    # ============================================================
+    "amazon prime": "Subscriptions",
+    "prime membership": "Subscriptions",
+    "netflix subscription": "Subscriptions",
+    "spotify subscription": "Subscriptions",
+    "apple music": "Subscriptions",
+    "apple one": "Subscriptions",
+    "icloud": "Subscriptions",
+    "google one": "Subscriptions",
+    "google storage": "Subscriptions",
+    "chatgpt": "Subscriptions",
+    "openai": "Subscriptions",
+    "claude": "Subscriptions",
+    "gemini": "Subscriptions",
+    "github copilot": "Subscriptions",
+    "adobe": "Subscriptions",
+    "canva": "Subscriptions",
+    "notion": "Subscriptions",
+    "linkedin premium": "Subscriptions",
+    "membership": "Subscriptions",
+    "subscription": "Subscriptions",
+    "monthly subscription": "Subscriptions",
+    "annual subscription": "Subscriptions",
+
+    # ============================================================
+    # EDUCATION
+    # ============================================================
+    "udemy": "Education",
+    "coursera": "Education",
+    "edx": "Education",
+    "skillshare": "Education",
+    "upgrad": "Education",
+    "unacademy": "Education",
+    "byjus": "Education",
+    "physics wallah": "Education",
+    "pw": "Education",
+    "college": "Education",
+    "university": "Education",
+    "school": "Education",
+    "tuition": "Education",
+    "course": "Education",
+    "courses": "Education",
+    "certification": "Education",
+    "exam fee": "Education",
+    "books": "Education",
+    "textbook": "Education",
+    "stationery": "Education",
+
+    # ============================================================
+    # UTILITIES
+    # ============================================================
+    "airtel": "Utilities",
+    "jio": "Utilities",
+    "vi": "Utilities",
+    "vodafone": "Utilities",
+    "bsnl": "Utilities",
+    "electricity": "Utilities",
+    "electricity bill": "Utilities",
+    "water bill": "Utilities",
+    "gas bill": "Utilities",
+    "internet": "Utilities",
+    "broadband": "Utilities",
+    "wifi": "Utilities",
+    "mobile recharge": "Utilities",
+    "recharge": "Utilities",
+    "bescom": "Utilities",
+    "torrent power": "Utilities",
+    "adani electricity": "Utilities",
+    "tata power": "Utilities",
+    "utility": "Utilities",
+
+    # ============================================================
+    # HOUSING & RENT
+    # ============================================================
+    "housing": "Housing & Rent",
+    "house rent": "Rent",
+    "monthly rent": "Rent",
+    "rent payment": "Rent",
+    "landlord": "Rent",
+    "rental": "Rent",
+    "apartment rent": "Rent",
+    "flat rent": "Rent",
+
+    # Housing-related purchases/services
+    "furniture": "Housing & Rent",
+    "home decor": "Housing & Rent",
+    "home depot": "Housing & Rent",
+    "ikea": "Housing & Rent",
+    "plumber": "Housing & Rent",
+    "carpenter": "Housing & Rent",
+    "electrician": "Housing & Rent",
+    "house maintenance": "Housing & Rent",
+    "home maintenance": "Housing & Rent",
+    "repair": "Housing & Rent",
+
+    # ============================================================
+    # INSURANCE
+    # ============================================================
+    "lic": "Insurance",
+    "life insurance": "Insurance",
+    "health insurance": "Insurance",
+    "car insurance": "Insurance",
+    "vehicle insurance": "Insurance",
+    "motor insurance": "Insurance",
+    "insurance premium": "Insurance",
+    "insurance": "Insurance",
+    "policy premium": "Insurance",
+    "policybazaar": "Insurance",
+
+    # ============================================================
+    # EMI
+    # ============================================================
+    "emi": "EMI",
+    "loan emi": "EMI",
+    "home loan": "EMI",
+    "car loan": "EMI",
+    "personal loan": "EMI",
+    "education loan": "EMI",
+    "loan repayment": "EMI",
+    "loan payment": "EMI",
+    "installment": "EMI",
+    "installment payment": "EMI",
+    "credit card emi": "EMI",
+
+    # ============================================================
+    # TAX
+    # ============================================================
+    "income tax": "Tax",
+    "income tax department": "Tax",
+    "itr": "Tax",
+    "gst": "Tax",
+    "tax payment": "Tax",
+    "tax": "Tax",
+    "tds": "Tax",
+    "advance tax": "Tax",
+    "professional tax": "Tax",
+
+    # ============================================================
+    # SALARY
+    # ============================================================
     "salary": "Salary",
-    "tcs": "Salary",
     "payroll": "Salary",
-    "stipend": "Salary",
+    "monthly salary": "Salary",
+    "salary credit": "Salary",
+    "pay": "Salary",
+    "wages": "Salary",
     "bonus": "Salary",
-    # Investments / Income
-    "interest": "Investments",
-    "sbi": "Investments",
-    "dividend": "Investments",
-    "yield": "Investments",
+    "annual bonus": "Salary",
+    "performance bonus": "Salary",
+
+    # ============================================================
+    # FREELANCING
+    # ============================================================
+    "freelance": "Freelancing",
+    "freelancing": "Freelancing",
+    "freelance payment": "Freelancing",
+    "freelancer": "Freelancing",
+    "upwork": "Freelancing",
+    "fiverr": "Freelancing",
+    "freelancer.com": "Freelancing",
+    "toptal": "Freelancing",
+    "client payment": "Freelancing",
+    "project payment": "Freelancing",
+    "contract payment": "Freelancing",
+
+    # ============================================================
+    # BUSINESS
+    # ============================================================
+    "business": "Business",
+    "business expense": "Business",
+    "business payment": "Business",
+    "vendor payment": "Business",
+    "supplier": "Business",
+    "inventory purchase": "Business",
+    "office expense": "Business",
+    "office supplies": "Business",
+    "business income": "Business",
+    "merchant payment": "Business",
+
+    # ============================================================
+    # INVESTMENT
+    # ============================================================
+    "mutual fund": "Investment",
+    "mutual funds": "Investment",
+    "sip": "Investment",
+    "stock": "Investment",
+    "stocks": "Investment",
+    "share": "Investment",
+    "shares": "Investment",
+    "zerodha": "Investment",
+    "groww": "Investment",
+    "upstox": "Investment",
+    "angel one": "Investment",
+    "angelone": "Investment",
+    "icici direct": "Investment",
+    "hdfc securities": "Investment",
+    "demat": "Investment",
+    "brokerage": "Investment",
+    "nse": "Investment",
+    "bse": "Investment",
+    "etf": "Investment",
+    "bond": "Investment",
+    "bonds": "Investment",
+    "dividend": "Investment",
+    "capital gain": "Investment",
+    "interest income": "Investment",
+
+    # ============================================================
+    # CRYPTO STAKING YIELD
+    # ============================================================
+    "crypto staking": "Crypto Staking Yield",
+    "staking": "Crypto Staking Yield",
+    "staking reward": "Crypto Staking Yield",
+    "staking rewards": "Crypto Staking Yield",
+    "crypto reward": "Crypto Staking Yield",
+    "crypto yield": "Crypto Staking Yield",
+    "ethereum staking": "Crypto Staking Yield",
+    "eth staking": "Crypto Staking Yield",
+    "solana staking": "Crypto Staking Yield",
+    "sol staking": "Crypto Staking Yield",
+    "coinbase staking": "Crypto Staking Yield",
+    "binance staking": "Crypto Staking Yield",
+    "kraken staking": "Crypto Staking Yield",
+
+    # ============================================================
+    # SAVINGS
+    # ============================================================
+    "savings": "Savings",
+    "savings transfer": "Savings",
+    "savings deposit": "Savings",
+    "goal deposit": "Savings",
+    "goal vault": "Savings",
+    "emergency fund": "Savings",
+    "recurring deposit": "Savings",
+    "rd": "Savings",
+    "fixed deposit": "Savings",
+    "fd": "Savings",
+
+    # ============================================================
+    # OTHER
+    # ============================================================
+    "cash withdrawal": "Other",
+    "atm withdrawal": "Other",
+    "cash deposit": "Other",
+    "miscellaneous": "Other",
+    "unknown": "Other",
 }
 
 

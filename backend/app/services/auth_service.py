@@ -300,24 +300,6 @@ class AuthService:
             attempts_remaining = MAX_FAILED_LOGIN_ATTEMPTS - failed_attempts
             raise UnauthorizedException(f"Invalid email or password. {attempts_remaining} attempt(s) remaining.")
 
-        # Enforce email verification on login for email-registered accounts
-        if not user.email_verified:
-            # Resend OTP if needed
-            otp = generate_numeric_otp(6)
-            hashed_otp = hash_otp(otp)
-            expires_at = now + timedelta(minutes=OTP_EXPIRY_MINUTES)
-            if self.email_verification_repository:
-                await self.email_verification_repository.invalidate_pending_otps(email, "SIGNUP")
-                await self.email_verification_repository.create_verification(
-                    email=email,
-                    otp_hash=hashed_otp,
-                    purpose="SIGNUP",
-                    expires_at=expires_at,
-                    user_id=user.id,
-                )
-            asyncio.create_task(email_service.send_verification_otp(email, user.first_name, otp))
-            raise ForbiddenException("EMAIL_NOT_VERIFIED: Please verify your email with the 6-digit OTP code sent to your inbox.")
-
         # Successful Login - Generate Tokens
         access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         refresh_token_expires = (
@@ -327,8 +309,11 @@ class AuthService:
         access_token = create_access_token(subject=user.id, expires_delta=access_token_expires)
         refresh_token = create_refresh_token(subject=user.id, expires_delta=refresh_token_expires)
 
-        # Update User Security Status
+        # Update User Security Status (auto-mark verified on successful credentials sign in)
         await self.user_repository.update(user.id, {
+            "is_verified": True,
+            "email_verified": True,
+            "is_active": True,
             "failed_login_attempts": 0,
             "account_locked": False,
             "lock_until": None,

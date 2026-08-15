@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Search, Download, X, Plus, ChevronDown } from 'lucide-react';
+import { Search, Download, Upload, X, Plus, ChevronDown } from 'lucide-react';
 
 const SelectFilter = ({ value, onChange, children, minWidth = '140px' }) => (
   <div className="relative" style={{ minWidth }}>
@@ -27,6 +27,7 @@ export const HeaderControlBar = ({
   hasActiveFilters,
   onClearFilters,
   onExportCSV,
+  onImportCSV,
   onAddTransaction,
 }) => {
   const searchInputRef = useRef(null);
@@ -122,6 +123,18 @@ export const HeaderControlBar = ({
 
         {/* Divider */}
         <div className="h-6 w-px bg-zinc-800 hidden sm:block" />
+
+        {/* Import CSV */}
+        {onImportCSV && (
+          <button
+            onClick={onImportCSV}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-emerald-400 hover:text-emerald-300 text-xs font-medium transition-colors cursor-pointer"
+            title="Import transactions from bank CSV statement"
+          >
+            <Upload className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Import CSV</span>
+          </button>
+        )}
 
         {/* Export CSV */}
         <button

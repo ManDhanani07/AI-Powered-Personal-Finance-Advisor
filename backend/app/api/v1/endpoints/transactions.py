@@ -1,16 +1,14 @@
-"""
-Transaction Management REST API Endpoints.
-"""
-
+import json
 from typing import Optional, List
 from uuid import UUID
 from datetime import datetime
 from decimal import Decimal
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, status, UploadFile, File, Form, Response
 
 from app.dependencies.auth import get_current_user
-from app.dependencies.service import get_transaction_service
+from app.dependencies.service import get_transaction_service, get_csv_import_service
 from app.services.transaction_service import TransactionService
+from app.services.csv_import_service import CsvImportService
 from app.models.user import User
 from app.schemas.base import APIResponse, PaginatedResponse
 from app.schemas.transaction import (
@@ -18,6 +16,11 @@ from app.schemas.transaction import (
     TransactionUpdateRequest,
     TransactionResponse,
     TransactionSummaryResponse,
+)
+from app.schemas.csv_import import (
+    CsvPreviewResponse,
+    CsvConfirmImportRequest,
+    CsvConfirmImportResponse,
 )
 
 router = APIRouter(prefix="/transactions", tags=["Transactions"])
@@ -273,4 +276,99 @@ async def seed_transactions(
         message=f"Successfully seeded {len(seeded)} sample ledger transactions into PostgreSQL",
         data={"seeded_count": len(seeded)},
     )
+
+
+@router.post(
+    "/import-csv/preview",
+    response_model=APIResponse[CsvPreviewResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Upload and preview CSV transactions with auto-column mapping and duplicate detection",
+)
+async def preview_csv_import(
+    file: UploadFile = File(..., description="CSV file with transaction records"),
+    default_account_type: str = Form("SAVINGS"),
+    default_payment_method: str = Form("UPI"),
+    column_mapping: Optional[str] = Form(None, description="Optional JSON string of column mapping overrides"),
+    current_user: User = Depends(get_current_user),
+    csv_service: CsvImportService = Depends(get_csv_import_service),
+):
+    if not file.filename or not file.filename.lower().endswith((".csv", ".txt")):
+        return APIResponse(
+            success=False,
+            message="Invalid file format. Please upload a standard .csv file.",
+            data=None,
+        )
+
+    file_bytes = await file.read()
+    if not file_bytes:
+        return APIResponse(
+            success=False,
+            message="Uploaded CSV file is empty. Please select a valid file.",
+            data=None,
+        )
+
+    mapping_overrides = None
+    if column_mapping:
+        try:
+            mapping_overrides = json.loads(column_mapping)
+        except Exception:
+            pass
+
+    preview = await csv_service.parse_and_preview_csv(
+        file_bytes=file_bytes,
+        user_id=current_user.id,
+        column_mapping_overrides=mapping_overrides,
+        default_account_type=default_account_type,
+        default_payment_method=default_payment_method,
+    )
+
+    return APIResponse(
+        success=True,
+        message=f"CSV parsed successfully: {preview.summary.valid_rows} valid transactions detected",
+        data=preview,
+    )
+
+
+@router.post(
+    "/import-csv/confirm",
+    response_model=APIResponse[CsvConfirmImportResponse],
+    status_code=status.HTTP_201_CREATED,
+    summary="Confirm and execute batch import of approved transactions into PostgreSQL",
+)
+async def confirm_csv_import(
+    payload: CsvConfirmImportRequest,
+    current_user: User = Depends(get_current_user),
+    csv_service: CsvImportService = Depends(get_csv_import_service),
+):
+    result = await csv_service.execute_batch_import(
+        user_id=current_user.id,
+        transactions_to_import=payload.transactions,
+        skip_duplicates=payload.skip_duplicates,
+        default_account_type=payload.default_account_type or "SAVINGS",
+        default_payment_method=payload.default_payment_method or "UPI",
+    )
+
+    return APIResponse(
+        success=True,
+        message=result.message,
+        data=result,
+    )
+
+
+@router.get(
+    "/import-csv/sample",
+    status_code=status.HTTP_200_OK,
+    summary="Download sample CSV template for transaction imports",
+)
+async def download_sample_csv():
+    sample_csv = CsvImportService.generate_sample_csv()
+    return Response(
+        content=sample_csv,
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": 'attachment; filename="sample_transactions.csv"',
+            "Content-Type": "text/csv; charset=utf-8",
+        },
+    )
+
 

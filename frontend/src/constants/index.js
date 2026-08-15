@@ -42,6 +42,13 @@ export const API_URLS = {
     PROFILE: '/user/profile',
     SETTINGS: '/user/settings',
   },
+  TRANSACTIONS: {
+    BASE: '/transactions',
+    SUMMARY: '/transactions/summary',
+    IMPORT_PREVIEW: '/transactions/import-csv/preview',
+    IMPORT_CONFIRM: '/transactions/import-csv/confirm',
+    IMPORT_SAMPLE: '/transactions/import-csv/sample',
+  },
 };
 
 export const STORAGE_KEYS = {
