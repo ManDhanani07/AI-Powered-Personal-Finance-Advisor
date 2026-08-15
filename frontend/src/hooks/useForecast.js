@@ -10,28 +10,14 @@ import forecastService from '../services/forecastService.js';
 export const useForecast = (initialPeriod = 90) => {
   const [periodDays, setPeriodDays] = useState(initialPeriod);
   const [selectedMetric, setSelectedMetric] = useState('ALL'); // 'ALL' | 'EXPENSE' | 'INCOME' | 'SAVINGS' | 'BALANCE'
-  const [summaryData, setSummaryData] = useState(() => {
-    try {
-      const cached = sessionStorage.getItem('forecast_cache_data');
-      return cached ? JSON.parse(cached) : null;
-    } catch {
-      return null;
-    }
-  });
-
-  const [loading, setLoading] = useState(() => {
-    try {
-      return !sessionStorage.getItem('forecast_cache_data');
-    } catch {
-      return true;
-    }
-  });
+  const [summaryData, setSummaryData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
 
   const fetchForecast = useCallback(async (silent = false) => {
-    if (!silent && !sessionStorage.getItem('forecast_cache_data')) setLoading(true);
+    if (!silent) setLoading(true);
     else setRefreshing(true);
 
     try {
@@ -40,7 +26,6 @@ export const useForecast = (initialPeriod = 90) => {
 
       if (payload) {
         setSummaryData(payload);
-        sessionStorage.setItem('forecast_cache_data', JSON.stringify(payload));
         setError(null);
       } else {
         setError('No forecast data available');

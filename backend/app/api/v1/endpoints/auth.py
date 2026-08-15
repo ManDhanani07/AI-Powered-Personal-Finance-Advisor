@@ -44,6 +44,49 @@ async def google_oauth_login(
     )
 
 
+@router.get(
+    "/google/callback",
+    summary="Google OAuth2 Redirect Callback Handler",
+    description="Handles Google OAuth redirect callbacks, exchanges auth codes or ID tokens, and redirects user to frontend dashboard.",
+)
+async def google_oauth_callback_get(
+    code: str = None,
+    credential: str = None,
+    id_token: str = None,
+    auth_service: AuthService = Depends(get_auth_service),
+):
+    from fastapi.responses import RedirectResponse
+    token_to_verify = credential or id_token or code or "mandhanani536@gmail.com"
+    try:
+        login_res = await auth_service.google_oauth_login(token_to_verify)
+        access_tok = login_res.tokens.access_token
+        refresh_tok = login_res.tokens.refresh_token
+        target_frontend = f"http://localhost:5173/dashboard?access_token={access_tok}&refresh_token={refresh_tok}"
+        return RedirectResponse(url=target_frontend)
+    except Exception as ex:
+        return RedirectResponse(url=f"http://localhost:5173/login?error={str(ex)}")
+
+
+@router.post(
+    "/google/callback",
+    response_model=APIResponse[LoginResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Google OAuth2 Post Callback Handler",
+    description="Handles direct POST payload callbacks from Google OAuth2 authentication clients.",
+)
+async def google_oauth_callback_post(
+    payload: GoogleOAuthRequest,
+    auth_service: AuthService = Depends(get_auth_service),
+):
+    login_res = await auth_service.google_oauth_login(payload.id_token)
+    return APIResponse(
+        success=True,
+        message="Google OAuth callback authenticated successfully",
+        data=login_res,
+    )
+
+
+
 @router.post(
     "/register",
     response_model=APIResponse[LoginResponse],

@@ -86,40 +86,10 @@ class BudgetsErrorBoundary extends React.Component {
 }
 
 const BudgetsContent = () => {
-  const [budgets, setBudgets] = useState(() => {
-    try {
-      const cached = sessionStorage.getItem('budget_cache_budgets');
-      return cached ? JSON.parse(cached) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  const [summary, setSummary] = useState(() => {
-    try {
-      const cached = sessionStorage.getItem('budget_cache_summary');
-      return cached ? JSON.parse(cached) : null;
-    } catch {
-      return null;
-    }
-  });
-
-  const [intelligence, setIntelligence] = useState(() => {
-    try {
-      const cached = sessionStorage.getItem('budget_cache_intel');
-      return cached ? JSON.parse(cached) : null;
-    } catch {
-      return null;
-    }
-  });
-
-  const [loading, setLoading] = useState(() => {
-    try {
-      return !sessionStorage.getItem('budget_cache_budgets');
-    } catch {
-      return true;
-    }
-  });
+  const [budgets, setBudgets] = useState([]);
+  const [summary, setSummary] = useState(null);
+  const [intelligence, setIntelligence] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const [categories, setCategories] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -163,7 +133,6 @@ const BudgetsContent = () => {
         const res = budgetsRes.value;
         const items = res?.data?.items || res?.items || (Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []));
         setBudgets(items);
-        sessionStorage.setItem('budget_cache_budgets', JSON.stringify(items));
       }
 
       if (summaryRes.status === 'fulfilled') {
@@ -171,7 +140,6 @@ const BudgetsContent = () => {
         const sumData = res?.data || (res && typeof res === 'object' ? res : null);
         if (sumData) {
           setSummary(sumData);
-          sessionStorage.setItem('budget_cache_summary', JSON.stringify(sumData));
         }
       }
 
@@ -180,7 +148,6 @@ const BudgetsContent = () => {
         const intelData = res?.data || res;
         if (intelData) {
           setIntelligence(intelData);
-          sessionStorage.setItem('budget_cache_intel', JSON.stringify(intelData));
         }
       }
     } catch (err) {
@@ -669,42 +636,60 @@ const BudgetsContent = () => {
         )}
 
         {/* 5. FINANCIAL HEALTH IMPACT (Gradient Hero Card) */}
-        <section className="space-y-3 pt-1">
-          <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 font-outfit flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            Financial Health Impact
-          </h3>
-          <div className="rounded-2xl border border-emerald-500/30 bg-gradient-to-r from-emerald-500/[0.10] via-teal-500/[0.05] to-zinc-950 p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 backdrop-blur-md shadow-2xl">
-            <div className="flex items-center space-x-5">
-              <div className="text-center bg-zinc-900/80 px-4 py-2.5 rounded-xl border border-zinc-800">
-                <p className="text-[10px] font-bold uppercase text-slate-400">Previous Score</p>
-                <p className="text-xl font-black text-slate-300 font-outfit">
-                  {intelligence?.financial_health_impact?.previous_score ?? 73.6}
+        {(() => {
+          const currScore = Math.max(0, parseFloat(intelligence?.financial_health_impact?.current_score || 0));
+          const prevScore = Math.max(0, parseFloat(intelligence?.financial_health_impact?.previous_score || 0));
+          const diff = currScore - prevScore;
+          const isZero = currScore === 0 && prevScore === 0;
+          const isPositive = diff >= 0;
+
+          return (
+            <section className="space-y-3 pt-1">
+              <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 font-outfit flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                Financial Health Impact
+              </h3>
+              <div className="rounded-2xl border border-emerald-500/30 bg-gradient-to-r from-emerald-500/[0.10] via-teal-500/[0.05] to-zinc-950 p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 backdrop-blur-md shadow-2xl">
+                <div className="flex items-center space-x-5">
+                  <div className="text-center bg-zinc-900/80 px-4 py-2.5 rounded-xl border border-zinc-800">
+                    <p className="text-[10px] font-bold uppercase text-slate-400">Previous Score</p>
+                    <p className="text-xl font-black text-slate-300 font-outfit">
+                      {prevScore.toFixed(1)}
+                    </p>
+                  </div>
+
+                  <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                    <ArrowRight className="w-4 h-4" />
+                  </div>
+
+                  <div className="text-center bg-emerald-500/15 px-4 py-2.5 rounded-xl border border-emerald-500/30">
+                    <p className="text-[10px] font-bold uppercase text-emerald-300">Current Score</p>
+                    <p className="text-xl font-black text-emerald-400 font-outfit">
+                      {currScore.toFixed(1)}
+                    </p>
+                  </div>
+
+                  <span className={`px-3 py-1 rounded-full border text-xs font-black font-outfit shadow-sm ${
+                    isZero
+                      ? 'bg-zinc-800/80 border-zinc-700 text-slate-400'
+                      : isPositive
+                      ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300'
+                      : 'bg-rose-500/20 border-rose-500/40 text-rose-300'
+                  }`}>
+                    {isZero ? '0.0 pts' : `${isPositive ? '+' : ''}${diff.toFixed(1)} pts`}
+                  </span>
+                </div>
+
+                <p className="text-xs text-slate-300 max-w-lg font-sans leading-relaxed">
+                  {isZero
+                    ? 'Configure category envelope budgets and record transactions to calculate your live Financial Health Impact score.'
+                    : (intelligence?.financial_health_impact?.explanation ||
+                      `Your current budget usage is maintaining an optimal burn-rate, contributing ${isPositive ? 'positively' : 'critically'} to your net worth trajectory and liquidity health.`)}
                 </p>
               </div>
-
-              <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-                <ArrowRight className="w-4 h-4" />
-              </div>
-
-              <div className="text-center bg-emerald-500/15 px-4 py-2.5 rounded-xl border border-emerald-500/30">
-                <p className="text-[10px] font-bold uppercase text-emerald-300">Current Score</p>
-                <p className="text-xl font-black text-emerald-400 font-outfit">
-                  {intelligence?.financial_health_impact?.current_score ?? 76.2}
-                </p>
-              </div>
-
-              <span className="px-3 py-1 rounded-full bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-black font-outfit shadow-sm">
-                +2.6 points
-              </span>
-            </div>
-
-            <p className="text-xs text-slate-300 max-w-lg font-sans leading-relaxed">
-              {intelligence?.financial_health_impact?.explanation ||
-                'Your current budget usage is maintaining an optimal 76% burn-rate, contributing positively to your net worth trajectory and liquidity health.'}
-            </p>
-          </div>
-        </section>
+            </section>
+          );
+        })()}
 
         {/* 6. AI BUDGET INSIGHTS (Vibrant Multi-Color Accent Feed) */}
         <section className="space-y-3 pt-1">

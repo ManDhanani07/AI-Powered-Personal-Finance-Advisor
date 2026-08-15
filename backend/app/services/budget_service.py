@@ -496,8 +496,8 @@ class BudgetService(BaseService[BudgetRepository]):
         }
 
         # 5. Financial Health Score Impact (Dynamic Single Source of Truth)
-        curr_health_score = 53.4
-        prev_health_score = 64.1
+        curr_health_score = 0.0
+        prev_health_score = 0.0
         health_reasons = []
 
         if self.health_service:
@@ -513,8 +513,10 @@ class BudgetService(BaseService[BudgetRepository]):
                         history_records = await self.health_repo.get_history(user_id, limit=2)
                         if len(history_records) > 1:
                             prev_health_score = float(history_records[1].health_score)
+                        elif curr_health_score > 0:
+                            prev_health_score = round(max(0.0, curr_health_score + (10.7 if is_exceeded else -4.2)), 1)
                         else:
-                            prev_health_score = round(curr_health_score + (10.7 if is_exceeded else -4.2), 1)
+                            prev_health_score = 0.0
             except Exception as ex:
                 logger.warning(f"Financial health service calculation error in budget service: {ex}")
         elif self.health_repo:
@@ -525,8 +527,10 @@ class BudgetService(BaseService[BudgetRepository]):
                     history_records = await self.health_repo.get_history(user_id, limit=2)
                     if len(history_records) > 1:
                         prev_health_score = float(history_records[1].health_score)
+                    elif curr_health_score > 0:
+                        prev_health_score = round(max(0.0, curr_health_score + (10.7 if is_exceeded else -4.2)), 1)
                     else:
-                        prev_health_score = round(curr_health_score + (10.7 if is_exceeded else -4.2), 1)
+                        prev_health_score = 0.0
             except Exception as ex:
                 logger.warning(f"Financial health repo lookup error in budget service: {ex}")
 

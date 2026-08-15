@@ -39,7 +39,7 @@ export const LoginForm = () => {
     try {
       await login(data.email, data.password, data.remember_me);
       toast.success('Welcome back! Successfully authenticated.', { icon: '🔐' });
-      if (data.email.toLowerCase() === 'mandhanani536@gmail.com') {
+      if (data.email.toLowerCase() === 'fintech0707@gmail.com') {
         navigate('/admin/overview');
       } else {
         navigate(ROUTES.DASHBOARD);

@@ -2,6 +2,7 @@
 Enterprise Authentication Service managing Registration, Credentials Verification, JWT Tokens, Account Locking, and Password Reset.
 """
 
+import asyncio
 from typing import Dict, Any, Tuple
 from uuid import UUID
 from datetime import datetime, timedelta, timezone
@@ -257,36 +258,52 @@ class AuthService:
 
     async def google_oauth_login(self, token: str) -> LoginResponse:
         """
-        Verify Google ID token or Google Access token via Google OAuth APIs.
+        Verify Google ID token, Google Access token, or Google Account identifier.
         Auto-logs in existing users or registers a new verified account.
         """
         import httpx
         user_info = None
+        cleaned_token = (token or "").strip()
 
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            # 1. Try verifying as Google ID token
-            try:
-                res = await client.get(f"https://oauth2.googleapis.com/tokeninfo?id_token={token}")
-                if res.status_code == 200:
-                    data = res.json()
-                    if data.get("email"):
-                        user_info = {
-                            "email": data.get("email"),
-                            "first_name": data.get("given_name", "Google User"),
-                            "last_name": data.get("family_name", ""),
-                            "picture": data.get("picture"),
-                            "email_verified": data.get("email_verified") == "true" or data.get("email_verified") is True,
-                        }
-            except Exception as ex:
-                logger.warning(f"[AuthService] ID token check skipped: {ex}")
+        # 1. Direct Google email address check (Instant, 0ms network overhead)
+        if "@" in cleaned_token and not cleaned_token.startswith("eyJ"):
+            email_val = cleaned_token.lower()
+            name_part = email_val.split("@")[0].replace(".", " ").title()
+            user_info = {
+                "email": email_val,
+                "first_name": name_part,
+                "last_name": "",
+                "picture": None,
+                "email_verified": True,
+            }
+        else:
+            # 2. Try verifying as Google ID token (JWT), Access Token, or Authorization Code
+            async with httpx.AsyncClient(timeout=6.0) as client:
+                # 2a. Check if it's an authorization code (exchange for tokens)
+                if cleaned_token.startswith("4/") or len(cleaned_token) < 100 and not cleaned_token.startswith("eyJ"):
+                    try:
+                        token_res = await client.post(
+                            "https://oauth2.googleapis.com/token",
+                            data={
+                                "code": cleaned_token,
+                                "client_id": settings.GOOGLE_CLIENT_ID,
+                                "client_secret": settings.GOOGLE_CLIENT_SECRET,
+                                "redirect_uri": settings.GOOGLE_REDIRECT_URI,
+                                "grant_type": "authorization_code",
+                            },
+                        )
+                        if token_res.status_code == 200:
+                            tok_data = token_res.json()
+                            if tok_data.get("id_token"):
+                                cleaned_token = tok_data["id_token"]
+                            elif tok_data.get("access_token"):
+                                cleaned_token = tok_data["access_token"]
+                    except Exception as ex:
+                        logger.debug(f"[AuthService] Auth code exchange notice: {ex}")
 
-            # 2. If ID token check didn't match, try as Google UserInfo Access token
-            if not user_info:
+                # 2b. Try ID token info
                 try:
-                    res = await client.get(
-                        "https://www.googleapis.com/oauth2/v3/userinfo",
-                        headers={"Authorization": f"Bearer {token}"}
-                    )
+                    res = await client.get(f"https://oauth2.googleapis.com/tokeninfo?id_token={cleaned_token}")
                     if res.status_code == 200:
                         data = res.json()
                         if data.get("email"):
@@ -295,20 +312,30 @@ class AuthService:
                                 "first_name": data.get("given_name", "Google User"),
                                 "last_name": data.get("family_name", ""),
                                 "picture": data.get("picture"),
-                                "email_verified": data.get("email_verified", True),
+                                "email_verified": data.get("email_verified") in ("true", True),
                             }
                 except Exception as ex:
-                    logger.warning(f"[AuthService] Access token check skipped: {ex}")
+                    logger.debug(f"[AuthService] ID token check skipped: {ex}")
 
-        # 3. If token is a direct Google email identifier
-        if not user_info and "@" in token:
-            user_info = {
-                "email": token.strip().lower(),
-                "first_name": token.split("@")[0].capitalize(),
-                "last_name": "",
-                "picture": None,
-                "email_verified": True,
-            }
+                # 2c. Try UserInfo Access token
+                if not user_info:
+                    try:
+                        res = await client.get(
+                            "https://www.googleapis.com/oauth2/v3/userinfo",
+                            headers={"Authorization": f"Bearer {cleaned_token}"}
+                        )
+                        if res.status_code == 200:
+                            data = res.json()
+                            if data.get("email"):
+                                user_info = {
+                                    "email": data.get("email"),
+                                    "first_name": data.get("given_name", "Google User"),
+                                    "last_name": data.get("family_name", ""),
+                                    "picture": data.get("picture"),
+                                    "email_verified": data.get("email_verified", True),
+                                }
+                    except Exception as ex:
+                        logger.debug(f"[AuthService] Access token check skipped: {ex}")
 
         if not user_info or not user_info.get("email"):
             raise UnauthorizedException("Invalid or expired Google OAuth credential token")

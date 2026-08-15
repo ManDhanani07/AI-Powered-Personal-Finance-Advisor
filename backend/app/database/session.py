@@ -23,7 +23,7 @@ class Base(DeclarativeBase):
 # Create Async Engine
 engine: AsyncEngine = create_async_engine(
     settings.DATABASE_URL,
-    echo=settings.DEBUG and settings.is_development,
+    echo=False,
     pool_size=settings.DB_POOL_SIZE,
     max_overflow=settings.DB_MAX_OVERFLOW,
     pool_recycle=settings.DB_POOL_RECYCLE,

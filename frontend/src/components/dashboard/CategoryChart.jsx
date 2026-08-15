@@ -60,11 +60,18 @@ export const CategoryChart = memo(({ charts, loading, onSeeded }) => {
 
   return (
     <div className="space-y-4 font-sans">
-      <div>
-        <h3 className="text-base font-bold text-white font-outfit">
-          Category Spending
-        </h3>
-        <p className="text-xs text-slate-400">Expense distribution across category envelopes</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-base font-bold text-white font-outfit">
+            Category Spending
+          </h3>
+          <p className="text-xs text-zinc-400">Expense distribution across category envelopes</p>
+        </div>
+        {data.length > 0 && (
+          <span className="text-xs font-mono font-bold text-zinc-400 bg-zinc-900 border border-zinc-800 px-2.5 py-1 rounded-lg">
+            {data.length} Categories
+          </span>
+        )}
       </div>
 
       {data.length === 0 ? (
@@ -72,7 +79,7 @@ export const CategoryChart = memo(({ charts, loading, onSeeded }) => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
           {/* Main Visual Donut Graph */}
-          <div className="md:col-span-6 relative flex items-center justify-center min-h-[250px]">
+          <div className="md:col-span-5 relative flex items-center justify-center min-h-[250px]">
             <ResponsiveContainer width="100%" height={260}>
               <PieChart>
                 <Pie
@@ -86,7 +93,7 @@ export const CategoryChart = memo(({ charts, loading, onSeeded }) => {
                   dataKey="value"
                   onMouseEnter={(_, index) => setActiveIndex(index)}
                   onMouseLeave={() => setActiveIndex(null)}
-                  animationDuration={1200}
+                  animationDuration={1000}
                 >
                   {data.map((entry, index) => (
                     <Cell
@@ -109,18 +116,15 @@ export const CategoryChart = memo(({ charts, loading, onSeeded }) => {
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center px-2">
               <span
                 className="text-[10px] font-extrabold uppercase tracking-widest font-outfit truncate max-w-[130px] transition-colors"
-                style={{ color: activeItem ? activeItem.fill : '#94A3B8' }}
+                style={{ color: activeItem ? activeItem.fill : '#A1A1AA' }}
               >
                 {activeItem ? activeItem.name : 'Total Spending'}
               </span>
-              <span
-                className="text-base font-black font-mono my-0.5 transition-colors"
-                style={{ color: activeItem ? activeItem.fill : '#FFFFFF' }}
-              >
+              <span className="text-base font-black font-mono my-0.5 text-white">
                 {formatCurrency(activeItem ? activeItem.value : totalValue)}
               </span>
               <span
-                className="text-[10px] font-bold font-outfit px-2 py-0.5 rounded-full transition-all"
+                className="text-[10px] font-bold font-mono px-2 py-0.5 rounded-full transition-all"
                 style={{
                   color: activeItem ? '#FFFFFF' : '#10B981',
                   backgroundColor: activeItem ? activeItem.fill : 'rgba(16, 185, 129, 0.15)',
@@ -133,8 +137,8 @@ export const CategoryChart = memo(({ charts, loading, onSeeded }) => {
             </div>
           </div>
 
-          {/* Interactive Category Legend */}
-          <div className="md:col-span-6 space-y-2 max-h-[250px] overflow-y-auto custom-scrollbar pr-1">
+          {/* Clean Executive Category Breakdown Rows (No Underline Progress) */}
+          <div className="md:col-span-7 space-y-2 max-h-[270px] overflow-y-auto custom-scrollbar pr-1">
             {data.map((item, index) => {
               const isHovered = activeIndex === index;
               return (
@@ -142,29 +146,38 @@ export const CategoryChart = memo(({ charts, loading, onSeeded }) => {
                   key={item.name}
                   onMouseEnter={() => setActiveIndex(index)}
                   onMouseLeave={() => setActiveIndex(null)}
-                  className={`flex items-center justify-between p-2.5 rounded-xl border transition-all cursor-pointer ${
+                  className={`group flex items-center justify-between py-2.5 px-3.5 rounded-xl border transition-all duration-150 cursor-pointer ${
                     isHovered
-                      ? 'bg-zinc-800/90 border-indigo-500/50 shadow-md translate-x-1'
-                      : 'bg-[#12131A] border-zinc-800/60 hover:bg-zinc-800/50'
+                      ? 'bg-zinc-800/90 border-zinc-700 shadow-md'
+                      : 'bg-[#090a0f] border-zinc-800/80 hover:border-zinc-700 hover:bg-zinc-800/50'
                   }`}
                 >
-                  <div className="flex items-center space-x-2.5 truncate">
+                  {/* Left: Indicator & Category Label */}
+                  <div className="flex items-center space-x-3 truncate min-w-0 pr-3">
                     <span
-                      className="w-3 h-3 rounded-full shrink-0 shadow-sm"
-                      style={{ backgroundColor: item.fill }}
+                      className="w-2.5 h-2.5 rounded-full shrink-0 transition-transform group-hover:scale-125"
+                      style={{
+                        backgroundColor: item.fill,
+                        boxShadow: `0 0 8px ${item.fill}90`,
+                      }}
                     />
-                    <span
-                      className="text-xs font-bold truncate font-outfit transition-colors"
-                      style={{ color: isHovered ? item.fill : '#FFFFFF' }}
-                    >
+                    <span className="text-xs font-bold truncate font-outfit text-white">
                       {item.name}
                     </span>
                   </div>
-                  <div className="text-right shrink-0">
-                    <span className="text-xs font-mono font-bold text-white block">
+
+                  {/* Right: Currency Value & Crisp Monospace Percentage Badge */}
+                  <div className="flex items-center space-x-3 shrink-0">
+                    <span className="text-xs font-mono font-bold text-white tracking-tight">
                       {formatCurrency(item.value)}
                     </span>
-                    <span className="text-[10px] font-mono text-slate-400 block">
+                    <span
+                      className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-lg border transition-colors ${
+                        isHovered
+                          ? 'bg-white text-zinc-950 border-white shadow-sm'
+                          : 'bg-zinc-900/90 text-zinc-400 border-zinc-800'
+                      }`}
+                    >
                       {item.percentage.toFixed(1)}%
                     </span>
                   </div>

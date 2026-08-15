@@ -2,7 +2,7 @@
 Application Settings & Configuration using Pydantic Settings v2.
 """
 
-from typing import List, Union
+from typing import List, Union, Optional
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from app.core.constants import EnvironmentOption
@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
     REFRESH_TOKEN_EXPIRE_DAYS: int = 30  # 30 days
+    GEMINI_API_KEY: Optional[str] = None
 
     # Admin Security Credentials (Stored securely in .env)
     ADMIN_EMAIL: str = "mandhanani536@gmail.com"
@@ -65,8 +66,13 @@ class Settings(BaseSettings):
     # SMTP / Email Configuration
     SMTP_SERVER: str = "smtp.gmail.com"
     SMTP_PORT: int = 587
-    SMTP_USERNAME: str = "mandhanani536@gmail.com"
+    SMTP_USERNAME: str = "fintech0707@gmail.com"
     SMTP_PASSWORD: str = ""
+
+    # Google OAuth 2.0 Credentials (loaded dynamically from environment / .env)
+    GOOGLE_CLIENT_ID: Optional[str] = None
+    GOOGLE_CLIENT_SECRET: Optional[str] = None
+    GOOGLE_REDIRECT_URI: str = "http://localhost:8000/api/v1/auth/google/callback"
 
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod

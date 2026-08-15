@@ -24,7 +24,7 @@ import {
 import useAuth from '../../hooks/useAuth.js';
 import NotificationPopover from '../../components/layout/NotificationPopover.jsx';
 
-const ADMIN_EMAIL = 'mandhanani536@gmail.com';
+const ADMIN_EMAIL = 'fintech0707@gmail.com';
 
 const NAV_ITEMS = [
   { path: '/admin/overview', label: 'Overview', icon: LayoutDashboard },

@@ -14,7 +14,7 @@ from app.core.logging import logger
 
 class EmailService:
     def __init__(self):
-        self.sender_email = getattr(settings, "SMTP_USERNAME", "mandhanani536@gmail.com")
+        self.sender_email = getattr(settings, "SMTP_USERNAME", "fintech0707@gmail.com")
         self.sender_name = "AI Personal Finance Advisor"
         self.smtp_server = getattr(settings, "SMTP_SERVER", "smtp.gmail.com")
         self.smtp_port = getattr(settings, "SMTP_PORT", 587)
@@ -40,6 +40,12 @@ class EmailService:
                 logger.info(f"[EmailService] [DEV DISPATCH SIMULATION] Sent welcome email from {self.sender_email} to {recipient_email}")
             
             return True
+        except smtplib.SMTPAuthenticationError as auth_ex:
+            logger.warning(
+                f"[EmailService] Gmail SMTP Authentication Error (535): Google requires a 16-character 'App Password' "
+                f"(generated from https://myaccount.google.com/apppasswords) for SMTP_PASSWORD instead of your standard login password."
+            )
+            return False
         except Exception as ex:
             logger.error(f"[EmailService] Error dispatching email to {recipient_email}: {ex}")
             return False
@@ -83,7 +89,7 @@ class EmailService:
                 <div class="card-title">🔐 Account Security Overview</div>
                 <p style="margin: 0; color: #94a3b8; font-size: 13px;">
                   • <strong>Email Registered:</strong> {recipient_email}<br>
-                  • <strong>Sender ID:</strong> mandhanani536@gmail.com<br>
+                  • <strong>Sender ID:</strong> {self.sender_email}<br>
                   • <strong>Security Protocol:</strong> 256-Bit Bank Grade Encryption<br>
                   • <strong>Status:</strong> Verified & Active
                 </p>
@@ -96,7 +102,7 @@ class EmailService:
               </div>
             </div>
             <div class="footer">
-              &copy; 2026 AI-Powered Personal Finance Advisor Platform. Sent from mandhanani536@gmail.com.
+              &copy; 2026 AI-Powered Personal Finance Advisor Platform. Sent from {self.sender_email}.
             </div>
           </div>
         </body>

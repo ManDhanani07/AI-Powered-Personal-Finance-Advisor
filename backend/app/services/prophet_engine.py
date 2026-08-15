@@ -121,8 +121,33 @@ class ProphetEngine:
         """
         metric_type = metric_type.upper().strip()
 
+        # Check for brand new accounts with no transaction history
+        active_txs = [t for t in (transactions or []) if not getattr(t, "is_deleted", False)]
+        if len(active_txs) < 3:
+            return {
+                "sufficient_data": False,
+                "message": "At least 3 to 14 days of recorded transactions are required to train the Meta Prophet model on your personal financial history.",
+                "forecast_points": [],
+                "accuracy_metrics": {
+                    "mae": Decimal("0.00"),
+                    "rmse": Decimal("0.00"),
+                    "mape": Decimal("0.0"),
+                    "data_points_count": 0,
+                    "training_transactions": len(active_txs),
+                    "model_name": "Meta Prophet ML Engine",
+                },
+                "smart_warnings": [],
+                "metric_type": metric_type,
+                "blended_monthly": 0.0,
+                "trend_pct": 0.0,
+                "actual_totals": {
+                    "total": 0.0,
+                    "monthly_avg": 0.0,
+                },
+            }
+
         # 1. Build Monthly Dataframe (1 Jan to current month)
-        df = cls.prepare_monthly_dataframe(transactions, metric_type)
+        df = cls.prepare_monthly_dataframe(active_txs, metric_type)
 
         today = date.today()
         current_year = today.year

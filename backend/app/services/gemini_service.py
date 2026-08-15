@@ -12,7 +12,7 @@ import re
 import uuid
 from typing import Dict, Any, List, Optional, Tuple
 from uuid import UUID
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone, timedelta, date
 from decimal import Decimal
 
 from sqlalchemy import select
@@ -21,6 +21,7 @@ from app.core.logging import logger
 from app.models.chat_history import ChatHistory
 from app.models.transaction import Transaction
 from app.models.category import Category
+from app.models.goal import Goal
 from app.repositories.chat_history_repository import ChatHistoryRepository
 from app.repositories.user_repository import UserRepository
 from app.repositories.transaction_repository import TransactionRepository
@@ -76,7 +77,7 @@ class GeminiService:
             try:
                 genai.configure(api_key=self.api_key)
             except Exception as e:
-                logger.warn(f"[GeminiService] Failed to configure Gemini SDK: {e}")
+                logger.warning(f"[GeminiService] Failed to configure Gemini SDK: {e}")
 
     async def _handle_transaction_crud_intent(self, user_id: UUID, message: str, ctx: Dict[str, Any]) -> Optional[str]:
         """Multi-turn Add, Edit, and Delete transactions directly via AI Assistant."""
@@ -204,34 +205,34 @@ class GeminiService:
                 )
 
         # 3. ADD TRANSACTION INTENT
-        has_number = bool(re.search(r'\b\d+(?:\.\d+)?\b', q_lower))
-        add_keywords = [
-            "add transaction", "create transaction", "record transaction",
-            "add expense", "add income", "new transaction", "i want to add",
-            "add one transaction", "record expense", "record income"
+        non_tx_words = [
+            "strategy", "plan", "roadmap", "report", "analysis", "forecast", "advice",
+            "roast", "explain", "how to", "how do", "why", "what", "compare", "breakdown",
+            "guide", "trajectory", "tell me", "recommend", "suggestion", "simulation", "what-if",
+            "situation", "problem", "review", "summary"
         ]
+        if any(w in q_lower for w in non_tx_words):
+            return None
 
-        is_analytical = any(w in q_lower for w in [
-            "analyze", "summary", "advice", "report", "insight", "explain", "overview", "how to", "what is",
-            "standing", "recommendation", "chart", "graph", "how much did i earn", "how much did i spend",
-            "how much did i save", "income", "expense", "category", "shopping", "food", "transport", "which",
-            "save", "saving", "goal", "emergency fund", "budget", "utilization", "overspend", "overspending",
-            "unnecessary", "cut", "reduce", "forecast", "predict", "next month", "health", "score", "strongest",
-            "weakest", "compare", "amazon", "zomato", "nike", "show all", "show my", "upi", "debit card",
-            "today", "this week", "perform this week", "what went well", "improve next month", "monthly summary",
-            "provide graph", "provide chart", "graph for", "chart for", "why is my", "why did i"
-        ])
-
-        is_add_intent = not is_analytical and (
-            any(k in q_lower for k in add_keywords) or
-            (any(verb in q_lower for verb in ["spent ", "bought ", "paid ", "earned "]) and has_number)
+        has_number = bool(re.search(r'\b\d+(?:\.\d+)?\b', q_lower))
+        is_add_action = any(k in q_lower for k in [
+            "add transaction", "create transaction", "record transaction", "log transaction",
+            "add expense", "add income", "add rupees", "add rs", "add inr", "new transaction",
+            "i want to add", "add one transaction", "record expense", "record income"
+        ]) or (
+            any(q_lower.startswith(prefix) for prefix in ["add ", "record ", "log ", "paid ", "spent ", "bought ", "insert "]) and (
+                any(sym in q_lower for sym in ["₹", "rs", "rupee", "inr"]) or
+                bool(re.search(r'\b(?:for|on|at|via)\b', q_lower))
+            ) and has_number
         )
 
-        if not is_add_intent:
+        is_question = any(q in q_lower for q in ["how to add", "how do i add", "can i add", "where to add", "how can i add"])
+
+        if not is_add_action or is_question:
             return None
 
         # Parse numeric amount
-        amount_match = re.search(r'(?:₹|rs\.?|inr)?\s*([\d,]+(?:\.\d{1,2})?)', message, re.IGNORECASE)
+        amount_match = re.search(r'(?:₹|rs\.?|inr|rupees)?\s*([\d,]+(?:\.\d{1,2})?)', message, re.IGNORECASE)
         amount_val = None
         if amount_match:
             raw_amt = amount_match.group(1).replace(",", "")
@@ -255,9 +256,20 @@ class GeminiService:
                 f"• **Example**: `Add income ₹75,000 for Monthly Freelance Project`"
             )
 
-        clean_text = re.sub(r'(?:₹|rs\.?|inr)?\s*[\d,]+(?:\.\d{1,2})?', '', message, flags=re.IGNORECASE)
-        clean_text = re.sub(r'\b(add|create|record|a|new|one|transaction|expense|income|for|on|at|i|spent|bought|paid|earned|rupees|rs)\b', '', clean_text, flags=re.IGNORECASE)
-        title_cand = clean_text.strip().title()
+        # Detect payment method
+        pay_method = "UPI"
+        if "cash" in q_lower:
+            pay_method = "CASH"
+        elif any(k in q_lower for k in ["debit", "card", "credit", "pos"]):
+            pay_method = "DEBIT_CARD"
+        elif any(k in q_lower for k in ["bank", "transfer", "neft", "rtgs", "imps", "net banking"]):
+            pay_method = "BANK_TRANSFER"
+
+        # Clean title extraction
+        clean_text = re.sub(r'(?:₹|rs\.?|inr|rupees)?\s*[\d,]+(?:\.\d{1,2})?', '', message, flags=re.IGNORECASE)
+        clean_text = re.sub(r'\b(add|create|record|insert|log|a|new|one|transaction|expense|income|for|on|at|i|spent|bought|paid|earned|rupees|rs|via|by|through|using|in|my|with|upi|cash|card|debit|bank|transfer)\b', '', clean_text, flags=re.IGNORECASE)
+        clean_text = re.sub(r'[^\w\s]', '', clean_text).strip()
+        title_cand = clean_text.title()
 
         title = title_cand if len(title_cand) >= 2 else ("General Expense" if tx_type == "EXPENSE" else "General Income")
         merchant = title
@@ -267,10 +279,10 @@ class GeminiService:
         category_id = None
         category_label = "General Expense" if tx_type == "EXPENSE" else "Income"
 
-        lower_t = title.lower()
+        lower_t = f"{title.lower()} {q_lower}"
         for cat in all_categories:
             cname = cat.category_name.lower()
-            if cname in lower_t or lower_t in cname:
+            if cname in lower_t:
                 category_id = cat.id
                 category_label = cat.category_name
                 break
@@ -282,10 +294,10 @@ class GeminiService:
                     category_id = inc_cat.id
                     category_label = inc_cat.category_name
             else:
-                food_words = ["dinner", "lunch", "breakfast", "coffee", "zomato", "swiggy", "food", "cafe", "burger", "pizza", "restaurant"]
-                shop_words = ["shopping", "amazon", "clothes", "shoes", "flipkart", "myntra", "shirt", "pants", "dress"]
-                trans_words = ["uber", "ola", "fuel", "petrol", "transport", "metro", "cab", "bus", "flight"]
-                util_words = ["electricity", "water", "wifi", "bill", "recharge", "utilities"]
+                food_words = ["dinner", "lunch", "breakfast", "coffee", "zomato", "swiggy", "food", "cafe", "burger", "pizza", "restaurant", "dosa", "dhosa", "snack"]
+                shop_words = ["shopping", "amazon", "clothes", "shoes", "flipkart", "myntra", "shirt", "pants", "dress", "watch", "laptop"]
+                trans_words = ["uber", "ola", "fuel", "petrol", "transport", "metro", "cab", "bus", "flight", "auto"]
+                util_words = ["electricity", "water", "wifi", "bill", "recharge", "utilities", "gas", "broadband", "mobile"]
 
                 matched_cat_name = None
                 if any(w in lower_t for w in food_words):
@@ -314,8 +326,8 @@ class GeminiService:
             transaction_type=tx_type,
             transaction_date=datetime.now(timezone.utc),
             merchant=merchant,
-            payment_method="UPI",
-            account_type="SAVINGS",
+            payment_method=pay_method,
+            account_type="SAVINGS" if pay_method != "DEBIT_CARD" else "CHECKING",
             description=f"Recorded via AI Assistant",
         )
 
@@ -343,6 +355,103 @@ class GeminiService:
             f"Your live ledger and transactions table have been updated!"
         )
 
+    async def _handle_goal_crud_intent(self, user_id: UUID, message: str, ctx: Dict[str, Any]) -> Optional[str]:
+        """Create and manage savings goals / vaults directly via AI Assistant."""
+        q_lower = message.lower().strip()
+        user_name = ctx["user_name"]
+
+        is_create_goal = any(k in q_lower for k in [
+            "create goal", "add goal", "new goal", "create savings goal", "add savings goal",
+            "set goal", "create vault", "add vault", "new vault", "create a goal", "add a goal",
+            "set a goal", "create a savings goal", "add a new goal", "create a new goal",
+            "start a goal", "start goal", "set up a goal", "set up goal"
+        ])
+        if not is_create_goal or any(w in q_lower for w in ["what is my goal", "show my goals", "list goals", "how to", "why"]):
+            return None
+
+        # Parse target amount
+        amount_match = re.search(r'(?:target|of|amount|worth|for)?\s*(?:₹|rs\.?|inr|rupees)?\s*([\d,]+(?:\.\d{1,2})?)', message, re.IGNORECASE)
+        target_amt = None
+        if amount_match:
+            try:
+                val = float(amount_match.group(1).replace(",", ""))
+                if val > 0 and val != 2026:
+                    target_amt = val
+            except ValueError:
+                pass
+
+        if not target_amt:
+            num_match = re.search(r'\b(\d+(?:,\d+)*(?:\.\d+)?)\b', message)
+            if num_match:
+                try:
+                    val = float(num_match.group(1).replace(",", ""))
+                    if val > 0 and val != 2026:
+                        target_amt = val
+                except ValueError:
+                    pass
+
+        # Extract title
+        clean = re.sub(r'(?:₹|rs\.?|inr|rupees)?\s*[\d,]+(?:\.\d{1,2})?', '', message, flags=re.IGNORECASE)
+        clean = re.sub(r'\b(create|add|set|start|up|a|new|goal|savings|vault|for|with|target|of|amount|worth|in|my|please)\b', '', clean, flags=re.IGNORECASE)
+        clean = re.sub(r'[^\w\s]', '', clean).strip()
+        goal_title = clean.title() if len(clean) >= 2 else "New Savings Goal"
+
+        if target_amt is None:
+            return (
+                f"Hello {user_name}! 👋 I can help you create a savings goal for **{goal_title}**.\n\n"
+                f"Please tell me the **target amount**.\n"
+                f"• **Example**: `Create goal for {goal_title} of ₹1,00,000`"
+            )
+
+        # Determine goal type
+        lower_title = goal_title.lower()
+        if any(w in lower_title for w in ["car", "bike", "scooter", "scooty", "vehicle", "bullet"]):
+            goal_type = "VEHICLE"
+        elif any(w in lower_title for w in ["travel", "trip", "vacation", "holiday", "europe", "goa", "paris", "japan"]):
+            goal_type = "TRAVEL"
+        elif any(w in lower_title for w in ["laptop", "macbook", "phone", "iphone", "tech", "gadget", "watch"]):
+            goal_type = "GADGET"
+        elif any(w in lower_title for w in ["emergency", "safety", "buffer"]):
+            goal_type = "EMERGENCY"
+        elif any(w in lower_title for w in ["house", "home", "flat", "property", "villa"]):
+            goal_type = "REAL_ESTATE"
+        else:
+            goal_type = "SAVINGS"
+
+        target_d = date.today().replace(year=date.today().year + 1)
+        new_goal = Goal(
+            user_id=user_id,
+            goal_name=goal_title,
+            goal_type=goal_type,
+            target_amount=Decimal(str(target_amt)),
+            current_amount=Decimal("0.00"),
+            target_date=target_d,
+            priority="HIGH",
+            status="IN_PROGRESS"
+        )
+        self.goal_repo.db.add(new_goal)
+        await self.goal_repo.db.commit()
+        await self.goal_repo.db.refresh(new_goal)
+
+        return (
+            f"🎯 **New Goal Vault Created Successfully!**\n\n"
+            f"• **Goal Name**: **{goal_title}**\n"
+            f"• **Target Amount**: **₹{target_amt:,.2f}**\n"
+            f"• **Category**: **{goal_type}**\n"
+            f"• **Current Progress**: **0% (₹0.00 / ₹{target_amt:,.2f})**\n"
+            f"• **Target Deadline**: **{target_d.strftime('%d %b %Y')}**\n\n"
+            f"Your new savings vault is now live in your **Goal Vaults & Wealth Tracker** dashboard!\n\n"
+            f"```chart\n"
+            f"{{\n"
+            f'  "type": "goal_progress",\n'
+            f'  "title": "Savings Goals Progression",\n'
+            f'  "data": [\n'
+            f'    {{"name": "{goal_title}", "target": {target_amt}, "saved": 0.0, "remaining": {target_amt}, "percentage": 0.0}}\n'
+            f"  ]\n"
+            f"}}\n"
+            f"```"
+        )
+
     async def _build_financial_context(self, user_id: UUID) -> Dict[str, Any]:
         """Collect and compute rich financial metrics from PostgreSQL for the user."""
         user = await self.user_repo.get_by_id(user_id)
@@ -362,9 +471,9 @@ class GeminiService:
                 dt = dt.replace(tzinfo=timezone.utc)
             return dt.astimezone(local_tz)
 
-        # 1. Transactions & Overview
-        tx_res = await self.tx_repo.get_by_user(user_id, page_size=1000)
-        raw_items = tx_res.items or []
+        # 1. Transactions & Overview (Full un-truncated database records)
+        raw_items = await self.tx_repo.get_all_by_user(user_id)
+        db_stats = await self.tx_repo.get_aggregate_stats(user_id)
 
         recent_txs = [
             {
@@ -382,10 +491,10 @@ class GeminiService:
             for t in raw_items
         ]
 
-        total_income = sum(float(t.amount) for t in raw_items if t.transaction_type == "INCOME")
-        total_expenses = sum(float(t.amount) for t in raw_items if t.transaction_type == "EXPENSE")
-        net_surplus = max(0.0, total_income - total_expenses)
-        savings_rate = round((net_surplus / total_income * 100), 2) if total_income > 0 else 0.0
+        total_income = db_stats["total_income"]
+        total_expenses = db_stats["total_expenses"]
+        net_surplus = db_stats["net_surplus"]
+        savings_rate = db_stats["savings_rate"]
 
         # Detailed Income & Expense Analytics
         income_txs = [t for t in raw_items if t.transaction_type == "INCOME"]
@@ -787,14 +896,15 @@ class GeminiService:
             "user_name": user_name,
             "currency": currency,
             "overview": {
-                "total_income": total_income if total_income > 0 else 325000.0,
-                "total_expenses": total_expenses if total_expenses > 0 else 304769.76,
-                "net_surplus": net_surplus if total_income > 0 else 20230.24,
-                "savings_rate": savings_rate if total_income > 0 else 6.22,
-                "transaction_count": len(raw_items) if raw_items else 47,
-                "expense_transactions_count": len(expense_txs) if expense_txs else 42,
-                "income_transactions_count": len(income_txs) if income_txs else 5,
-                "total_transaction_value": (total_income + total_expenses) if (total_income + total_expenses) > 0 else 329769.76,
+                "total_income": total_income,
+                "total_expenses": total_expenses,
+                "net_surplus": net_surplus,
+                "savings_rate": savings_rate,
+                "transaction_count": db_stats["total_count"],
+                "total_transactions_count": db_stats["total_count"],
+                "expense_transactions_count": db_stats["expense_count"],
+                "income_transactions_count": db_stats["income_count"],
+                "total_transaction_value": (total_income + total_expenses),
                 "total_budget_limit": total_budget_limit,
                 "total_budget_spent": total_budget_spent,
                 "overall_budget_utilization": overall_budget_utilization,
@@ -923,39 +1033,110 @@ class GeminiService:
             answer_text = crud_tx_res
             model_name = "gemini-transaction-engine"
         else:
-            # Fetch recent chat context for follow-up resolution
-            recent_chats = await self.chat_repo.get_by_user(user_id, limit=3)
-            last_question = recent_chats[0].question if recent_chats else ""
-            last_answer = recent_chats[0].answer if recent_chats else ""
-
-            # Check if Gemini API Key is available
-            if self.api_key and HAS_GEMINI_SDK:
-                ctx_str = json.dumps(ctx, indent=2)
-                system_instruction = (
-                    "You are an expert AI Personal Finance Advisor and Financial Copilot.\n"
-                    "Your objective is to answer user financial questions with strict accuracy using the user's live context.\n"
-                    "FORMATTING: Use clean GitHub markdown, bold numbers (**₹3,25,000**), bullets, and INR currency symbols.\n"
-                    f"LIVE CONTEXT FOR USER {ctx['user_name'].upper()}:\n{ctx_str}"
-                )
-                try:
-                    model = genai.GenerativeModel(
-                        model_name="gemini-1.5-flash",
-                        system_instruction=system_instruction,
-                    )
-                    loop = asyncio.get_running_loop()
-                    response = await asyncio.wait_for(
-                        loop.run_in_executor(None, model.generate_content, message),
-                        timeout=10.0
-                    )
-                    if response and response.text:
-                        answer_text = response.text.strip()
-                    else:
-                        answer_text = self._fallback_rule_based_answer(message, ctx, last_question, last_answer)
-                except Exception as e:
-                    logger.warn(f"[GeminiService] LLM API call failed: {e}")
-                    answer_text = self._fallback_rule_based_answer(message, ctx, last_question, last_answer)
+            # 3. Check for Goal CRUD Intent (Create Goal / Vault)
+            crud_goal_res = await self._handle_goal_crud_intent(user_id, message, ctx)
+            if crud_goal_res:
+                answer_text = crud_goal_res
+                model_name = "gemini-goal-engine"
             else:
-                answer_text = self._fallback_rule_based_answer(message, ctx, last_question, last_answer)
+                # Fetch recent chat context for follow-up resolution
+                recent_chats = await self.chat_repo.get_by_user(user_id, limit=3)
+                last_question = recent_chats[0].question if recent_chats else ""
+                last_answer = recent_chats[0].answer if recent_chats else ""
+
+                # Check if Gemini API Key is available
+                if self.api_key and HAS_GEMINI_SDK:
+                    ctx_str = json.dumps(ctx, indent=2, default=str)
+                    system_instruction = (
+                        "You are an expert AI Personal Finance Advisor and Financial Copilot.\n"
+                        "Your highest priority is STRICT ACCURACY with the user's real-time financial database.\n\n"
+                        "CORE CAPABILITIES & INTENT UNDERSTANDING:\n"
+                        "1. STRICT LANGUAGE MATCHING (CRITICAL):\n"
+                        "   - Look at the CURRENT USER QUESTION to determine the language:\n"
+                        "   - If the current user question is written in ENGLISH (e.g., 'What is my savings rate?', 'How can I save more?'): You MUST respond entirely in 100% PROPER, PROFESSIONAL, ARTICULATE ENGLISH. Do NOT use any Hindi/Hinglish words (e.g. do not say 'bhai', 'sawaal', 'tera', 'aaja', 'kharcha') when the user asks in English.\n"
+                        "   - If the current user question is written in HINGLISH (e.g., 'mera kitna bacha', 'shopping pe zyada kharcha kyu hua', 'savings kaise badhau'): You MUST respond in natural, friendly, conversational HINGLISH.\n"
+                        "   - If the current user question is written in HINDI (Devanagari script, e.g. 'मेरी बचत कितनी है?'): Respond in fluent, clear HINDI.\n"
+                        "   - If the current user question is written in REGIONAL LANGUAGE (e.g. Gujarati, Marathi): Respond in that language.\n"
+                        "   - RULE: ALWAYS strictly mirror the language of the current user question, regardless of past conversation history!\n\n"
+                        "2. TYPOS, SPELLING & GRAMMAR TOLERANCE:\n"
+                        "   - Users may have spelling mistakes (e.g., 'expanse', 'shoping', 'incom', 'moni', 'transction', 'bachat', 'kharcha', 'buget', 'emargancy', 'salry', 'diference', 'scoter').\n"
+                        "   - Users may write broken English, bad grammar, incomplete phrases, or informal slang (e.g., 'me save fast how', 'food much high why', 'how much left money', 'can i buy bike decembr').\n"
+                        "   - ALWAYS deduce what the user REALLY wants beneath their typos or imperfect grammar.\n"
+                        "   - NEVER correct or point out their grammar/spelling errors. Always respond respectfully, warmly, clearly, and directly to their intended question in their language.\n\n"
+                        "3. STRICT DATA ACCURACY:\n"
+                        "   - Never invent or fabricate transactions or alter totals. Use the EXACT numbers from the LIVE CONTEXT (Income, Expenses, Surplus, Category breakdown, Goals, Health Score).\n"
+                        "   - When answering, calculate the exact figures based on the live context provided.\n\n"
+                        "4. CURRENCY & FORMATTING:\n"
+                        "   - Format all amounts cleanly in Indian Rupees (**₹3,25,000.00**).\n"
+                        "   - Use bold numbers, bullet points, clean markdown tables, and emojis to make answers easy to read.\n\n"
+                        "5. INTERACTIVE CHARTS:\n"
+                        "   - Our UI has a built-in interactive charting engine. When the user asks for any chart, pie chart, donut chart, bar chart, graph, trend, visualization, category breakdown, or goal progress, you MUST include an interactive chart code block at the end formatted exactly as:\n"
+                        "   ```chart\n"
+                        "   {\n"
+                        "     \"type\": \"category_donut\" | \"horizontal_bars\" | \"income_vs_expense\" | \"budget_bars\" | \"savings_trend\" | \"forecast\" | \"goal_progress\",\n"
+                        "     \"title\": \"Title of Chart\",\n"
+                        "     \"data\": [...]\n"
+                        "   }\n"
+                        "   ```\n"
+                        "   - For Pie / Donut Charts: use `\"type\": \"category_donut\"` with `\"data\": [{\"name\": \"Shopping\", \"amount\": 144500.0, \"percentage\": 56.06, \"color\": \"#F43F5E\"}, ...]`\n"
+                        "   - For Category Bars / Top Expenses: use `\"type\": \"horizontal_bars\"` with `\"data\": [{\"name\": \"Shopping\", \"amount\": 144500.0, \"percentage\": 56.06, \"color\": \"#F43F5E\"}, ...]`\n"
+                        "   - For Income vs Expenses: use `\"type\": \"income_vs_expense\"` with `\"income\": 325000.0, \"expenses\": 257769.76, \"net_savings\": 67230.24, \"savings_rate\": 20.69, \"data\": [{\"name\": \"Income\", \"amount\": 325000.0, \"color\": \"#10B981\"}, {\"name\": \"Expenses\", \"amount\": 257769.76, \"color\": \"#F43F5E\"}]`\n"
+                        "   - For Budgets: use `\"type\": \"budget_bars\"` with `\"data\": [{\"name\": \"Food & Dining\", \"limit\": 10000.0, \"spent\": 7640.0, \"remaining\": 2360.0, \"utilization_pct\": 76.4, \"status_label\": \"Approaching Limit\"}]`\n"
+                        "   - For Savings Trend / Trajectory: use `\"type\": \"savings_trend\"` with `\"data\": [{\"month\": \"Aug 2026\", \"savings\": 67230.24}, {\"month\": \"Sep 2026\", \"savings\": 96130.24}]`\n"
+                        "   - For Goal Progress: use `\"type\": \"goal_progress\"` with `\"data\": [{\"name\": \"Emergency Fund\", \"target\": 100000.0, \"saved\": 63500.0, \"remaining\": 36500.0, \"percentage\": 63.5}]`\n"
+                        "   - STRICT RULE: NEVER output text ASCII art, block characters (like █, ░, ▓, ▒), or backtick pseudo progress bars. Always format data with clean, elegant markdown bullets, bold currency numbers, crisp bold percentages, and the interactive ```chart ``` JSON block!\n\n"
+                        f"LIVE CONTEXT FOR USER {ctx['user_name'].upper()}:\n{ctx_str}"
+                    )
+
+                    # Build multi-turn context
+                    if recent_chats:
+                        history_lines = []
+                        for h in reversed(recent_chats[:3]):
+                            history_lines.append(f"User: {h.question}\nAdvisor: {h.answer}")
+                        full_user_prompt = f"RECENT CONVERSATION HISTORY:\n" + "\n---\n".join(history_lines) + f"\n\nCURRENT USER QUESTION:\n{message}"
+                    else:
+                        full_user_prompt = message
+
+                    try:
+                        def _call_gemini_model():
+                            candidate_models = [
+                                "gemini-flash-lite-latest",
+                                "gemini-3.1-flash-lite",
+                                "gemini-3.5-flash-lite",
+                                "gemini-3.6-flash",
+                                "gemini-flash-latest",
+                            ]
+                            last_err = None
+                            for c_model in candidate_models:
+                                try:
+                                    m = genai.GenerativeModel(
+                                        model_name=c_model,
+                                        system_instruction=system_instruction,
+                                    )
+                                    res = m.generate_content(full_user_prompt)
+                                    if res and res.text:
+                                        return res.text.strip()
+                                except Exception as me:
+                                    last_err = me
+                                    continue
+                            if last_err:
+                                raise last_err
+                            return None
+
+                        loop = asyncio.get_running_loop()
+                        llm_text = await asyncio.wait_for(
+                            loop.run_in_executor(None, _call_gemini_model),
+                            timeout=25.0
+                        )
+                        if llm_text:
+                            answer_text = llm_text
+                        else:
+                            answer_text = self._fallback_rule_based_answer(message, ctx, last_question, last_answer)
+                    except Exception as e:
+                        logger.warning(f"[GeminiService] LLM API call failed: {e}")
+                        answer_text = self._fallback_rule_based_answer(message, ctx, last_question, last_answer)
+                else:
+                    answer_text = self._fallback_rule_based_answer(message, ctx, last_question, last_answer)
 
         # 4. Store Chat in Database
         chat_record = ChatHistory(
@@ -1496,13 +1677,35 @@ class GeminiService:
                 f"Maintaining this rate enables you to contribute consistently to your Emergency Fund."
             )
 
-        # "How much can I realistically save?"
-        if any(k in q_lower for k in ["realistically save", "how much can i save", "how to save more", "increase my savings"]):
-            pot_sav = surplus + (shopping_cat["amount"] * 0.2)
-            pot_rate = round((pot_sav / (inc or 1)) * 100, 2)
+        # "How can I save more money?" / "How to save more" / "Increase my savings"
+        if any(k in q_lower for k in [
+            "how can i save more money", "how can i save more", "how to save more money", "how to save more",
+            "save more money", "save more", "tips to save", "ways to save", "how can i save",
+            "realistically save", "how much can i save", "increase my savings", "increase savings"
+        ]):
+            shop_save_20 = shopping_cat["amount"] * 0.2
+            new_surplus = surplus + shop_save_20
+            new_sav_rate = round((new_surplus / (inc or 1)) * 100, 2)
+            chart_json = json.dumps({
+                "type": "savings_trend",
+                "title": "Projected Savings Growth (With 20% Shopping Cut)",
+                "data": [
+                    {"month": "Current August", "savings": surplus},
+                    {"month": "With Optimization", "savings": new_surplus}
+                ]
+            }, indent=2)
             return (
-                f"💡 **You could realistically save ₹{pot_sav:,.2f}/month ({pot_rate}% savings rate).**\n\n"
-                f"By reducing discretionary Shopping by just 20% (-₹{shopping_cat['amount'] * 0.2:,.2f}), you gain immediate capital for your Emergency Fund."
+                f"💡 **Blueprint to Increase Your Monthly Savings**\n\n"
+                f"• **Current Net Savings**: **₹{surplus:,.2f}** ({sav_rate}% savings rate from ₹{inc:,.2f} income)\n\n"
+                f"### 🎯 Actionable Opportunities Identified:\n"
+                f"1. **Cap Discretionary Shopping (-20% = +₹{shop_save_20:,.2f})**:\n"
+                f"   • Currently, Shopping accounts for **₹{shopping_cat['amount']:,.2f}** ({shopping_cat['percentage']}% of total expenses).\n"
+                f"   • Reducing non-essential shopping by just 20% immediately increases your monthly savings to **₹{new_surplus:,.2f}** (**{new_sav_rate}% savings rate**).\n\n"
+                f"2. **Maintain Food & Dining Budget Discipline**:\n"
+                f"   • You have **₹{total_budget_remaining:,.2f}** remaining in your Food & Dining envelope ({overall_budget_utilization}% used). Staying within this limit preserves your monthly buffer.\n\n"
+                f"3. **Accelerate Emergency Fund Goal**:\n"
+                f"   • Redirecting the extra **+₹{shop_save_20:,.2f}** each month into your **{p_name}** will fund the remaining **₹{p_rem:,.2f}** in approximately **{max(1, round(p_rem / (new_surplus or 1)))} months**.\n\n"
+                f"```chart\n{chart_json}\n```"
             )
 
         # "What is my average monthly savings?"
@@ -1638,7 +1841,7 @@ class GeminiService:
             }, indent=2)
             return (
                 f"🎯 **Goal Progress**\n\n"
-                f"• **{p_name}**: **₹{p_saved:,.2f} / ₹{p_target:,.2f}** (`{_render_progress_bar(p_pct, 14)}`)\n"
+                f"• **{p_name}**: **₹{p_saved:,.2f} / ₹{p_target:,.2f}** (**{p_pct:.1f}%** reached)\n"
                 f"• **Remaining**: **₹{p_rem:,.2f} remaining**\n\n"
                 f"```chart\n{chart_json}\n```"
             )
@@ -1646,6 +1849,31 @@ class GeminiService:
         # =====================================================================
         # 6. 📊 BUDGET & 7. OVERSPENDING QUESTIONS
         # =====================================================================
+
+        # "Show all budgets" / "My budgets"
+        if any(k in q_lower for k in [
+            "show all budgets", "show my budgets", "my budgets", "all budgets", "list budgets",
+            "show budgets", "what are my budgets", "all my budgets", "my budget envelopes"
+        ]):
+            chart_json = json.dumps({
+                "type": "budget_bars",
+                "title": "Budget Envelope Utilization",
+                "data": budgets
+            }, indent=2)
+            env_lines = "\n".join([
+                f"• **{b['name']}**: **₹{b['spent']:,.2f} / ₹{b['limit']:,.2f}** ({b['utilization_pct']}% used, **₹{b['remaining']:,.2f} remaining**) — {b['status_label']}"
+                for b in budgets
+            ])
+            return (
+                f"🛡️ **Your Active Budget Envelopes — August 2026**\n\n"
+                f"• **Total Allocated Budget**: **₹{total_budget_limit:,.2f}**\n"
+                f"• **Total Spent**: **₹{total_budget_spent:,.2f}** ({overall_budget_utilization}% overall utilization)\n"
+                f"• **Total Remaining**: **₹{total_budget_remaining:,.2f}**\n\n"
+                f"### 📋 Active Envelopes:\n"
+                f"{env_lines}\n\n"
+                f"💡 **Tip**: Consider setting a budget envelope for **{top_cat['category']}** (currently unbudgeted at ₹{top_cat['amount']:,.2f}) to control your largest monthly outflow.\n\n"
+                f"```chart\n{chart_json}\n```"
+            )
 
         # "What is my total budget?"
         if any(k in q_lower for k in ["what is my total budget", "total budget", "allocated budget"]):
@@ -1734,7 +1962,7 @@ class GeminiService:
             }, indent=2)
 
             env_lines = "\n".join([
-                f"• **{b['name']}**: Spent **₹{b['spent']:,.2f}** of **₹{b['limit']:,.2f}** (`{_render_progress_bar(b['utilization_pct'], 12)}` {b['utilization_pct']}%) — {b['status_label']}\n  Remaining: **₹{b['remaining']:,.2f}** | Daily Allowance: **₹{b.get('daily_allowance', 0.0):,.2f}/day**"
+                f"• **{b['name']}**: Spent **₹{b['spent']:,.2f}** of **₹{b['limit']:,.2f}** (**{b['utilization_pct']}%** used) — {b['status_label']}\n  Remaining: **₹{b['remaining']:,.2f}** | Daily Allowance: **₹{b.get('daily_allowance', 0.0):,.2f}/day**"
                 for b in budgets
             ]) if budgets else "No active budget envelopes configured."
 
@@ -2070,8 +2298,14 @@ class GeminiService:
                 f"💡 **Insight**: Your income increased, but expenses increased faster. As a result, your savings decreased despite earning more."
             )
 
-        # "Compare my income and expenses"
-        if any(k in q_lower for k in ["compare my income and expenses", "compare income and expenses", "income vs expenses"]):
+        # "Compare my income and expenses" / "Chart for income and expenses"
+        if any(k in q_lower for k in [
+            "compare my income and expenses", "compare income and expenses", "income vs expenses",
+            "income vs expense", "income vs expanses", "chart for income and expense", "chart for income vs expenses",
+            "chart for income vs expanses", "line chart for income and expense", "income and expense chart",
+            "make chart for income", "make line chart for income", "graph for income and expense", "income expense graph",
+            "income vs expenses graph", "income and expense line chart"
+        ]) or (("income" in q_lower or "earn" in q_lower) and ("expense" in q_lower or "expanse" in q_lower or "spend" in q_lower) and any(ck in q_lower for ck in ["chart", "graph", "compare", "vs", "versus", "plot", "line"])):
             chart_json = json.dumps({
                 "type": "income_vs_expense",
                 "title": "Income vs Expenses Comparison",
@@ -2215,33 +2449,26 @@ class GeminiService:
         # 16. 📊 VISUALIZATION REQUESTS
         # =====================================================================
 
-        # "Show me my spending"
-        if q_lower in ["show me my spending", "show my spending", "visualize my spending", "show spending"]:
+        # "Show me my spending" / "Category breakdown" / "Spending breakdown with visual distribution bars"
+        if any(k in q_lower for k in [
+            "show me my spending", "show my spending", "visualize my spending", "show spending",
+            "category breakdown", "spending breakdown", "spending across categories", "visual distribution bars",
+            "do category breakdown", "breakdown by category", "category distribution", "categories breakdown",
+            "show categories", "all categories", "category wise", "spending by category", "category chart",
+            "show spending breakdown"
+        ]):
             chart_json = json.dumps({
                 "type": "horizontal_bars",
                 "title": "Category Spending Distribution",
                 "data": [{"name": c["category"], "amount": c["amount"], "percentage": c["percentage"], "color": c["color"]} for c in categories]
             }, indent=2)
-            cat_bars = "\n".join([f"• **{c['category']}**: `{_render_progress_bar(c['percentage'], 18)}`" for c in categories])
+            cat_bars = "\n".join([f"• **{c['category']}**: **₹{c['amount']:,.2f}** (**{c['percentage']:.2f}%** of total expenses)" for c in categories])
             return (
-                f"📊 **Your Spending**\n\n"
-                f"• **Total expenses**: **₹{exp:,.2f}**\n"
-                f"• **Your largest spending category**: **{top_cat['category']} — {top_cat['percentage']}%**.\n\n"
+                f"🛍️ **Category Spending Breakdown — August 2026**\n\n"
+                f"Your total expenses of **₹{exp:,.2f}** are distributed across **{len(categories)} categories**:\n\n"
                 f"{cat_bars}\n\n"
-                f"```chart\n{chart_json}\n```"
-            )
-
-        # "Show spending by category"
-        if any(k in q_lower for k in ["show spending by category", "spending by category chart", "category chart"]):
-            chart_json = json.dumps({
-                "type": "category_donut" if len(categories) <= 4 else "horizontal_bars",
-                "title": "Category Spending Breakdown",
-                "total": exp,
-                "data": [{"name": c["category"], "amount": c["amount"], "percentage": c["percentage"], "color": c["color"]} for c in categories]
-            }, indent=2)
-            return (
-                f"🛍️ **Spending by Category**\n\n"
-                f"Your total spending of **₹{exp:,.2f}** is distributed across **{len(categories)} categories**, with **{top_cat['category']}** accounting for the largest share ({top_cat['percentage']}%).\n\n"
+                f"• **Top Spending Driver**: **{top_cat['category']}** accounts for **₹{top_cat['amount']:,.2f}** ({top_cat['percentage']:.2f}% of expenses)\n"
+                f"• **Second Outflow**: **{second_cat['category']}** at **₹{second_cat['amount']:,.2f}** ({second_cat['percentage']:.2f}%)\n\n"
                 f"```chart\n{chart_json}\n```"
             )
 

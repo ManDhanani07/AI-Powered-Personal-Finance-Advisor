@@ -10,7 +10,7 @@ export const AuthProvider = ({ children }) => {
   const [accessToken, setAccessToken] = useState(() => getItem(STORAGE_KEYS.AUTH_TOKEN) || null);
   const [refreshToken, setRefreshToken] = useState(() => getItem(STORAGE_KEYS.REFRESH_TOKEN) || null);
   const [isAuthenticated, setIsAuthenticated] = useState(() => !!getItem(STORAGE_KEYS.AUTH_TOKEN));
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   /**
    * Clear session state & local storage
@@ -22,12 +22,18 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(false);
     removeItem(STORAGE_KEYS.AUTH_TOKEN);
     removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+    try {
+      sessionStorage.clear();
+    } catch {}
   }, []);
 
   /**
    * Save session tokens
    */
   const saveAuthState = useCallback((tokens, userData = null) => {
+    try {
+      sessionStorage.clear();
+    } catch {}
     if (tokens?.access_token) {
       setAccessToken(tokens.access_token);
       setItem(STORAGE_KEYS.AUTH_TOKEN, tokens.access_token);
@@ -43,29 +49,46 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   /**
-   * Fetch current user profile on app startup
+   * Fetch current user profile on app startup (supports URL query token callback)
    */
   const loadCurrentUser = useCallback(async () => {
+    // Check if redirected from Google OAuth callback with tokens in URL query
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlAccess = urlParams.get('access_token');
+      const urlRefresh = urlParams.get('refresh_token');
+      if (urlAccess) {
+        setItem(STORAGE_KEYS.AUTH_TOKEN, urlAccess);
+        setAccessToken(urlAccess);
+        setIsAuthenticated(true);
+        if (urlRefresh) {
+          setItem(STORAGE_KEYS.REFRESH_TOKEN, urlRefresh);
+          setRefreshToken(urlRefresh);
+        }
+        // Clean URL query parameters
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    } catch (e) {
+      console.warn('URL token parse notice:', e);
+    }
+
     const token = getItem(STORAGE_KEYS.AUTH_TOKEN);
     if (!token) {
-      setIsLoading(false);
       return;
     }
 
     try {
-      setIsLoading(true);
       const res = await authService.getCurrentUser();
       if (res?.data) {
         setUser(res.data);
         setIsAuthenticated(true);
-      } else {
-        clearAuthState();
       }
     } catch (err) {
-      console.warn('Auto-login session check failed:', err);
-      clearAuthState();
-    } finally {
-      setIsLoading(false);
+      console.warn('Silent auto-login session refresh notice:', err);
+      // Only clear if status is 401
+      if (err?.status === 401) {
+        clearAuthState();
+      }
     }
   }, [clearAuthState]);
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import useAuth from '../../hooks/useAuth.js';
 import aiService from '../../services/aiService.js';
 import dashboardService from '../../services/dashboardService.js';
 
@@ -8,28 +9,15 @@ import ConversationSidebar from './ConversationSidebar.jsx';
 import ChatWindow from './ChatWindow.jsx';
 
 export const AIChat = () => {
+  const { user } = useAuth();
   const location = useLocation();
   const prefillHandled = useRef(false);
 
   // Active continuous conversation thread
-  const [messages, setMessages] = useState(() => {
-    try {
-      const saved = sessionStorage.getItem('ai_active_messages');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [messages, setMessages] = useState([]);
 
   // Past conversation history items from PostgreSQL
-  const [historyItems, setHistoryItems] = useState(() => {
-    try {
-      const cached = sessionStorage.getItem('ai_history_cache');
-      return cached ? JSON.parse(cached) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [historyItems, setHistoryItems] = useState([]);
 
   // Real-time PostgreSQL financial context payload
   const [summaryContext, setSummaryContext] = useState(null);
@@ -39,16 +27,11 @@ export const AIChat = () => {
   const [isLeftSidebarCollapsed, setIsLeftSidebarCollapsed] = useState(false);
   const [isOpenLeftMobile, setIsOpenLeftMobile] = useState(false);
 
-  // Save active session to sessionStorage
+  // Reset active session when authenticated user changes
   useEffect(() => {
-    try {
-      if (messages.length > 0) {
-        sessionStorage.setItem('ai_active_messages', JSON.stringify(messages));
-      }
-    } catch (e) {
-      console.warn('Failed to sync chat messages to sessionStorage', e);
-    }
-  }, [messages]);
+    setMessages([]);
+    setHistoryItems([]);
+  }, [user?.id, user?.email]);
 
   // Helper to build full continuous message thread from raw history items
   const buildFullThreadFromItems = (items) => {
@@ -94,12 +77,11 @@ export const AIChat = () => {
           (Array.isArray(raw?.data) ? raw.data : Array.isArray(raw) ? raw : []);
         if (Array.isArray(items)) {
           setHistoryItems(items);
-          sessionStorage.setItem('ai_history_cache', JSON.stringify(items));
-
-          const hasSavedSession = Boolean(sessionStorage.getItem('ai_active_messages'));
-          if (!hasSavedSession && items.length > 0) {
+          if (items.length > 0) {
             const fullThread = buildFullThreadFromItems(items);
             setMessages(fullThread);
+          } else {
+            setMessages([]);
           }
         }
       }
@@ -110,7 +92,7 @@ export const AIChat = () => {
 
   useEffect(() => {
     loadInitialData();
-  }, [loadInitialData]);
+  }, [loadInitialData, user?.id]);
 
   useEffect(() => {
     if (location.state?.prefill && !prefillHandled.current) {
@@ -185,11 +167,6 @@ export const AIChat = () => {
 
   // Reset current session
   const handleNewSession = () => {
-    try {
-      sessionStorage.removeItem('ai_active_messages');
-    } catch (e) {
-      console.warn('Failed to clear sessionStorage', e);
-    }
     setMessages([]);
     toast.info('New chat session started!', { icon: '✨' });
   };
@@ -198,7 +175,6 @@ export const AIChat = () => {
   const handleClearHistory = async () => {
     try {
       await aiService.clearChatHistory();
-      sessionStorage.removeItem('ai_active_messages');
       setHistoryItems([]);
       setMessages([]);
       toast.success('Chat history cleared permanently.', { icon: '🧹' });

@@ -88,26 +88,26 @@ export const ForecastPage = () => {
               <button
                 onClick={handleSeed}
                 disabled={seeding}
-                className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-primary-500 to-indigo-600 hover:from-primary-600 hover:to-indigo-700 text-white font-bold text-xs shadow-lg hover:shadow-xl transition-all flex items-center space-x-2 cursor-pointer disabled:opacity-50"
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 hover:from-emerald-300 hover:to-cyan-300 text-slate-950 font-black text-xs shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center space-x-2 cursor-pointer disabled:opacity-50 font-outfit"
               >
                 {seeding ? (
                   <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin text-slate-950" />
                     <span>Seeding Ledger...</span>
                   </>
                 ) : (
                   <>
-                    <Database className="w-4 h-4 text-accent-300" />
-                    <span>⚡ Load Sample Financial Ledger</span>
+                    <Database className="w-3.5 h-3.5 text-slate-950 stroke-[2.5]" />
+                    <span className="tracking-tight">Load Sample Ledger</span>
                   </>
                 )}
               </button>
 
               <button
                 onClick={() => navigate(ROUTES.TRANSACTIONS)}
-                className="px-4 py-2.5 rounded-2xl bg-bg-surface border border-border-strong hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs transition-all flex items-center space-x-1.5 cursor-pointer"
+                className="px-4 py-2.5 rounded-xl bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-800 text-slate-300 hover:text-white font-bold text-xs transition-all flex items-center space-x-1.5 cursor-pointer font-outfit"
               >
-                <Plus className="w-4 h-4 text-primary-400" />
+                <Plus className="w-3.5 h-3.5 text-emerald-400" />
                 <span>Add Transaction</span>
               </button>
             </div>

@@ -137,8 +137,8 @@ export const IncomeExpenseChart = memo(({ charts, loading, onSeeded }) => {
               name="Income"
               stroke="#10B981"
               strokeWidth={3}
-              dot={{ r: 5, fill: '#10B981', stroke: '#FFFFFF', strokeWidth: 1.5 }}
-              activeDot={{ r: 7, fill: '#10B981', stroke: '#FFFFFF', strokeWidth: 2 }}
+              dot={{ r: 4.5, fill: '#10B981', stroke: '#10B981', strokeWidth: 0 }}
+              activeDot={{ r: 6.5, fill: '#10B981', stroke: '#064e3b', strokeWidth: 2 }}
               animationDuration={1200}
             />
 
@@ -149,8 +149,8 @@ export const IncomeExpenseChart = memo(({ charts, loading, onSeeded }) => {
               name="Expenses"
               stroke="#EF4444"
               strokeWidth={3}
-              dot={{ r: 5, fill: '#EF4444', stroke: '#FFFFFF', strokeWidth: 1.5 }}
-              activeDot={{ r: 7, fill: '#EF4444', stroke: '#FFFFFF', strokeWidth: 2 }}
+              dot={{ r: 4.5, fill: '#EF4444', stroke: '#EF4444', strokeWidth: 0 }}
+              activeDot={{ r: 6.5, fill: '#EF4444', stroke: '#7f1d1d', strokeWidth: 2 }}
               animationDuration={1200}
             />
           </LineChart>

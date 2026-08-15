@@ -3,11 +3,11 @@ import { Navigate } from 'react-router-dom';
 import { AppLayout } from './AppLayout.jsx';
 import useAuth from '../hooks/useAuth.js';
 
-const ADMIN_EMAIL = 'mandhanani536@gmail.com';
+const ADMIN_EMAIL = 'fintech0707@gmail.com';
 
 /**
  * Protected Layout Guard Component
- * Redirects admin account (mandhanani536@gmail.com) directly to /admin/overview.
+ * Redirects admin account (fintech0707@gmail.com) directly to /admin/overview.
  * Standard users continue to user AppLayout.
  */
 export const ProtectedLayout = () => {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Plus, Target, Loader2, Sparkles } from 'lucide-react';
+import { Plus, Target, Loader2, Sparkles, Search, Filter, ShieldCheck, Wallet } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 
 import { PageContainer } from '../../components/layout/PageContainer.jsx';
@@ -39,6 +40,7 @@ export const Goals = () => {
   });
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedType, setSelectedType] = useState('ALL');
 
   // Modals
   const [isDepositOpen, setIsDepositOpen] = useState(false);
@@ -88,15 +90,21 @@ export const Goals = () => {
   // Filtered Goals List
   const filteredGoals = useMemo(() => {
     return goals.filter((g) => {
+      if (selectedType !== 'ALL') {
+        const gType = (g.goal_type || '').toUpperCase();
+        if (gType !== selectedType.toUpperCase()) return false;
+      }
+
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
-        const matchName = g.goal_name.toLowerCase().includes(q);
-        const matchType = g.goal_type ? g.goal_type.toLowerCase().includes(q) : false;
-        if (!matchName && !matchType) return false;
+        const matchName = (g.goal_name || '').toLowerCase().includes(q);
+        const matchType = (g.goal_type || '').toLowerCase().includes(q);
+        const matchDesc = (g.description || '').toLowerCase().includes(q);
+        if (!matchName && !matchType && !matchDesc) return false;
       }
       return true;
     });
-  }, [goals, searchQuery]);
+  }, [goals, searchQuery, selectedType]);
 
   const handleOpenDeposit = (g) => {
     setSelectedGoalForDeposit(g);
@@ -119,17 +127,19 @@ export const Goals = () => {
     toast.info(`Automated rule configured for ${g.goal_name}: ₹2,000 monthly auto-transfer`, { icon: '⚙️' });
   };
 
+  const handleCreateNewGoal = () => {
+    setEditingGoal(null);
+    setIsFormOpen(true);
+  };
+
   return (
     <PageContainer
       title="Goal Vaults & Wealth Tracker"
       description="Visual savings targets with dynamic SVG liquid progress gauges and automated deposit rules."
       action={
         <button
-          onClick={() => {
-            setEditingGoal(null);
-            setIsFormOpen(true);
-          }}
-          className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-primary-500 to-indigo-600 hover:from-primary-600 hover:to-indigo-700 text-white font-bold text-xs uppercase tracking-wider shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-1.5"
+          onClick={handleCreateNewGoal}
+          className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-600 to-indigo-600 hover:from-emerald-600 hover:to-indigo-700 text-white font-bold text-xs uppercase tracking-wider shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-1.5 cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           <span>New Savings Vault</span>
@@ -140,36 +150,62 @@ export const Goals = () => {
         {/* Summary Stats Cards */}
         <GoalSummary summary={summary} />
 
+        {/* Toolbar: Search + Quick Filters + Add Goal */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl border border-zinc-800 bg-[#09090B] shadow-sm">
+          <div className="flex flex-1 items-center gap-3">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+              <input
+                type="text"
+                placeholder="Search goals by name or category..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 rounded-xl border border-zinc-800 bg-zinc-900/80 text-white placeholder-zinc-500 text-xs font-medium focus:outline-none focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/30 transition-all"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleCreateNewGoal}
+              className="px-4 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-950 font-bold text-xs uppercase tracking-wider shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add Goal</span>
+            </button>
+          </div>
+        </div>
+
         {/* Goal Vault Grid */}
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 space-y-3">
-            <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
+            <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
             <p className="text-xs font-semibold text-slate-400">Loading savings vaults...</p>
           </div>
         ) : filteredGoals.length === 0 ? (
-          <div className="rounded-3xl border border-border-subtle bg-bg-surface p-12 text-center shadow-glass space-y-3">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-500/10 text-primary-500">
-              <Target className="h-6 w-6" />
+          <div className="rounded-3xl border border-zinc-800 bg-[#09090B] p-12 text-center shadow-glass space-y-4">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <Target className="h-7 w-7" />
             </div>
-            <h4 className="text-base font-bold text-slate-900 dark:text-white font-outfit">
-              No Savings Vaults Found
-            </h4>
-            <p className="text-xs text-slate-400 max-w-sm mx-auto">
-              Set up target vaults for your emergency fund, major purchases, or investments.
-            </p>
+            <div className="space-y-1">
+              <h4 className="text-lg font-black text-white font-outfit">
+                No Savings Vaults Found
+              </h4>
+              <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                Set up target vaults for your emergency fund, vehicle, vacation, or investments.
+              </p>
+            </div>
             <button
-              onClick={() => {
-                setEditingGoal(null);
-                setIsFormOpen(true);
-              }}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-primary-500 px-4 py-2 text-xs font-bold text-white shadow-md hover:bg-primary-600 transition-colors"
+              onClick={handleCreateNewGoal}
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
             >
               <Plus className="h-4 w-4" />
-              Create First Vault
+              <span>Create First Goal Vault</span>
             </button>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Existing Goal Cards */}
             {filteredGoals.map((g, i) => (
               <GoalVaultCard
                 key={g.id}

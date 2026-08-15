@@ -12,32 +12,9 @@ import HealthHistory from '../../components/financial-health/HealthHistory.jsx';
 import HealthBreakdown from '../../components/financial-health/HealthBreakdown.jsx';
 
 export const FinancialHealth = () => {
-  const [healthData, setHealthData] = useState(() => {
-    try {
-      const cached = sessionStorage.getItem('health_cache_data');
-      return cached ? JSON.parse(cached) : null;
-    } catch {
-      return null;
-    }
-  });
-
-  const [historyData, setHistoryData] = useState(() => {
-    try {
-      const cached = sessionStorage.getItem('health_cache_history');
-      return cached ? JSON.parse(cached) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  const [loading, setLoading] = useState(() => {
-    try {
-      return !sessionStorage.getItem('health_cache_data');
-    } catch {
-      return true;
-    }
-  });
-
+  const [healthData, setHealthData] = useState(null);
+  const [historyData, setHistoryData] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const loadData = useCallback(async () => {
@@ -50,11 +27,9 @@ export const FinancialHealth = () => {
 
       if (healthRes?.success && healthRes?.data) {
         setHealthData(healthRes.data);
-        sessionStorage.setItem('health_cache_data', JSON.stringify(healthRes.data));
       }
       if (historyRes?.success && historyRes?.data) {
         setHistoryData(historyRes.data || []);
-        sessionStorage.setItem('health_cache_history', JSON.stringify(historyRes.data || []));
       }
     } catch (err) {
       console.error('Financial Health Error:', err);
@@ -66,6 +41,14 @@ export const FinancialHealth = () => {
 
   useEffect(() => {
     loadData();
+
+    const handleLedgerUpdate = () => {
+      loadData();
+    };
+    window.addEventListener('ledger_updated', handleLedgerUpdate);
+    return () => {
+      window.removeEventListener('ledger_updated', handleLedgerUpdate);
+    };
   }, [loadData]);
 
   if (loading) {
@@ -135,7 +118,10 @@ export const FinancialHealth = () => {
         {/* ── 4. Parameter Breakdown & History Trajectory Open Panels ── */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch pt-2">
           <HealthBreakdown parameters={healthData?.parameters || []} />
-          <HealthHistory history={historyData} />
+          <HealthHistory
+            history={historyData}
+            currentScore={healthData?.overall_score}
+          />
         </div>
       </div>
     </PageContainer>

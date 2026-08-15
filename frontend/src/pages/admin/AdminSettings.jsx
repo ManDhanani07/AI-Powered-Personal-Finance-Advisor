@@ -2,7 +2,7 @@ import React from 'react';
 import { Settings, ShieldCheck, Lock, UserCheck, Key, Server } from 'lucide-react';
 import { showToast } from '../../components/common/ToastProvider.jsx';
 
-const ADMIN_EMAIL = "mandhanani536@gmail.com";
+const ADMIN_EMAIL = "fintech0707@gmail.com";
 
 export const AdminSettings = () => {
   const handleSaveConfig = (e) => {

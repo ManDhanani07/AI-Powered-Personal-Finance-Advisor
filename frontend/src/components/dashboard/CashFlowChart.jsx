@@ -183,7 +183,7 @@ export const CashFlowChart = memo(({ charts, loading, onSeeded }) => {
                   strokeColor={strokeColor}
                 />
               )}
-              activeDot={{ r: 7, strokeWidth: 3, stroke: '#FFFFFF' }}
+              activeDot={{ r: 7, strokeWidth: 2, stroke: '#4c1d95', fill: strokeColor }}
             />
           </AreaChart>
         </ResponsiveContainer>

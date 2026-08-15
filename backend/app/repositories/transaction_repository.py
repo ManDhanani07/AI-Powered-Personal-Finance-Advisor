@@ -58,6 +58,71 @@ class TransactionRepository(BaseRepository[Transaction]):
         await self.db.commit()
         return True
 
+    async def get_all_by_user(self, user_id: UUID) -> List[Transaction]:
+        """Fetch all un-deleted transactions for a user without pagination limits."""
+        query = (
+            select(Transaction)
+            .options(selectinload(Transaction.category))
+            .where(
+                and_(
+                    Transaction.user_id == user_id,
+                    Transaction.is_deleted == False,
+                )
+            )
+            .order_by(Transaction.transaction_date.desc())
+        )
+        result = await self.db.execute(query)
+        return list(result.scalars().all())
+
+    async def get_aggregate_stats(self, user_id: UUID) -> Dict[str, Any]:
+        """Compute high-speed database aggregations directly on PostgreSQL."""
+        # Total counts
+        cnt_q = select(func.count(Transaction.id)).where(
+            and_(Transaction.user_id == user_id, Transaction.is_deleted == False)
+        )
+        total_count = (await self.db.execute(cnt_q)).scalar() or 0
+
+        # Income aggregates
+        inc_q = select(
+            func.count(Transaction.id),
+            func.coalesce(func.sum(Transaction.amount), 0)
+        ).where(
+            and_(
+                Transaction.user_id == user_id,
+                Transaction.transaction_type == "INCOME",
+                Transaction.is_deleted == False
+            )
+        )
+        inc_res = (await self.db.execute(inc_q)).one()
+        income_count, total_income = inc_res[0], float(inc_res[1])
+
+        # Expense aggregates
+        exp_q = select(
+            func.count(Transaction.id),
+            func.coalesce(func.sum(Transaction.amount), 0)
+        ).where(
+            and_(
+                Transaction.user_id == user_id,
+                Transaction.transaction_type == "EXPENSE",
+                Transaction.is_deleted == False
+            )
+        )
+        exp_res = (await self.db.execute(exp_q)).one()
+        expense_count, total_expenses = exp_res[0], float(exp_res[1])
+
+        net_surplus = total_income - total_expenses
+        savings_rate = round((net_surplus / total_income * 100), 2) if total_income > 0 else 0.0
+
+        return {
+            "total_count": total_count,
+            "income_count": income_count,
+            "total_income": total_income,
+            "expense_count": expense_count,
+            "total_expenses": total_expenses,
+            "net_surplus": net_surplus,
+            "savings_rate": savings_rate,
+        }
+
     async def get_by_user(
         self,
         user_id: UUID,
