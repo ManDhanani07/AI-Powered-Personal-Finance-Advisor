@@ -50,9 +50,17 @@ def get_goal_repository(db: AsyncSession = Depends(get_db)) -> GoalRepository:
     return GoalRepository(db)
 
 
+from app.repositories.email_verification_repository import EmailVerificationRepository
+
+
+def get_email_verification_repository(db: AsyncSession = Depends(get_db)) -> EmailVerificationRepository:
+    return EmailVerificationRepository(db)
+
+
 def get_auth_service(db: AsyncSession = Depends(get_db)) -> AuthService:
     user_repo = UserRepository(db)
-    return AuthService(user_repo)
+    email_verif_repo = EmailVerificationRepository(db)
+    return AuthService(user_repo, email_verif_repo)
 
 
 def get_category_service(db: AsyncSession = Depends(get_db)) -> CategoryService:

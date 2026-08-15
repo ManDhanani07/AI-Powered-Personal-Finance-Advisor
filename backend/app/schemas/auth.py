@@ -72,7 +72,29 @@ class ForgotPasswordRequest(BaseModel):
     email: EmailStr
 
 
+class RegisterResponse(BaseModel):
+    message: str
+    verification_required: bool = True
+    email: str
+
+
+class VerifyEmailRequest(BaseModel):
+    email: EmailStr
+    otp: str = Field(..., min_length=6, max_length=6, pattern=r"^\d{6}$", description="6-digit numeric OTP")
+
+
+class ResendOTPRequest(BaseModel):
+    email: EmailStr
+    purpose: Optional[str] = Field(default="SIGNUP", description="SIGNUP, PASSWORD_RESET, or CHANGE_EMAIL")
+
+
+class VerifyResetOTPRequest(BaseModel):
+    email: EmailStr
+    otp: str = Field(..., min_length=6, max_length=6, pattern=r"^\d{6}$", description="6-digit numeric OTP")
+
+
 class ResetPasswordRequest(BaseModel):
+    email: Optional[EmailStr] = None
     token: str
     new_password: str = Field(..., min_length=8)
 

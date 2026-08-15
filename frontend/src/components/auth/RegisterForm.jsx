@@ -16,7 +16,6 @@ import {
   GraduationCap,
   Briefcase,
   Building2,
-  ShieldCheck,
   Sparkles,
   Eye,
   EyeOff,
@@ -52,14 +51,6 @@ const PERSONAS = [
   },
 ];
 
-const BANKS = [
-  { name: 'HDFC Bank', logo: '🏦' },
-  { name: 'ICICI Bank', logo: '🏛️' },
-  { name: 'State Bank of India', logo: '💳' },
-  { name: 'Axis Bank', logo: '🏦' },
-  { name: 'Zerodha Kite', logo: '📈' },
-];
-
 // Shared dark input class
 const INPUT_BASE = 'block w-full rounded-xl border py-2 text-xs bg-[#09090B] text-white placeholder-slate-700 transition-all focus:outline-none focus:ring-2';
 const INPUT_NORMAL = 'border-zinc-800 focus:border-emerald-500/50 focus:ring-emerald-500/10';
@@ -72,7 +63,6 @@ export const RegisterForm = () => {
 
   const [step, setStep] = useState(1);
   const [selectedPersona, setSelectedPersona] = useState('professional');
-  const [selectedBanks, setSelectedBanks] = useState(['HDFC Bank']);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -120,14 +110,6 @@ export const RegisterForm = () => {
     }
   };
 
-  const goToStep3 = () => setStep(3);
-
-  const toggleBankSelect = (bankName) => {
-    setSelectedBanks((prev) =>
-      prev.includes(bankName) ? prev.filter((b) => b !== bankName) : [...prev, bankName]
-    );
-  };
-
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     try {
@@ -140,9 +122,15 @@ export const RegisterForm = () => {
         monthly_income: parseFloat(data.monthly_income) || 0.0,
         occupation: selectedPersona,
       };
-      await registerAuth(payload);
-      toast.success('Account created successfully! Welcome to FinAdvisor.', { icon: '🎉' });
-      navigate(ROUTES.DASHBOARD);
+      const res = await registerAuth(payload);
+      toast.success('Verification code sent to your email! Please enter the 6-digit code.', { icon: '✉️' });
+      navigate(ROUTES.AUTH.VERIFY_EMAIL, {
+        state: {
+          email: data.email,
+          maskedEmail: res?.data?.email,
+          purpose: 'SIGNUP',
+        },
+      });
     } catch (error) {
       toast.error(error.message || 'Registration failed. Please try again.');
     } finally {
@@ -166,12 +154,12 @@ export const RegisterForm = () => {
           Create Free Account
         </h2>
         <p className="mt-0.5 text-[11px] text-slate-500">
-          Step {step} of 3: {step === 1 ? 'Account Credentials' : step === 2 ? 'Personal Setup' : 'Bank Integration'}
+          Step {step} of 2: {step === 1 ? 'Account Credentials' : 'Personal Financial Setup'}
         </p>
 
         {/* Step Progress Dots */}
         <div className="mt-2 flex items-center justify-center gap-1.5">
-          {[1, 2, 3].map((s) => (
+          {[1, 2].map((s) => (
             <div
               key={s}
               className={`h-1 rounded-full transition-all duration-300 ${
@@ -193,14 +181,27 @@ export const RegisterForm = () => {
           {step === 1 && (
             <motion.div
               key="step1"
-              initial={{ opacity: 0, x: 20 }}
+              initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
+              exit={{ opacity: 0, x: 20 }}
               transition={{ duration: 0.22 }}
-              className="space-y-2.5"
+              className="space-y-3"
             >
-              {/* Name Grid */}
-              <div className="grid grid-cols-2 gap-2.5">
+              {/* Google OAuth Instant Register */}
+              <SocialLoginButtons />
+
+              {/* Divider */}
+              <div className="relative my-2">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-zinc-800" />
+                </div>
+                <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-widest">
+                  <span className="bg-[#121216] px-2 text-slate-600">or manual registration</span>
+                </div>
+              </div>
+
+              {/* First & Last Name */}
+              <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className={LABEL_BASE}>First Name</label>
                   <div className="relative">
@@ -209,25 +210,32 @@ export const RegisterForm = () => {
                     </div>
                     <input
                       type="text"
-                      placeholder="John"
-                      autoComplete="given-name"
-                      {...register('first_name', { required: 'Required' })}
-                      className={`${INPUT_BASE} pl-9 pr-2.5 ${errors.first_name ? INPUT_ERROR : INPUT_NORMAL}`}
+                      placeholder="Alex"
+                      {...register('first_name', { required: 'First name is required' })}
+                      className={`${INPUT_BASE} pl-9 pr-3 ${errors.first_name ? INPUT_ERROR : INPUT_NORMAL}`}
                     />
                   </div>
-                  {errors.first_name && <p className="text-[10px] text-rose-400 mt-0.5">{errors.first_name.message}</p>}
+                  {errors.first_name && (
+                    <p className="mt-0.5 text-[10px] text-rose-400">{errors.first_name.message}</p>
+                  )}
                 </div>
 
                 <div>
                   <label className={LABEL_BASE}>Last Name</label>
-                  <input
-                    type="text"
-                    placeholder="Doe"
-                    autoComplete="family-name"
-                    {...register('last_name', { required: 'Required' })}
-                    className={`${INPUT_BASE} px-3 ${errors.last_name ? INPUT_ERROR : INPUT_NORMAL}`}
-                  />
-                  {errors.last_name && <p className="text-[10px] text-rose-400 mt-0.5">{errors.last_name.message}</p>}
+                  <div className="relative">
+                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-600">
+                      <User className="h-3.5 w-3.5" />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Vance"
+                      {...register('last_name', { required: 'Last name is required' })}
+                      className={`${INPUT_BASE} pl-9 pr-3 ${errors.last_name ? INPUT_ERROR : INPUT_NORMAL}`}
+                    />
+                  </div>
+                  {errors.last_name && (
+                    <p className="mt-0.5 text-[10px] text-rose-400">{errors.last_name.message}</p>
+                  )}
                 </div>
               </div>
 
@@ -240,16 +248,20 @@ export const RegisterForm = () => {
                   </div>
                   <input
                     type="email"
-                    placeholder="john.doe@example.com"
-                    autoComplete="email"
+                    placeholder="alex@company.com"
                     {...register('email', {
-                      required: 'Email is required',
-                      pattern: { value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, message: 'Invalid email' },
+                      required: 'Email address is required',
+                      pattern: {
+                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                        message: 'Invalid email address',
+                      },
                     })}
                     className={`${INPUT_BASE} pl-9 pr-3 ${errors.email ? INPUT_ERROR : INPUT_NORMAL}`}
                   />
                 </div>
-                {errors.email && <p className="text-[10px] text-rose-400 mt-0.5">{errors.email.message}</p>}
+                {errors.email && (
+                  <p className="mt-0.5 text-[10px] text-rose-400">{errors.email.message}</p>
+                )}
               </div>
 
               {/* Password */}
@@ -260,26 +272,92 @@ export const RegisterForm = () => {
                     <Lock className="h-3.5 w-3.5" />
                   </div>
                   <input
-                    id="password"
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="••••••••"
-                    autoComplete="new-password"
+                    placeholder="Min. 8 characters"
                     {...register('password', {
                       required: 'Password is required',
-                      validate: () => passedCount === 5 || 'Password must satisfy all requirements',
+                      validate: () => passedCount === 5 || 'Password does not meet all criteria',
                     })}
                     className={`${INPUT_BASE} pl-9 pr-9 ${errors.password ? INPUT_ERROR : INPUT_NORMAL}`}
                   />
                   <button
                     type="button"
-                    tabIndex={-1}
-                    onClick={() => setShowPassword((s) => !s)}
+                    onClick={() => setShowPassword(!showPassword)}
                     className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-600 hover:text-slate-400"
                   >
                     {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                   </button>
                 </div>
-                {errors.password && <p className="text-[10px] text-rose-400 mt-0.5">{errors.password.message}</p>}
+
+                {/* Password Strength Checklist */}
+                {watchPassword && (
+                  <div className="mt-2 rounded-xl border border-zinc-800 bg-[#09090B] p-2 space-y-1.5">
+                    <div className="flex items-center justify-between text-[10px] font-bold">
+                      <span className="text-slate-500 uppercase tracking-widest">Strength</span>
+                      <span className={passedCount === 5 ? 'text-emerald-400' : 'text-amber-400'}>
+                        {passedCount}/5 Satisfied
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-5 gap-1 h-1 w-full">
+                      {[1, 2, 3, 4, 5].map((lvl) => (
+                        <div
+                          key={lvl}
+                          className={`h-full rounded-full transition-all duration-300 ${
+                            lvl <= passedCount
+                              ? passedCount === 5
+                                ? 'bg-emerald-500'
+                                : 'bg-amber-500'
+                              : 'bg-zinc-800'
+                          }`}
+                        />
+                      ))}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-1 pt-1 text-[10px]">
+                      <div className="flex items-center gap-1 text-slate-500">
+                        {passwordCriteria.length ? (
+                          <Check className="h-3 w-3 text-emerald-400" />
+                        ) : (
+                          <X className="h-3 w-3 text-zinc-700" />
+                        )}
+                        <span className={passwordCriteria.length ? 'text-slate-300' : ''}>8+ chars</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-slate-500">
+                        {passwordCriteria.uppercase ? (
+                          <Check className="h-3 w-3 text-emerald-400" />
+                        ) : (
+                          <X className="h-3 w-3 text-zinc-700" />
+                        )}
+                        <span className={passwordCriteria.uppercase ? 'text-slate-300' : ''}>Uppercase (A-Z)</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-slate-500">
+                        {passwordCriteria.lowercase ? (
+                          <Check className="h-3 w-3 text-emerald-400" />
+                        ) : (
+                          <X className="h-3 w-3 text-zinc-700" />
+                        )}
+                        <span className={passwordCriteria.lowercase ? 'text-slate-300' : ''}>Lowercase (a-z)</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-slate-500">
+                        {passwordCriteria.number ? (
+                          <Check className="h-3 w-3 text-emerald-400" />
+                        ) : (
+                          <X className="h-3 w-3 text-zinc-700" />
+                        )}
+                        <span className={passwordCriteria.number ? 'text-slate-300' : ''}>Number (0-9)</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-slate-500 col-span-2">
+                        {passwordCriteria.special ? (
+                          <Check className="h-3 w-3 text-emerald-400" />
+                        ) : (
+                          <X className="h-3 w-3 text-zinc-700" />
+                        )}
+                        <span className={passwordCriteria.special ? 'text-slate-300' : ''}>Special symbol (!@#$)</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Confirm Password */}
@@ -290,50 +368,48 @@ export const RegisterForm = () => {
                     <Lock className="h-3.5 w-3.5" />
                   </div>
                   <input
-                    id="confirm_password"
                     type={showConfirmPassword ? 'text' : 'password'}
-                    placeholder="••••••••"
-                    autoComplete="new-password"
+                    placeholder="Repeat password"
                     {...register('confirm_password', {
                       required: 'Please confirm password',
-                      validate: (v) => v === watchPassword || 'Passwords do not match',
+                      validate: (val) => val === watchPassword || 'Passwords do not match',
                     })}
                     className={`${INPUT_BASE} pl-9 pr-9 ${errors.confirm_password ? INPUT_ERROR : INPUT_NORMAL}`}
                   />
                   <button
                     type="button"
-                    tabIndex={-1}
-                    onClick={() => setShowConfirmPassword((s) => !s)}
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-600 hover:text-slate-400"
                   >
                     {showConfirmPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                   </button>
                 </div>
-                {errors.confirm_password && <p className="text-[10px] text-rose-400 mt-0.5">{errors.confirm_password.message}</p>}
+                {errors.confirm_password && (
+                  <p className="mt-0.5 text-[10px] text-rose-400">{errors.confirm_password.message}</p>
+                )}
               </div>
 
-              {/* Action Button */}
+              {/* Next Button */}
               <button
                 type="button"
                 onClick={goToStep2}
-                className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl bg-white py-2.5 text-xs font-bold text-slate-950 shadow-md transition-all hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.99]"
+                disabled={passedCount < 5}
+                className="w-full flex items-center justify-center gap-2 rounded-xl bg-white py-2.5 text-xs font-bold text-slate-950 transition-all hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed mt-1"
               >
-                <span>Continue to Personal Setup</span>
+                <span>Continue to Financial Setup</span>
                 <ArrowRight className="h-3.5 w-3.5" />
               </button>
 
-              <SocialLoginButtons />
-
-              <p className="pt-1 text-center text-[11px] text-slate-500">
+              <p className="text-center text-[11px] text-slate-500 pt-1">
                 Already have an account?{' '}
                 <Link to={ROUTES.AUTH.LOGIN} className="font-semibold text-emerald-400 hover:text-emerald-300">
-                  Sign in instead
+                  Sign in
                 </Link>
               </p>
             </motion.div>
           )}
 
-          {/* ── STEP 2: PERSONAL SETUP ── */}
+          {/* ── STEP 2: PERSONA & MONTHLY INCOME ── */}
           {step === 2 && (
             <motion.div
               key="step2"
@@ -344,8 +420,8 @@ export const RegisterForm = () => {
               className="space-y-3"
             >
               <div>
-                <label className={LABEL_BASE}>Financial Persona / Occupation</label>
-                <div className="grid grid-cols-1 gap-2">
+                <label className={LABEL_BASE}>Select Your Financial Profile</label>
+                <div className="space-y-2">
                   {PERSONAS.map((p) => {
                     const Icon = p.icon;
                     const isSelected = selectedPersona === p.id;
@@ -357,18 +433,21 @@ export const RegisterForm = () => {
                           setSelectedPersona(p.id);
                           setValue('monthly_income', p.defaultIncome);
                         }}
-                        className={`flex items-start gap-2.5 rounded-xl border p-2.5 text-left transition-all ${
+                        className={`w-full flex items-start gap-2.5 rounded-xl border p-2.5 text-left transition-all ${
                           isSelected
-                            ? 'border-emerald-500/60 bg-emerald-500/10 text-white shadow-sm'
+                            ? 'border-emerald-500/60 bg-emerald-500/10 text-white'
                             : 'border-zinc-800 bg-[#09090B] text-slate-400 hover:border-zinc-700'
                         }`}
                       >
-                        <div className={`rounded-lg p-1.5 ${isSelected ? 'bg-emerald-500 text-slate-950' : 'bg-zinc-800 text-slate-400'}`}>
+                        <div className={`mt-0.5 rounded-lg p-1.5 ${isSelected ? 'bg-emerald-500/20 text-emerald-400' : 'bg-zinc-800 text-slate-400'}`}>
                           <Icon className="h-4 w-4" />
                         </div>
-                        <div>
-                          <p className="text-xs font-bold text-white">{p.title}</p>
-                          <p className="text-[10px] text-slate-400 leading-tight mt-0.5">{p.desc}</p>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-white">{p.title}</span>
+                            {isSelected && <Check className="h-3.5 w-3.5 text-emerald-400 shrink-0" />}
+                          </div>
+                          <p className="text-[10px] text-slate-400 mt-0.5 leading-snug">{p.desc}</p>
                         </div>
                       </button>
                     );
@@ -408,79 +487,11 @@ export const RegisterForm = () => {
                 </div>
               </div>
 
-              {/* Buttons */}
-              <div className="flex gap-2 pt-1">
-                <button
-                  type="button"
-                  onClick={() => setStep(1)}
-                  className="flex items-center justify-center gap-1.5 rounded-xl border border-zinc-800 bg-[#09090B] px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-zinc-800"
-                >
-                  <ArrowLeft className="h-3.5 w-3.5" />
-                  <span>Back</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={goToStep3}
-                  className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-white py-2 text-xs font-bold text-slate-950 hover:bg-slate-100"
-                >
-                  <span>Continue to Bank Sync</span>
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            </motion.div>
-          )}
-
-          {/* ── STEP 3: BANK INTEGRATION ── */}
-          {step === 3 && (
-            <motion.div
-              key="step3"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.22 }}
-              className="space-y-3"
-            >
-              <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-2.5 text-center">
-                <div className="flex justify-center mb-1">
-                  <ShieldCheck className="h-5 w-5 text-emerald-400" />
-                </div>
-                <p className="text-xs font-bold text-white">RBI Account Aggregator (AA) Ready</p>
-                <p className="text-[10px] text-slate-400 mt-0.5">
-                  Select your primary accounts to auto-sync transactions safely via 256-bit AES encryption.
-                </p>
-              </div>
-
-              <div>
-                <label className={LABEL_BASE}>Select Your Financial Accounts</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {BANKS.map((b) => {
-                    const isSelected = selectedBanks.includes(b.name);
-                    return (
-                      <button
-                        key={b.name}
-                        type="button"
-                        onClick={() => toggleBankSelect(b.name)}
-                        className={`flex items-center gap-2 rounded-xl border p-2 text-left transition-all ${
-                          isSelected
-                            ? 'border-emerald-500/60 bg-emerald-500/10 text-white'
-                            : 'border-zinc-800 bg-[#09090B] text-slate-400 hover:border-zinc-700'
-                        }`}
-                      >
-                        <span className="text-sm">{b.logo}</span>
-                        <span className="text-[11px] font-semibold flex-1 truncate">{b.name}</span>
-                        {isSelected && <Check className="h-3.5 w-3.5 text-emerald-400 shrink-0" />}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Final Submit */}
+              {/* Submit Buttons */}
               <div className="flex gap-2 pt-2">
                 <button
                   type="button"
-                  onClick={() => setStep(2)}
+                  onClick={() => setStep(1)}
                   className="flex items-center justify-center gap-1.5 rounded-xl border border-zinc-800 bg-[#09090B] px-4 py-2.5 text-xs font-semibold text-slate-300 hover:bg-zinc-800"
                 >
                   <ArrowLeft className="h-3.5 w-3.5" />
@@ -490,11 +501,11 @@ export const RegisterForm = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-emerald-500 py-2.5 text-xs font-bold text-slate-950 shadow-lg shadow-emerald-500/20 hover:bg-emerald-400 disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 py-2.5 text-xs font-black uppercase tracking-wider text-slate-950 shadow-lg shadow-emerald-500/20 hover:scale-[1.01] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? (
                     <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <Loader2 className="h-4 w-4 animate-spin text-slate-950" />
                       <span>Creating Account...</span>
                     </>
                   ) : (

@@ -43,6 +43,8 @@ class User(Base, UUIDMixin, TimestampMixin):
     role: Mapped[str] = mapped_column(String(50), default="USER", nullable=False, index=True)
 
     # Enterprise Authentication & Security Fields
+    google_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True, index=True)
+    auth_provider: Mapped[str] = mapped_column(String(50), default="email", nullable=False)
     email_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     email_verification_token: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     password_reset_token: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)

@@ -13,6 +13,27 @@ export const authService = {
   },
 
   /**
+   * Verify email address with 6-digit OTP
+   */
+  async verifyEmail(data) {
+    return await apiClient.post(API_URLS.AUTH.VERIFY_EMAIL, data);
+  },
+
+  /**
+   * Resend 6-digit verification code
+   */
+  async resendVerificationCode(data) {
+    return await apiClient.post(API_URLS.AUTH.RESEND_CODE, data);
+  },
+
+  /**
+   * Verify password reset 6-digit OTP
+   */
+  async verifyResetOtp(data) {
+    return await apiClient.post(API_URLS.AUTH.VERIFY_RESET_OTP, data);
+  },
+
+  /**
    * Log in user with credentials
    */
   async login(data) {

@@ -21,6 +21,7 @@ const RouteLoadingFallback = () => (
 // Dynamic Lazy-Loaded Auth Pages
 const Login = lazy(() => import('../pages/auth/Login.jsx'));
 const Register = lazy(() => import('../pages/auth/Register.jsx'));
+const VerifyEmail = lazy(() => import('../pages/auth/VerifyEmail.jsx'));
 const ForgotPassword = lazy(() => import('../pages/auth/ForgotPassword.jsx'));
 const ResetPassword = lazy(() => import('../pages/auth/ResetPassword.jsx'));
 
@@ -114,6 +115,22 @@ export const AppRoutes = () => {
           element={
             <GuestRoute>
               <Register />
+            </GuestRoute>
+          }
+        />
+        <Route
+          path={ROUTES.AUTH.VERIFY_EMAIL}
+          element={
+            <GuestRoute>
+              <VerifyEmail />
+            </GuestRoute>
+          }
+        />
+        <Route
+          path="/verify-email"
+          element={
+            <GuestRoute>
+              <VerifyEmail />
             </GuestRoute>
           }
         />

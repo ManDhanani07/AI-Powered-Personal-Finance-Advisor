@@ -132,3 +132,39 @@ def verify_token(token: str, token_type: str = "access") -> Dict[str, Any]:
 def generate_random_token(length: int = 32) -> str:
     """Generate secure cryptographically random hex token."""
     return secrets.token_hex(length // 2)
+
+
+def generate_numeric_otp(length: int = 6) -> str:
+    """
+    Generate cryptographically secure numeric OTP using secrets module.
+    Example: '583214'
+    """
+    # Generate integer in range [10^(length-1), 10^length - 1]
+    min_val = 10 ** (length - 1)
+    max_val = (10 ** length) - 1
+    # secrets.randbelow is cryptographically secure
+    otp_int = min_val + secrets.randbelow(max_val - min_val + 1)
+    return str(otp_int)
+
+
+def hash_otp(otp: str) -> str:
+    """
+    Hash OTP code using SHA-256 with project SECRET_KEY pepper for secure database storage.
+    Never stores raw OTP.
+    """
+    import hashlib
+    if not otp:
+        raise BadRequestException("OTP cannot be empty")
+    data_to_hash = f"{settings.SECRET_KEY}:{otp.strip()}".encode("utf-8")
+    return hashlib.sha256(data_to_hash).hexdigest()
+
+
+def verify_otp_hash(plain_otp: str, hashed_otp: str) -> bool:
+    """
+    Constant-time comparison of plain OTP against stored hash to prevent timing attacks.
+    """
+    import hmac
+    if not plain_otp or not hashed_otp:
+        return False
+    computed_hash = hash_otp(plain_otp)
+    return hmac.compare_digest(computed_hash, hashed_otp)
