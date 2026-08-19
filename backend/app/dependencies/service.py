@@ -157,4 +157,9 @@ def get_csv_import_service(db: AsyncSession = Depends(get_db)) -> CsvImportServi
 def get_expense_prediction_service(db: AsyncSession = Depends(get_db)) -> ExpensePredictionService:
     tx_repo = TransactionRepository(db)
     cat_repo = CategoryRepository(db)
-    return ExpensePredictionService(transaction_repository=tx_repo, category_repository=cat_repo)
+    budget_repo = BudgetRepository(db)
+    return ExpensePredictionService(
+        transaction_repository=tx_repo,
+        category_repository=cat_repo,
+        budget_repository=budget_repo
+    )

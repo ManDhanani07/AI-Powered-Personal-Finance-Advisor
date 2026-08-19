@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
   BrainCircuit,
   RefreshCw,
   Sparkles,
   PlusCircle,
-  Zap,
   AlertCircle,
   Database,
-  History,
-  TrendingUp,
+  Sliders,
+  ChevronDown,
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 
@@ -19,11 +18,30 @@ import { ROUTES } from '../../constants/index.js';
 import transactionService from '../../services/transactionService.js';
 import useExpensePrediction from '../../hooks/useExpensePrediction.js';
 
-import PredictionHeroCard from '../../components/expense-prediction/PredictionHeroCard.jsx';
-import QuantileRangeGauge from '../../components/expense-prediction/QuantileRangeGauge.jsx';
-import TierExpenseBreakdown from '../../components/expense-prediction/TierExpenseBreakdown.jsx';
+import PredictionTopKpiCards from '../../components/expense-prediction/PredictionTopKpiCards.jsx';
+import UnifiedExpenseForecastChart from '../../components/expense-prediction/UnifiedExpenseForecastChart.jsx';
+import DualForecastInsights from '../../components/expense-prediction/DualForecastInsights.jsx';
+import CategoryForecastList from '../../components/expense-prediction/CategoryForecastList.jsx';
+import ForecastVsBudgetCard from '../../components/expense-prediction/ForecastVsBudgetCard.jsx';
+import RecentPerformanceGrid from '../../components/expense-prediction/RecentPerformanceGrid.jsx';
+import AiForecastInsightCard from '../../components/expense-prediction/AiForecastInsightCard.jsx';
 import ScenarioSimulatorCard from '../../components/expense-prediction/ScenarioSimulatorCard.jsx';
-import SpendingRiskAuditCard from '../../components/expense-prediction/SpendingRiskAuditCard.jsx';
+import TierExpenseBreakdown from '../../components/expense-prediction/TierExpenseBreakdown.jsx';
+
+const MONTH_OPTIONS = [
+  { num: 1, name: 'January' },
+  { num: 2, name: 'February' },
+  { num: 3, name: 'March' },
+  { num: 4, name: 'April' },
+  { num: 5, name: 'May' },
+  { num: 6, name: 'June' },
+  { num: 7, name: 'July' },
+  { num: 8, name: 'August' },
+  { num: 9, name: 'September' },
+  { num: 10, name: 'October' },
+  { num: 11, name: 'November' },
+  { num: 12, name: 'December' },
+];
 
 export const ExpensePredictionPage = () => {
   const navigate = useNavigate();
@@ -43,6 +61,7 @@ export const ExpensePredictionPage = () => {
   } = useExpensePrediction();
 
   const [seeding, setSeeding] = useState(false);
+  const [showSimulator, setShowSimulator] = useState(false);
 
   const handleSeedTransactions = async () => {
     setSeeding(true);
@@ -62,39 +81,75 @@ export const ExpensePredictionPage = () => {
 
   return (
     <PageContainer
-      title="AI Expense Prediction & Financial Advisory Engine"
-      description="Multi-scale adaptive machine learning forecasting next-month outflows, P10–P90 quantile intervals, and safe budget ceilings."
+      title="Expense Prediction"
+      description="AI-powered forecast based on your historical spending"
     >
       <div className="space-y-6 max-w-[1920px] w-full mx-auto">
-        {/* Top Control Bar */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-4 rounded-3xl border border-zinc-800 bg-[#09090B] shadow-glass backdrop-blur-xl">
-          <div className="flex items-center space-x-2">
-            <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              <BrainCircuit className="w-4 h-4" />
+        {/* Top Header & Horizon Selector matching blueprint */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-5 rounded-3xl border border-zinc-800 bg-[#09090B] shadow-glass backdrop-blur-xl">
+          <div className="flex items-center space-x-3">
+            <div className="p-2.5 rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <BrainCircuit className="w-5 h-5 animate-pulse" />
             </div>
             <div>
-              <span className="text-xs font-black uppercase text-white font-outfit">
-                Multi-Scale Adaptive Engine
-              </span>
-              <p className="text-[11px] text-slate-400 font-normal">
-                EMAs + Residual Gradient Booster (R²: 0.9990, WPA: 98.86%)
+              <div className="flex items-center space-x-2">
+                <h1 className="text-xl sm:text-2xl font-black text-white font-outfit tracking-tight">
+                  Expense Prediction
+                </h1>
+                {isSimulated && (
+                  <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 font-black text-[10px] font-outfit uppercase animate-pulse">
+                    Simulation Active
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-400 font-normal">
+                AI-powered forecast based on your historical spending
               </p>
             </div>
           </div>
 
+          {/* Controls: Target Month Selector & Refresh */}
           <div className="flex items-center space-x-2.5 justify-end">
+            <div className="relative">
+              <select
+                value={targetMonth || ''}
+                onChange={(e) => changeTargetMonth(e.target.value)}
+                className="appearance-none rounded-2xl border border-zinc-700 bg-zinc-900/90 pl-4 pr-10 py-2 text-xs font-black text-slate-200 focus:outline-none focus:border-emerald-500 cursor-pointer font-outfit shadow-sm"
+              >
+                <option value="">This Month (Auto-Resolved)</option>
+                {MONTH_OPTIONS.map((m) => (
+                  <option key={m.num} value={m.num}>
+                    {m.name} Forecast
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            </div>
+
             <button
               onClick={refresh}
               disabled={refreshing || loading}
-              className="p-2 rounded-xl border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-slate-300 hover:text-white transition-all cursor-pointer disabled:opacity-50"
+              className="p-2.5 rounded-2xl border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-slate-300 hover:text-white transition-all cursor-pointer disabled:opacity-50"
               title="Refresh Live Forecast"
             >
               <RefreshCw className={`w-4 h-4 text-emerald-400 ${refreshing ? 'animate-spin' : ''}`} />
             </button>
 
             <button
+              onClick={() => setShowSimulator(!showSimulator)}
+              className={`px-3.5 py-2 rounded-2xl border text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer font-outfit ${
+                showSimulator
+                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                  : 'bg-zinc-900 hover:bg-zinc-800 border-zinc-800 text-slate-300'
+              }`}
+            >
+              <Sliders className="w-3.5 h-3.5" />
+              <span>{showSimulator ? 'Hide Simulator' : 'What-If Simulator'}</span>
+            </button>
+
+            <button
               onClick={() => navigate(ROUTES.TRANSACTIONS)}
-              className="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs font-bold text-slate-200 hover:text-white transition-all flex items-center space-x-1.5 cursor-pointer font-outfit"
+              className="px-4 py-2 rounded-2xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs font-bold text-slate-200 hover:text-white transition-all flex items-center space-x-1.5 cursor-pointer font-outfit"
             >
               <PlusCircle className="w-3.5 h-3.5 text-emerald-400" />
               <span>Log Transaction</span>
@@ -102,17 +157,45 @@ export const ExpensePredictionPage = () => {
           </div>
         </div>
 
+        {/* Optional Expandable Scenario Simulator */}
+        <AnimatePresence>
+          {showSimulator && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="overflow-hidden"
+            >
+              <ScenarioSimulatorCard
+                onRunSimulation={runSimulation}
+                onResetSimulation={resetSimulation}
+                isSimulated={isSimulated}
+                simulating={simulating}
+                targetMonth={targetMonth}
+                onChangeTargetMonth={changeTargetMonth}
+                baselineIncome={data?.sanitized_summary?.robust_income}
+                baselineRoutineSpend={data?.sanitized_summary?.clean_routine_spend}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Loading Skeleton */}
         {loading ? (
           <div className="space-y-6">
-            <div className="animate-pulse h-64 rounded-3xl bg-zinc-900/60 border border-zinc-800" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="animate-pulse h-36 rounded-3xl bg-zinc-900/60 border border-zinc-800" />
+              <div className="animate-pulse h-36 rounded-3xl bg-zinc-900/60 border border-zinc-800" />
+              <div className="animate-pulse h-36 rounded-3xl bg-zinc-900/60 border border-zinc-800" />
+            </div>
+            <div className="animate-pulse h-72 rounded-3xl bg-zinc-900/60 border border-zinc-800" />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="animate-pulse h-48 rounded-3xl bg-zinc-900/60 border border-zinc-800" />
               <div className="animate-pulse h-48 rounded-3xl bg-zinc-900/60 border border-zinc-800" />
             </div>
           </div>
         ) : !hasData ? (
-          /* Cold-Start / Insufficient Data Banner */
+          /* Cold-Start Empty State */
           <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -159,44 +242,50 @@ export const ExpensePredictionPage = () => {
             </div>
           </motion.div>
         ) : (
-          /* Main Dashboard Content Grid */
+          /* Main Blueprint Layout */
           <div className="space-y-6">
-            {/* Primary Hero Forecast Card */}
-            <PredictionHeroCard
+            {/* 1. TOP 3 KPI METRIC CARDS */}
+            <PredictionTopKpiCards
               forecast={data?.forecast}
               summary={data?.sanitized_summary}
-              isSimulated={isSimulated}
-              onResetSimulation={resetSimulation}
+              trendMetrics={data?.trend_metrics}
+              overspendingRisk={data?.overspending_risk}
             />
 
-            {/* Middle Row: Quantile Gauge & 3-Tier Decomposition */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <QuantileRangeGauge
-                confidenceRange={data?.forecast?.confidence_range_p10_p90}
-                predictedSpend={data?.forecast?.predicted_routine_spend}
-                safeCeiling={data?.forecast?.safe_total_budget_ceiling}
-              />
-
-              <TierExpenseBreakdown summary={data?.sanitized_summary} />
-            </div>
-
-            {/* Interactive What-If Scenario Simulator */}
-            <ScenarioSimulatorCard
-              onRunSimulation={runSimulation}
-              onResetSimulation={resetSimulation}
-              isSimulated={isSimulated}
-              simulating={simulating}
-              targetMonth={targetMonth}
-              onChangeTargetMonth={changeTargetMonth}
-              baselineIncome={data?.sanitized_summary?.robust_income}
-              baselineRoutineSpend={data?.sanitized_summary?.clean_routine_spend}
+            {/* 2. EXPENSE FORECAST UNIFIED CHART */}
+            <UnifiedExpenseForecastChart
+              historicalTrend={data?.historical_trend}
+              multiHorizonForecast={data?.multi_horizon_forecast}
+              forecast={data?.forecast}
             />
 
-            {/* Risk Assessment Audit & Model Metadata */}
-            <SpendingRiskAuditCard
+            {/* 3. DUAL INSIGHTS: WHY THIS FORECAST & FORECAST RANGE */}
+            <DualForecastInsights
+              drivers={data?.why_this_forecast_drivers}
+              confidenceRange={data?.forecast?.confidence_range_p10_p90}
+              predictedSpend={data?.forecast?.predicted_routine_spend}
+            />
+
+            {/* 4. CATEGORY FORECAST (HORIZONTAL BARS) */}
+            <CategoryForecastList
+              categoryForecast={data?.category_forecast}
+              totalPredicted={data?.forecast?.predicted_routine_spend}
+            />
+
+            {/* 5. FORECAST vs BUDGET */}
+            <ForecastVsBudgetCard budgetComparison={data?.budget_comparison} />
+
+            {/* 6. RECENT PERFORMANCE MULTI-PERIOD GRID */}
+            <RecentPerformanceGrid benchmarks={data?.performance_benchmarks} />
+
+            {/* 7. AI FORECAST INSIGHT & ASK AI ACTION */}
+            <AiForecastInsightCard
               audit={data?.financial_health_audit}
-              metadata={metadata}
+              forecast={data?.forecast}
             />
+
+            {/* 8. TIER EXPENSE BREAKDOWN */}
+            <TierExpenseBreakdown summary={data?.sanitized_summary} />
           </div>
         )}
       </div>

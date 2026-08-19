@@ -55,6 +55,56 @@ class HistoricalMonthData(BaseModel):
     is_projected: bool = False
 
 
+class CategoryForecastItem(BaseModel):
+    category: str
+    predicted_amount: float
+    percentage: float
+    color: str = "#10B981"
+    historical_avg: float = 0.0
+
+
+class PerformanceBenchmarks(BaseModel):
+    this_month_predicted: float
+    last_month_actual: float
+    three_month_avg: float
+    six_month_avg: float
+
+
+class BudgetComparison(BaseModel):
+    monthly_budget_limit: float
+    expected_expense: float
+    remaining_budget: float
+    utilization_pct: float
+    status_alert: str
+    is_over_budget: bool = False
+    has_custom_budget: bool = False
+
+
+class SpendingTrendMetrics(BaseModel):
+    direction: str = "STABLE"  # INCREASING, DECREASING, STABLE
+    direction_symbol: str = "→"  # ↗, ↘, →
+    direction_label: str = "Stable"
+    mom_change_pct: float = 0.0
+    mom_change_amt: float = 0.0
+    last_month_expense: float = 0.0
+
+
+class OverspendingRisk(BaseModel):
+    risk_percentage: int = 24
+    risk_level: str = "Low"  # Low, Medium, High
+    risk_color: str = "#10B981"
+    risk_factors: List[str] = Field(default_factory=list)
+
+
+class ForecastHorizonPoint(BaseModel):
+    period: str
+    month_name: str
+    amount: float
+    is_forecast: bool = False
+    p10: Optional[float] = None
+    p90: Optional[float] = None
+
+
 class ExpensePredictionResponse(BaseModel):
     user_id: UUID
     generated_at: datetime = Field(default_factory=datetime.utcnow)
@@ -62,6 +112,13 @@ class ExpensePredictionResponse(BaseModel):
     forecast: ForecastDetails
     financial_health_audit: FinancialHealthAudit
     historical_trend: List[HistoricalMonthData] = Field(default_factory=list)
+    trend_metrics: Optional[SpendingTrendMetrics] = None
+    overspending_risk: Optional[OverspendingRisk] = None
+    category_forecast: List[CategoryForecastItem] = Field(default_factory=list)
+    budget_comparison: Optional[BudgetComparison] = None
+    performance_benchmarks: Optional[PerformanceBenchmarks] = None
+    why_this_forecast_drivers: List[str] = Field(default_factory=list)
+    multi_horizon_forecast: List[ForecastHorizonPoint] = Field(default_factory=list)
     has_sufficient_data: bool = True
     active_days: int = 30
 

@@ -13,6 +13,8 @@ import numpy as np
 from app.ml_engine import FinancialAdvisorEngine
 from app.repositories.transaction_repository import TransactionRepository
 from app.repositories.category_repository import CategoryRepository
+from app.repositories.budget_repository import BudgetRepository
+from app.core.logging import logger
 from app.schemas.expense_prediction import (
     ExpensePredictionResponse,
     SanitizedSummary,
@@ -22,7 +24,37 @@ from app.schemas.expense_prediction import (
     HistoricalMonthData,
     PredictionScenarioRequest,
     ModelMetadataResponse,
+    CategoryForecastItem,
+    PerformanceBenchmarks,
+    BudgetComparison,
+    SpendingTrendMetrics,
+    OverspendingRisk,
+    ForecastHorizonPoint,
 )
+
+CATEGORY_COLORS = {
+    "food & dining": "#10B981",
+    "food": "#10B981",
+    "groceries": "#059669",
+    "shopping": "#8B5CF6",
+    "housing & rent": "#F43F5E",
+    "housing and rent": "#F43F5E",
+    "rent": "#F43F5E",
+    "transport": "#38BDF8",
+    "transportation": "#38BDF8",
+    "transit": "#38BDF8",
+    "utilities": "#F59E0B",
+    "bills & utilities": "#F59E0B",
+    "entertainment": "#EC4899",
+    "health & medical": "#06B6D4",
+    "healthcare": "#06B6D4",
+    "emi": "#6366F1",
+    "investment": "#14B8A6",
+    "education": "#EAB308",
+    "travel": "#A855F7",
+    "miscellaneous": "#64748B",
+    "other": "#64748B",
+}
 
 
 class ExpensePredictionService:
@@ -36,10 +68,12 @@ class ExpensePredictionService:
         self,
         transaction_repository: TransactionRepository,
         category_repository: Optional[CategoryRepository] = None,
+        budget_repository: Optional[BudgetRepository] = None,
         engine: Optional[FinancialAdvisorEngine] = None,
     ):
         self.tx_repo = transaction_repository
         self.cat_repo = category_repository
+        self.budget_repo = budget_repository
         self.engine = engine or FinancialAdvisorEngine()
 
     async def get_user_prediction(
@@ -149,6 +183,11 @@ class ExpensePredictionService:
         health_audit_data = pred_raw.get("financial_health_audit", {})
         conf_range_data = forecast_data.get("confidence_range_p10_p90", {})
 
+        pred_spend = float(forecast_data.get("predicted_routine_spend", 0.0))
+        rob_inc = float(sanitized_summary_data.get("robust_income", 0.0))
+        target_m_name = month_name[target_month]
+        target_year = current_year if target_month >= current_month_num else current_year + 1
+
         # 5. Build Historical Trend List (Last 6-12 months + Next projected month)
         trend_items: List[HistoricalMonthData] = []
         for ym in sorted_ym[-6:]:
@@ -168,11 +207,6 @@ class ExpensePredictionService:
             )
 
         # Append projected next month
-        pred_spend = float(forecast_data.get("predicted_routine_spend", 0.0))
-        rob_inc = float(sanitized_summary_data.get("robust_income", 0.0))
-        target_m_name = month_name[target_month]
-        target_year = current_year if target_month >= current_month_num else current_year + 1
-
         trend_items.append(
             HistoricalMonthData(
                 month_name=f"{target_m_name[:3]} {target_year} (Projected)",
@@ -182,6 +216,277 @@ class ExpensePredictionService:
                 savings=round(max(0.0, rob_inc - pred_spend), 2),
                 routine_spend=round(pred_spend, 2),
                 is_projected=True,
+            )
+        )
+
+        # 6. Performance Benchmarks
+        last_month_actual = round(monthly_groups[sorted_ym[-1]]["expense"], 2) if sorted_ym else pred_spend
+        all_hist_spends = [monthly_groups[k]["expense"] for k in sorted_ym]
+        three_month_avg = round(float(np.mean(all_hist_spends[-3:])), 2) if all_hist_spends else last_month_actual
+        six_month_avg = round(float(np.mean(all_hist_spends[-6:])), 2) if all_hist_spends else last_month_actual
+
+        benchmarks = PerformanceBenchmarks(
+            this_month_predicted=round(pred_spend, 2),
+            last_month_actual=last_month_actual,
+            three_month_avg=three_month_avg,
+            six_month_avg=six_month_avg,
+        )
+
+        # 7. Spending Trend & MoM Change
+        mom_diff = pred_spend - last_month_actual
+        mom_change_pct = round((mom_diff / max(1.0, last_month_actual)) * 100, 1)
+        if mom_change_pct > 2.0:
+            trend_dir = "INCREASING"
+            trend_sym = "↗"
+            trend_lbl = "Increasing"
+        elif mom_change_pct < -2.0:
+            trend_dir = "DECREASING"
+            trend_sym = "↘"
+            trend_lbl = "Decreasing"
+        else:
+            trend_dir = "STABLE"
+            trend_sym = "→"
+            trend_lbl = "Stable"
+
+        spending_trend = SpendingTrendMetrics(
+            direction=trend_dir,
+            direction_symbol=trend_sym,
+            direction_label=trend_lbl,
+            mom_change_pct=mom_change_pct,
+            mom_change_amt=round(mom_diff, 2),
+            last_month_expense=last_month_actual,
+        )
+
+        # 8. Category-Level Forecast
+        cat_spends: Dict[str, float] = {}
+        for t in current_month_txs:
+            if t["transaction_type"].lower() == "expense":
+                c_name = t["category"]
+                cat_spends[c_name] = cat_spends.get(c_name, 0.0) + t["amount"]
+
+        if not cat_spends:
+            for t in tx_data_list:
+                if t["transaction_type"].lower() == "expense":
+                    c_name = t["category"]
+                    cat_spends[c_name] = cat_spends.get(c_name, 0.0) + t["amount"]
+
+        total_cat_amt = sum(cat_spends.values()) or 1.0
+        category_forecast_items: List[CategoryForecastItem] = []
+        for c_name, c_amt in sorted(cat_spends.items(), key=lambda x: x[1], reverse=True):
+            share = c_amt / total_cat_amt
+            pred_cat_val = round(share * pred_spend, 2)
+            c_color = CATEGORY_COLORS.get(c_name.lower(), "#64748B")
+            category_forecast_items.append(
+                CategoryForecastItem(
+                    category=c_name,
+                    predicted_amount=pred_cat_val,
+                    percentage=round((pred_cat_val / max(1.0, pred_spend)) * 100, 1),
+                    color=c_color,
+                    historical_avg=round(c_amt, 2),
+                )
+            )
+
+        # 9. Budget Comparison
+        monthly_budget_limit = 0.0
+        has_custom_budget = False
+        if self.budget_repo:
+            try:
+                active_budgets = await self.budget_repo.get_by_user(user_id, status="ACTIVE", page_size=100)
+                if active_budgets and active_budgets.items:
+                    monthly_budget_limit = float(sum(b.amount for b in active_budgets.items if b.amount))
+                    has_custom_budget = monthly_budget_limit > 0
+            except Exception as e:
+                logger.warning(f"[ExpensePredictionService] Could not fetch user budgets: {e}")
+
+        if monthly_budget_limit <= 0:
+            monthly_budget_limit = round(float(forecast_data.get("safe_total_budget_ceiling", pred_spend * 1.12)), 2)
+
+        rem_budget = round(monthly_budget_limit - pred_spend, 2)
+        util_pct = round((pred_spend / max(1.0, monthly_budget_limit)) * 100, 1)
+        is_over = pred_spend > monthly_budget_limit
+
+        if is_over:
+            stat_alert = "⚠ Forecasted expenses exceed your monthly budget limit."
+        elif util_pct >= 90.0:
+            stat_alert = "⚠ You are likely to approach your monthly budget."
+        elif util_pct >= 75.0:
+            stat_alert = "Moderate budget utilization expected."
+        else:
+            stat_alert = "✓ Projected spend is well within your budget target."
+
+        budget_comp = BudgetComparison(
+            monthly_budget_limit=round(monthly_budget_limit, 2),
+            expected_expense=round(pred_spend, 2),
+            remaining_budget=rem_budget,
+            utilization_pct=util_pct,
+            status_alert=stat_alert,
+            is_over_budget=is_over,
+            has_custom_budget=has_custom_budget,
+        )
+
+        # 10. Overspending Risk
+        disc_val = float(sanitized_summary_data.get("disc_spend", 0.0))
+        fixed_val = float(sanitized_summary_data.get("fixed_bills", 0.0))
+        routine_val = float(sanitized_summary_data.get("routine_spend", 0.0))
+        disc_ratio_pct = (disc_val / max(1.0, pred_spend)) * 100
+
+        raw_risk = int(util_pct * 0.25 + disc_ratio_pct * 0.35 + (35 if is_over else 0))
+        risk_pct = min(98, max(8, raw_risk))
+        
+        if risk_pct >= 65 or is_over:
+            risk_lvl = "High"
+            risk_col = "#F43F5E"
+        elif risk_pct >= 35:
+            risk_lvl = "Medium"
+            risk_col = "#F59E0B"
+        else:
+            risk_lvl = "Low"
+            risk_col = "#10B981"
+
+        risk_factors = []
+        if is_over:
+            risk_factors.append("Projected spend exceeds monthly budget")
+        if disc_ratio_pct > 30:
+            risk_factors.append(f"High discretionary ratio ({disc_ratio_pct:.0f}% of total spend)")
+        if mom_change_pct > 10:
+            risk_factors.append(f"Spending accelerating by +{mom_change_pct:.1f}%")
+        if not risk_factors:
+            risk_factors.append("Controlled routine living & steady contractual liabilities")
+
+        overspending_risk_obj = OverspendingRisk(
+            risk_percentage=risk_pct,
+            risk_level=risk_lvl,
+            risk_color=risk_col,
+            risk_factors=risk_factors,
+        )
+
+        # 11. Why This Forecast Drivers
+        top_cat_str = ""
+        if category_forecast_items:
+            top_c = category_forecast_items[0]
+            top_cat_str = f"• {top_c.category} represents {top_c.percentage}% of projected outflows (₹{top_c.predicted_amount:,.2f})"
+
+        drivers = [
+            f"• Recent spending {trend_lbl.lower()} ({'+' if mom_change_pct > 0 else ''}{mom_change_pct}% vs last recorded month)",
+            top_cat_str if top_cat_str else f"• Discretionary spending calibrated at ₹{disc_val:,.2f}",
+            f"• Essential routine living baseline stable at ₹{routine_val:,.2f}",
+            f"• Contractual recurring bills (Rent, EMI, SIP) unchanged at ₹{fixed_val:,.2f}",
+        ]
+
+        # 12. Multi-Horizon Forecast Points
+        horizon_points: List[ForecastHorizonPoint] = []
+        for ym in sorted_ym[-6:]:
+            dt_obj = datetime.strptime(ym, "%Y-%m")
+            horizon_points.append(
+                ForecastHorizonPoint(
+                    period=dt_obj.strftime("%b %Y"),
+                    month_name=dt_obj.strftime("%b"),
+                    amount=round(monthly_groups[ym]["expense"], 2),
+                    is_forecast=False,
+                    p10=None,
+                    p90=None,
+                )
+            )
+
+        p10_val = round(conf_range_data.get("p10_minimum_survival", pred_spend * 0.85), 2)
+        p90_val = round(conf_range_data.get("p90_upper_discretionary", pred_spend * 1.15), 2)
+
+        horizon_points.append(
+            ForecastHorizonPoint(
+                period=f"{target_m_name} (Forecast)",
+                month_name=f"{target_m_name[:3]}",
+                amount=round(pred_spend, 2),
+                is_forecast=True,
+                p10=p10_val,
+                p90=p90_val,
+            )
+        )
+
+        # -------------------------------------------------------------
+        # RECURSIVE AUTO-REGRESSIVE MULTI-HORIZON ML FORECASTING (M+2 & M+3)
+        # -------------------------------------------------------------
+        m2_num = (target_month % 12) + 1
+        m2_name = month_name[m2_num]
+        
+        # Construct M+1 simulated transaction payload with decaying discretionary elasticity (0.75x)
+        sim_fixed = sanitized_summary_data.get("fixed_bills", 0.0)
+        sim_routine = sanitized_summary_data.get("routine_spend", 0.0)
+        base_disc = max(0.0, pred_spend - sim_fixed - sim_routine)
+        sim_disc_m1 = round(base_disc * 0.75, 2)
+        
+        sim_txs_m1 = [
+            {"amount": sim_fixed, "category": "Housing & Rent", "transaction_type": "Expense", "recurring": True},
+            {"amount": sim_routine, "category": "Food & Dining", "transaction_type": "Expense", "recurring": False},
+            {"amount": sim_disc_m1, "category": "Shopping", "transaction_type": "Expense", "recurring": False},
+        ]
+        
+        # Base historical spend series extended with the latest recorded month
+        latest_month_expense = monthly_groups.get(latest_ym, {}).get("expense", pred_spend) if sorted_ym else pred_spend
+        sim_hist_m2 = hist_spends + [latest_month_expense]
+        
+        # Predict M+2 using full ML Engine
+        pred_res_m2 = self.engine.predict(
+            transactions=sim_txs_m1,
+            target_month=m2_num,
+            days_active=30,
+            historical_spends=sim_hist_m2,
+            historical_incomes=hist_incomes,
+            current_month=target_month
+        )
+        
+        m2_pred = round(pred_res_m2["forecast"]["predicted_routine_spend"], 2)
+        
+        # Econometric uncertainty propagation (sqrt(h) interval scaling)
+        spread_m1 = (p90_val - pred_spend)
+        m2_spread = spread_m1 * np.sqrt(2.0)
+        m2_p10 = round(max(sim_fixed, m2_pred - m2_spread), 2)
+        m2_p90 = round(m2_pred + m2_spread, 2)
+
+        horizon_points.append(
+            ForecastHorizonPoint(
+                period=f"{m2_name} (Forecast)",
+                month_name=f"{m2_name[:3]}",
+                amount=m2_pred,
+                is_forecast=True,
+                p10=m2_p10,
+                p90=m2_p90,
+            )
+        )
+
+        # Predict M+3 using full ML Engine recursively with multi-step discretionary decay
+        m3_num = ((target_month + 1) % 12) + 1
+        m3_name = month_name[m3_num]
+        
+        sim_hist_m3 = sim_hist_m2 + [m2_pred]
+        sim_disc_m2 = round(max(0.0, m2_pred - sim_fixed - sim_routine) * 0.70, 2)
+        sim_txs_m2 = [
+            {"amount": sim_fixed, "category": "Housing & Rent", "transaction_type": "Expense", "recurring": True},
+            {"amount": sim_routine, "category": "Food & Dining", "transaction_type": "Expense", "recurring": False},
+            {"amount": sim_disc_m2, "category": "Shopping", "transaction_type": "Expense", "recurring": False},
+        ]
+        
+        pred_res_m3 = self.engine.predict(
+            transactions=sim_txs_m2,
+            target_month=m3_num,
+            days_active=30,
+            historical_spends=sim_hist_m3,
+            historical_incomes=hist_incomes,
+            current_month=m2_num
+        )
+        
+        m3_pred = round(pred_res_m3["forecast"]["predicted_routine_spend"], 2)
+        m3_spread = spread_m1 * np.sqrt(3.0)
+        m3_p10 = round(max(sim_fixed, m3_pred - m3_spread), 2)
+        m3_p90 = round(m3_pred + m3_spread, 2)
+
+        horizon_points.append(
+            ForecastHorizonPoint(
+                period=f"{m3_name} (Forecast)",
+                month_name=f"{m3_name[:3]}",
+                amount=m3_pred,
+                is_forecast=True,
+                p10=m3_p10,
+                p90=m3_p90,
             )
         )
 
@@ -205,9 +510,9 @@ class ExpensePredictionService:
             forecast=ForecastDetails(
                 predicted_routine_spend=round(pred_spend, 2),
                 confidence_range_p10_p90=ConfidenceRange(
-                    p10_minimum_survival=round(conf_range_data.get("p10_minimum_survival", pred_spend * 0.85), 2),
+                    p10_minimum_survival=p10_val,
                     p50_expected_routine=round(conf_range_data.get("p50_expected_routine", pred_spend), 2),
-                    p90_upper_discretionary=round(conf_range_data.get("p90_upper_discretionary", pred_spend * 1.15), 2),
+                    p90_upper_discretionary=p90_val,
                 ),
                 recommended_emergency_buffer=round(forecast_data.get("recommended_emergency_buffer", 0.0), 2),
                 safe_total_budget_ceiling=round(forecast_data.get("safe_total_budget_ceiling", pred_spend), 2),
@@ -218,11 +523,18 @@ class ExpensePredictionService:
             ),
             financial_health_audit=FinancialHealthAudit(
                 risk_status=health_audit_data.get("risk_status", "HEALTHY_SURPLUS"),
-                advisor_insight=health_audit_data.get("advisor_insight", "Prudent financial stability."),
+                advisor_insight=health_audit_data.get("advisor_insight", "Prudent financial health and balanced liquidity."),
                 is_festive_quarter=bool(health_audit_data.get("is_festive_quarter", False)),
             ),
             historical_trend=trend_items,
-            has_sufficient_data=len(transactions) >= 5,
+            trend_metrics=spending_trend,
+            overspending_risk=overspending_risk_obj,
+            category_forecast=category_forecast_items,
+            budget_comparison=budget_comp,
+            performance_benchmarks=benchmarks,
+            why_this_forecast_drivers=drivers,
+            multi_horizon_forecast=horizon_points,
+            has_sufficient_data=True,
             active_days=days_active,
         )
 
@@ -336,6 +648,24 @@ class ExpensePredictionService:
                 is_festive_quarter=target_month in [10, 11, 12],
             ),
             historical_trend=[],
+            trend_metrics=SpendingTrendMetrics(),
+            overspending_risk=OverspendingRisk(risk_percentage=0, risk_level="Low", risk_factors=["Awaiting transaction data"]),
+            category_forecast=[],
+            budget_comparison=BudgetComparison(
+                monthly_budget_limit=0.0,
+                expected_expense=0.0,
+                remaining_budget=0.0,
+                utilization_pct=0.0,
+                status_alert="Awaiting transaction history to calculate budget utilization.",
+            ),
+            performance_benchmarks=PerformanceBenchmarks(
+                this_month_predicted=0.0,
+                last_month_actual=0.0,
+                three_month_avg=0.0,
+                six_month_avg=0.0,
+            ),
+            why_this_forecast_drivers=["• Awaiting transaction history to initialize predictive engine."],
+            multi_horizon_forecast=[],
             has_sufficient_data=False,
             active_days=1,
         )

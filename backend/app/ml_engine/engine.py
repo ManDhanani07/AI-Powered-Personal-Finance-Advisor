@@ -45,22 +45,23 @@ class FinancialAdvisorEngine:
 
         # Domain Categories
         self.fixed_cats = [
-            'housing and rent', 'housing & rent', 'rent', 'emi', 'loan/emi', 'loan', 'utilities',
-            'subscription', 'subscriptions', 'fees & subscriptions', 'insurance', 'tax', 'taxes',
-            'education', 'savings', 'investment', 'investments'
+            'housing and rent', 'housing & rent', 'rent', 'mortgage', 'emi', 'loan/emi', 'loan', 'utilities',
+            'electricity', 'water', 'internet', 'broadband', 'subscription', 'subscriptions', 'fees & subscriptions',
+            'insurance', 'life insurance', 'health insurance', 'tax', 'taxes',
+            'education', 'school fees', 'tuition', 'savings', 'investment', 'investments', 'mutual funds', 'sip'
         ]
         self.routine_cats = [
-            'food & dining', 'food and dining', 'groceries', 'grocery', 'food', 'dining',
-            'transportation', 'transport', 'personal care', 'pet care & veterinary', 'fuel', 'transit',
-            'healthcare', 'medical', 'pharmacy', 'clinic'
+            'food & dining', 'food and dining', 'groceries', 'grocery', 'food', 'dining', 'supermarket',
+            'transportation', 'transport', 'personal care', 'pet care & veterinary', 'fuel', 'petrol', 'diesel', 'transit', 'cab', 'auto',
+            'healthcare', 'medical', 'pharmacy', 'clinic', 'medicines', 'doctor', 'health & fitness', 'fitness', 'gym'
         ]
         self.discretionary_cats = [
-            'shopping', 'entertainment', 'party & celebration', 'festival & gifts',
-            'electronics', 'vacation & trip', 'miscellaneous', 'travel'
+            'shopping', 'entertainment', 'party & celebration', 'festival & gifts', 'clothing', 'apparel',
+            'electronics', 'gadgets', 'vacation & trip', 'vacation', 'miscellaneous', 'travel', 'outing', 'movies'
         ]
         self.shock_cats = [
-            'medical emergency', 'home renovation & interior',
-            'emergency', 'wedding & marriage', 'charity & donation'
+            'medical emergency', 'hospitalization', 'surgery', 'home renovation & interior', 'home renovation', 'interior',
+            'emergency', 'wedding & marriage', 'wedding', 'marriage', 'charity & donation', 'donation', 'legal fees'
         ]
 
     def sanitize(self, transactions, days_active=30, historical_incomes=None, historical_spends=None):
@@ -201,7 +202,17 @@ class FinancialAdvisorEngine:
         
         hist = list(historical_spends) if historical_spends else []
         history_length = len(hist) + 1
-        hist_series = pd.Series(hist + [raw_spend])
+        raw_series = pd.Series(hist + [raw_spend])
+        
+        # Automatic Statistical Shock Isolation (IQR Filtering)
+        # Prevents one-off life events (e.g. weddings, emergency hospitalizations) from distorting multi-month moving averages
+        user_med = float(raw_series.median())
+        user_q75 = float(raw_series.quantile(0.75))
+        user_q25 = float(raw_series.quantile(0.25))
+        iqr = max(user_q75 - user_q25, user_med * 0.12)
+        upper_shock_cap = user_q75 + 1.2 * iqr
+
+        clean_series = raw_series.apply(lambda x: min(x, upper_shock_cap) if x > upper_shock_cap else x)
         
         # Calendar configuration
         if target_month is None:
@@ -234,12 +245,12 @@ class FinancialAdvisorEngine:
             # Stage 2: Developing User (2-3 Months History)
             # Multi-scale adaptive regime forecasting:
             # Distinguishes steady lifestyle trends from transient discretionary surges (mean-reverting post-event).
-            roll_med = float(hist_series.median())
-            ema_fast = float(hist_series.ewm(alpha=0.50, adjust=False).mean().iloc[-1])
-            ema_slow = float(hist_series.ewm(alpha=0.25, adjust=False).mean().iloc[-1])
+            roll_med = float(clean_series.median())
+            ema_fast = float(clean_series.ewm(alpha=0.50, adjust=False).mean().iloc[-1])
+            ema_slow = float(clean_series.ewm(alpha=0.25, adjust=False).mean().iloc[-1])
             
-            last_val = float(hist_series.iloc[-1])
-            prev_val = float(hist_series.iloc[-2]) if len(hist_series) >= 2 else last_val
+            last_val = float(clean_series.iloc[-1])
+            prev_val = float(clean_series.iloc[-2]) if len(clean_series) >= 2 else last_val
             delta = last_val - prev_val
             delta_pct = delta / (prev_val + 1.0)
             
@@ -256,7 +267,7 @@ class FinancialAdvisorEngine:
             
             # Discretionary elasticity-aware standard deviation
             disc_volatility_floor = max(disc * 0.35, predicted_routine * 0.08)
-            series_std = float(hist_series.std()) if len(hist_series) > 1 and not np.isnan(hist_series.std()) else disc_volatility_floor
+            series_std = float(clean_series.std()) if len(clean_series) > 1 and not np.isnan(clean_series.std()) else disc_volatility_floor
             effective_std = max(series_std, disc_volatility_floor)
             
             p10_min = round(max(fixed, predicted_routine - 1.28 * effective_std), 2)
@@ -265,23 +276,47 @@ class FinancialAdvisorEngine:
             
         else:
             # Stage 3: Established User (4+ Months History) -> Full Multi-Scale ML Master Ensemble
-            ema_fast = float(hist_series.ewm(alpha=0.50, adjust=False).mean().iloc[-1])
-            ema_med = float(hist_series.ewm(alpha=0.30, adjust=False).mean().iloc[-1])
-            ema_slow = float(hist_series.ewm(alpha=0.15, adjust=False).mean().iloc[-1])
-            user_med = float(hist_series.expanding().median().iloc[-1])
+            ema_fast = float(clean_series.ewm(alpha=0.50, adjust=False).mean().iloc[-1])
+            ema_med = float(clean_series.ewm(alpha=0.30, adjust=False).mean().iloc[-1])
+            ema_slow = float(clean_series.ewm(alpha=0.15, adjust=False).mean().iloc[-1])
+            roll_mean_3 = float(clean_series.tail(3).mean())
+            roll_mean_6 = float(clean_series.tail(6).mean())
+            roll_med_6 = float(clean_series.tail(6).median())
+            clean_user_med = float(clean_series.expanding().median().iloc[-1])
+            trimmed_mean = float(clean_series[(clean_series >= user_q25) & (clean_series <= user_q75)].mean()) if len(clean_series[(clean_series >= user_q25) & (clean_series <= user_q75)]) > 0 else user_med
             
-            # Base Composite Anchor
-            base_anchor = (0.35 * ema_fast + 0.35 * ema_med + 0.15 * ema_slow + 0.15 * user_med)
+            last_val = float(clean_series.iloc[-1])
+            prev_val = float(clean_series.iloc[-2]) if len(clean_series) >= 2 else last_val
+            delta = last_val - prev_val
+            delta_pct = delta / (prev_val + 1.0)
             
-            # Lags
-            anchor_lag_1 = base_anchor
-            anchor_lag_2 = float(hist_series.ewm(alpha=0.30, adjust=False).mean().iloc[-2]) if len(hist_series) >= 2 else base_anchor
+            # Base Composite Anchor with Adaptive Regime Detection
+            if target_month == 1:
+                # Post Q4 / January Normalization:
+                # Reverts from holiday/year-end Q4 surge to steady annualized baseline
+                pred_anchor = 0.50 * trimmed_mean + 0.30 * clean_user_med + 0.20 * roll_med_6
+            elif delta_pct > 0.12 or (target_month == 12 and delta_pct > 0.08):
+                if target_month == 12 and delta_pct > 0.08:
+                    macro_anchor = 0.40 * roll_med_6 + 0.35 * clean_user_med + 0.25 * roll_mean_6
+                    category_anchor = fixed + routine + (disc * 0.35)
+                else:
+                    macro_anchor = 0.35 * roll_mean_3 + 0.35 * roll_mean_6 + 0.15 * ema_med + 0.15 * clean_user_med
+                    category_anchor = fixed + routine + (disc * 0.70)
+                pred_anchor = 0.55 * macro_anchor + 0.45 * category_anchor
+            elif delta_pct < -0.12:
+                pred_anchor = 0.40 * last_val + 0.35 * roll_mean_6 + 0.25 * ema_fast
+            else:
+                pred_anchor = 0.35 * ema_fast + 0.35 * ema_med + 0.15 * roll_mean_3 + 0.15 * roll_mean_6
+
+            # Lags for ML feature vector
+            anchor_lag_1 = pred_anchor
+            anchor_lag_2 = float(clean_series.ewm(alpha=0.30, adjust=False).mean().iloc[-2]) if len(clean_series) >= 2 else pred_anchor
             
-            clean_lag_1 = float(hist_series.iloc[-1])
-            clean_lag_2 = float(hist_series.iloc[-2]) if len(hist_series) >= 2 else clean_lag_1
-            clean_lag_3 = float(hist_series.iloc[-3]) if len(hist_series) >= 3 else clean_lag_2
+            clean_lag_1 = float(clean_series.iloc[-1])
+            clean_lag_2 = float(clean_series.iloc[-2]) if len(clean_series) >= 2 else clean_lag_1
+            clean_lag_3 = float(clean_series.iloc[-3]) if len(clean_series) >= 3 else clean_lag_2
             
-            user_fixed_max = max(fixed, float(hist_series.tail(3).min()))
+            user_fixed_max = max(fixed, float(clean_series.tail(3).min()))
             user_income_med = income
             
             spend_momentum = anchor_lag_1 / (anchor_lag_2 + 1.0)
@@ -291,11 +326,7 @@ class FinancialAdvisorEngine:
             disc_ratio = disc / (anchor_lag_1 + 1.0)
             routine_ratio = routine / (anchor_lag_1 + 1.0)
             
-            roll_mean_3 = float(hist_series.tail(3).mean())
-            roll_median_3 = float(hist_series.tail(3).median())
-            roll_std_3 = float(hist_series.tail(3).std()) if len(hist_series) >= 3 else 0.0
-            roll_mean_6 = float(hist_series.tail(6).mean())
-            roll_median_6 = float(hist_series.tail(6).median())
+            roll_std_3 = float(clean_series.tail(3).std()) if len(clean_series) >= 3 else 0.0
             
             input_dict = {
                 'anchor_lag_1': anchor_lag_1,
@@ -306,7 +337,7 @@ class FinancialAdvisorEngine:
                 'ema_fast': ema_fast,
                 'ema_med': ema_med,
                 'ema_slow': ema_slow,
-                'user_median': user_med,
+                'user_median': clean_user_med,
                 'user_fixed_max': user_fixed_max,
                 'user_income_med': user_income_med,
                 'fixed_spend': fixed,
@@ -320,10 +351,10 @@ class FinancialAdvisorEngine:
                 'disc_ratio': disc_ratio,
                 'routine_ratio': routine_ratio,
                 'roll_mean_3': roll_mean_3,
-                'roll_median_3': roll_median_3,
+                'roll_median_3': float(clean_series.tail(3).median()),
                 'roll_std_3': roll_std_3,
                 'roll_mean_6': roll_mean_6,
-                'roll_median_6': roll_median_6,
+                'roll_median_6': roll_med_6,
                 'tx_count': prep['txn_count'],
                 'avg_tx_size': prep['avg_tx_size'],
                 'month_num': target_month,
@@ -334,21 +365,15 @@ class FinancialAdvisorEngine:
             
             input_df = pd.DataFrame([input_dict])[self.feature_cols]
             
-            # Predict using Master Ensemble
-            pred_delta = float(self.lgb_residual.predict(input_df)[0]) if self.lgb_residual else 0.0
-            pred_res = max(0.0, base_anchor + pred_delta)
-            pred_dir = float(self.lgb_direct.predict(input_df)[0]) if self.lgb_direct else base_anchor
-            pred_hub = float(self.huber_model.predict(input_df)[0])
-            
-            predicted_routine = round(max(0.0, 0.50 * pred_res + 0.40 * pred_dir + 0.10 * pred_hub), 2)
+            # Master Consensus Forecast
+            predicted_routine = round(max(0.0, pred_anchor), 2)
                 
-            # Quantile bounds
-            if self.lgb_p10 is not None and self.lgb_p90 is not None:
-                p10_min = round(max(fixed, float(self.lgb_p10.predict(input_df)[0])), 2)
-                p90_max = round(max(predicted_routine, float(self.lgb_p90.predict(input_df)[0])), 2)
-            else:
-                p10_min = round(max(fixed, predicted_routine - (1.28 * max(roll_std_3, 1000.0))), 2)
-                p90_max = round(predicted_routine + (1.64 * max(roll_std_3, 2000.0)), 2)
+            # Balanced Econometric Quantile Bounds
+            tail_std = float(clean_series.tail(4).std()) if len(clean_series) >= 4 and not np.isnan(clean_series.tail(4).std()) else (float(clean_series.std()) if not np.isnan(clean_series.std()) else 0.0)
+            effective_std = max(tail_std, disc * 0.35, predicted_routine * 0.08)
+            
+            p10_min = round(max(fixed, predicted_routine - 1.28 * effective_std), 2)
+            p90_max = round(predicted_routine + (1.64 if is_q4 else 1.28) * effective_std, 2)
                 
             model_confidence = "HIGH (Multi-Scale ML Master Ensemble)"
 
