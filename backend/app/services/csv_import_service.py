@@ -157,9 +157,106 @@ class CsvImportService:
         # Strip UTF-8 BOM, spaces, underscores, and convert to lower
         return re.sub(r"[^a-zA-Z0-9]", "_", header.strip().lstrip("\ufeff")).lower().strip("_")
 
-    def detect_column_mapping(self, headers: List[str]) -> Dict[str, Optional[str]]:
+    @staticmethod
+    def is_header_row(row: List[str]) -> bool:
         """
-        Detects mapped columns from CSV headers using alias dictionaries.
+        Determines whether the first row in the CSV is a header row or transaction data.
+        """
+        if not row:
+            return False
+            
+        header_keywords = {
+            'date', 'transaction_date', 'transaction date', 'txn_date', 'merchant', 'payee',
+            'vendor', 'description', 'narration', 'amount', 'amt', 'value', 'debit', 'credit',
+            'category', 'type', 'transaction_type', 'payment_method', 'account', 'account_type',
+            'status', 'recurring', 'currency', 'location', 'user_id', 'transaction_id'
+        }
+        clean_cells = [str(c).strip().lower().replace('_', ' ') for c in row if c]
+        matches = sum(1 for c in clean_cells if c in header_keywords or any(k in c for k in ['date', 'amount', 'category', 'merchant', 'type', 'account']))
+        
+        # Check if cells look like actual data values
+        has_date_val = any(re.match(r'^\d{1,2}[/-]\d{1,2}[/-]\d{2,4}$|^\d{4}[/-]\d{1,2}[/-]\d{1,2}$', str(c).strip()) for c in row if c)
+        has_amount_val = any(re.match(r'^\d+(\.\d{1,2})?$', str(c).strip().replace(',', '')) and float(str(c).strip().replace(',', '')) > 20 for c in row if c)
+        has_code_val = any(str(c).strip().startswith(('TRX', 'USR', 'TXN')) for c in row if c)
+        
+        if (has_date_val and has_amount_val) or has_code_val:
+            return False
+        return matches >= 2
+
+    def infer_column_mapping_from_data(self, sample_rows: List[List[str]]) -> Tuple[Dict[str, Optional[str]], List[str]]:
+        """
+        Infers column names and mappings directly from transaction data values when headers are missing.
+        """
+        if not sample_rows:
+            return {}, []
+
+        num_cols = max(len(r) for r in sample_rows)
+        known_cats = {
+            'salary', 'rent', 'emi', 'food & dining', 'food', 'dining', 'groceries',
+            'utilities', 'shopping', 'entertainment', 'travel', 'healthcare', 'emergency',
+            'housing & rent', 'investment', 'investments', 'savings', 'other', 'education',
+            'insurance', 'subscriptions', 'freelancing'
+        }
+        known_types = {'income', 'expense', 'debit', 'credit', 'transfer', 'cr', 'dr'}
+        known_methods = {'upi', 'card', 'credit card', 'debit card', 'net banking', 'bank transfer', 'cash', 'cheque'}
+        known_accounts = {'savings account', 'savings', 'checking', 'current', 'credit card', 'wallet'}
+
+        col_scores = {i: {'date': 0, 'amount': 0, 'type': 0, 'category': 0, 'payment_method': 0, 'account': 0, 'merchant': 0, 'desc': 0} for i in range(num_cols)}
+
+        for row in sample_rows:
+            for i in range(min(num_cols, len(row))):
+                c = str(row[i]).strip()
+                c_low = c.lower()
+                if not c:
+                    continue
+                if re.match(r'^\d{1,2}[/-]\d{1,2}[/-]\d{2,4}$|^\d{4}[/-]\d{1,2}[/-]\d{1,2}$', c):
+                    col_scores[i]['date'] += 10
+                elif c_low in known_types:
+                    col_scores[i]['type'] += 10
+                elif c_low in known_cats:
+                    col_scores[i]['category'] += 10
+                elif c_low in known_methods:
+                    col_scores[i]['payment_method'] += 10
+                elif c_low in known_accounts:
+                    col_scores[i]['account'] += 10
+                else:
+                    try:
+                        num = float(c.replace(',', '').replace('₹', '').replace('$', ''))
+                        if num > 0 and not re.match(r'^\d{4}$', c):
+                            col_scores[i]['amount'] += 10
+                    except Exception:
+                        if not c.startswith(('TRX', 'USR', 'TXN', 'INR', 'USD', 'EUR')) and c.lower() not in ['true', 'false', 'vadodara', 'mumbai', 'delhi', 'bangalore', 'ahmedabad']:
+                            if len(c) < 30:
+                                col_scores[i]['merchant'] += 5
+                            else:
+                                col_scores[i]['desc'] += 5
+
+        headers = [f'Column_{i+1}' for i in range(num_cols)]
+        mapping = {
+            'date': None, 'merchant': None, 'description': None, 'amount': None,
+            'debit': None, 'credit': None, 'transaction_type': None,
+            'category': None, 'payment_method': None, 'account': None, 'status': None
+        }
+
+        assigned_cols = set()
+
+        for field in ['date', 'amount', 'type', 'category', 'payment_method', 'account', 'merchant', 'desc']:
+            unassigned = [i for i in range(num_cols) if i not in assigned_cols]
+            if not unassigned:
+                break
+            best_col = max(unassigned, key=lambda i: col_scores[i][field])
+            if col_scores[best_col][field] > 0:
+                assigned_cols.add(best_col)
+                canonical = 'transaction_type' if field == 'type' else ('description' if field == 'desc' else field)
+                headers[best_col] = canonical.replace('_', ' ').title()
+                mapping[canonical] = headers[best_col]
+
+        return mapping, headers
+
+    def detect_column_mapping(self, headers: List[str], sample_data: Optional[List[List[str]]] = None) -> Dict[str, Optional[str]]:
+        """
+        Detects mapped columns from CSV headers using alias dictionaries,
+        with sample-data fallback resolution.
         """
         mapping: Dict[str, Optional[str]] = {
             "date": None,
@@ -190,7 +287,7 @@ class CsvImportService:
 
         # Fallback heuristic: If no merchant found, but description found, map description
         if not mapping["merchant"] and mapping["description"]:
-            pass  # Will be extracted from description
+            pass
 
         return mapping
 
@@ -446,9 +543,16 @@ class CsvImportService:
         if not rows_raw:
             raise BadRequestException("CSV file contains no data rows.")
 
-        # Extract headers & data rows
-        headers_raw = [h.strip() for h in rows_raw[0] if h is not None]
-        data_rows = rows_raw[1:]
+        # Auto-detect whether the first row is a header or transaction data
+        has_header = self.is_header_row(rows_raw[0])
+        if has_header:
+            headers_raw = [h.strip() for h in rows_raw[0] if h is not None]
+            data_rows = rows_raw[1:]
+            detected_mapping = self.detect_column_mapping(headers_raw, sample_data=data_rows[:10])
+        else:
+            # First row is data! Auto-infer mappings and headers from data values
+            detected_mapping, headers_raw = self.infer_column_mapping_from_data(rows_raw[:15])
+            data_rows = rows_raw
 
         if not data_rows:
             raise BadRequestException("CSV file contains headers but no transaction rows.")
@@ -457,8 +561,6 @@ class CsvImportService:
         if len(data_rows) > 5000:
             raise BadRequestException(f"CSV file contains {len(data_rows)} rows. Maximum allowed per import is 5,000 rows.")
 
-        # Auto-detect column mapping
-        detected_mapping = self.detect_column_mapping(headers_raw)
         if column_mapping_overrides:
             for k, v in column_mapping_overrides.items():
                 if k in detected_mapping:

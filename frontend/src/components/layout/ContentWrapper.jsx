@@ -7,7 +7,7 @@ export const ContentWrapper = ({ children, className = '' }) => {
 
   if (isAiPage) {
     return (
-      <main className="flex-1 flex flex-col p-2.5 sm:p-3 min-w-0 max-w-screen-2xl w-full mx-auto overflow-hidden min-h-0 h-full box-border">
+      <main className="flex-1 flex flex-col p-3 sm:p-4 min-w-0 max-w-screen-2xl w-full mx-auto overflow-hidden min-h-0 h-full box-border">
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden h-full w-full">
           {children}
         </div>

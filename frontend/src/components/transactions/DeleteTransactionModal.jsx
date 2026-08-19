@@ -9,6 +9,7 @@ export const DeleteTransactionModal = ({
   onClose,
   transaction,
   onSuccess,
+  onConfirm,
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -20,13 +21,15 @@ export const DeleteTransactionModal = ({
     setIsSubmitting(true);
     try {
       await transactionService.deleteTransaction(transaction.id, hard);
-      toast.info(
+      toast.success(
         hard
           ? 'Transaction permanently deleted.'
           : 'Transaction moved to Trash. You can restore it anytime.',
         { icon: '🗑️' }
       );
-      if (onSuccess) onSuccess();
+      if (onSuccess) onSuccess(transaction.id);
+      if (onConfirm) onConfirm(transaction.id);
+      window.dispatchEvent(new CustomEvent('ledger_updated'));
       onClose();
     } catch (error) {
       toast.error(error.message || 'Failed to delete transaction.');

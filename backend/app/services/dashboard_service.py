@@ -73,14 +73,22 @@ class DashboardService:
         current_month = today.month
         current_year = today.year
 
+        # Current month totals
+        curr = await self.dash.get_monthly_totals(user_id, current_month, current_year)
+
+        # Fallback to latest active ledger month if current calendar month has no data
+        if curr.get("INCOME", Decimal("0.00")) == Decimal("0.00") and curr.get("EXPENSE", Decimal("0.00")) == Decimal("0.00"):
+            latest = await self.dash.get_latest_active_month(user_id)
+            if latest:
+                current_month, current_year = latest
+                curr = await self.dash.get_monthly_totals(user_id, current_month, current_year)
+
         # Prior month for trend calculations
         if current_month == 1:
             prev_month, prev_year = 12, current_year - 1
         else:
             prev_month, prev_year = current_month - 1, current_year
 
-        # Current + previous month totals
-        curr = await self.dash.get_monthly_totals(user_id, current_month, current_year)
         prev = await self.dash.get_monthly_totals(user_id, prev_month, prev_year)
 
         monthly_income = curr.get("INCOME", Decimal("0.00"))
@@ -175,13 +183,25 @@ class DashboardService:
         current_month = today.month
         current_year = today.year
 
-        # ── 12-month Income vs Expense (Jan to Dec of Current Year) ──
-        start_12m = datetime(current_year, 1, 1, 0, 0, 0)
-        end_12m = datetime(current_year, 12, 31, 23, 59, 59)
+        # Resolve active ledger month if current month is empty
+        cat_rows = await self.dash.get_category_spending(user_id, current_month, current_year)
+        if not cat_rows:
+            latest = await self.dash.get_latest_active_month(user_id)
+            if latest:
+                current_month, current_year = latest
+                cat_rows = await self.dash.get_category_spending(user_id, current_month, current_year)
+
+        # ── Rolling 12-month Income vs Expense ending at active month ──
+        start_year = current_year - 1 if current_month < 12 else current_year
+        start_month = (current_month % 12) + 1 if current_month < 12 else 1
+        start_12m = datetime(start_year, start_month, 1, 0, 0, 0)
+
+        last_day = calendar.monthrange(current_year, current_month)[1]
+        end_12m = datetime(current_year, current_month, last_day, 23, 59, 59)
 
         raw_cf = await self.dash.get_cash_flow_by_month(user_id, start_12m, end_12m)
 
-        # Build dict keyed by (year, month) using the integer fields returned by get_cash_flow_by_month
+        # Build dict keyed by (year, month) using integer fields
         monthly_map: Dict[tuple, Dict] = {}
         for row in raw_cf:
             key = (row["yr"], row["mo"])
@@ -189,21 +209,22 @@ class DashboardService:
                 monthly_map[key] = {"INCOME": Decimal("0.00"), "EXPENSE": Decimal("0.00")}
             monthly_map[key][row["transaction_type"]] = row["total"]
 
-
-        # Build 12 labels in order from Jan to Dec
+        # Build 12 rolling points in chronological sequence
         monthly_points = []
-        for month_num in range(1, 13):
-            key = (current_year, month_num)
+        for i in range(12):
+            m_offset = (start_month - 1 + i)
+            yr = start_year + (m_offset // 12)
+            mo = (m_offset % 12) + 1
+            key = (yr, mo)
             income = monthly_map.get(key, {}).get("INCOME", Decimal("0.00"))
             expense = monthly_map.get(key, {}).get("EXPENSE", Decimal("0.00"))
             net = income - expense
-            label = date(current_year, month_num, 1).strftime("%b '%y")
+            label = date(yr, mo, 1).strftime("%b '%y")
             monthly_points.append({
                 "month": label, "income": income, "expense": expense, "net": net
             })
 
-        # ── Category spending this month ──
-        cat_rows = await self.dash.get_category_spending(user_id, current_month, current_year)
+        # ── Category spending active month ──
         total_cat_spent = sum(r["total_amount"] for r in cat_rows) or Decimal("1")
         cat_chart = [
             {
@@ -463,10 +484,16 @@ class DashboardService:
         today = date.today()
         current_month = today.month
         current_year = today.year
-        month_name = today.strftime("%B")
 
-        # Category spending this month
+        # Resolve active ledger month
         cat_rows = await self.dash.get_category_spending(user_id, current_month, current_year)
+        if not cat_rows:
+            latest = await self.dash.get_latest_active_month(user_id)
+            if latest:
+                current_month, current_year = latest
+                cat_rows = await self.dash.get_category_spending(user_id, current_month, current_year)
+
+        month_name = date(current_year, current_month, 1).strftime("%B")
 
         highest = None
         lowest = None

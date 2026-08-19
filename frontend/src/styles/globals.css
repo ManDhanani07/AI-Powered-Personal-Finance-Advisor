@@ -21,12 +21,20 @@
     color-scheme: dark !important;
   }
 
-  html, body {
+  *, *::before, *::after {
     font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  html, body {
+    font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif !important;
     background-color: #000000 !important;
     color: #FFFFFF !important;
     color-scheme: dark !important;
     @apply min-h-screen antialiased transition-colors duration-200;
+  }
+
+  button, input, select, textarea, span, p, h1, h2, h3, h4, h5, h6, a, div, table, tr, th, td, label, svg text, .recharts-text, .recharts-legend-item-text, .recharts-tooltip-item {
+    font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif !important;
   }
 
   select option {
@@ -153,4 +161,222 @@
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: #3f3f46 !important;
   }
+}
+
+/* ============================================================
+   Typography: Outfit & Prompt Variable & Utility Classes
+   ============================================================ */
+
+.font-prompt {
+  font-family: "Prompt", sans-serif;
+}
+
+.font-outfit {
+  font-family: "Outfit", sans-serif;
+}
+
+.outfit-variable {
+  font-family: "Outfit", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+.prompt-thin {
+  font-family: "Prompt", sans-serif;
+  font-weight: 100;
+  font-style: normal;
+}
+
+.prompt-extralight {
+  font-family: "Prompt", sans-serif;
+  font-weight: 200;
+  font-style: normal;
+}
+
+.prompt-light {
+  font-family: "Prompt", sans-serif;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.prompt-regular {
+  font-family: "Prompt", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.prompt-medium {
+  font-family: "Prompt", sans-serif;
+  font-weight: 500;
+  font-style: normal;
+}
+
+.prompt-semibold {
+  font-family: "Prompt", sans-serif;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.prompt-bold {
+  font-family: "Prompt", sans-serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
+.prompt-extrabold {
+  font-family: "Prompt", sans-serif;
+  font-weight: 800;
+  font-style: normal;
+}
+
+.prompt-black {
+  font-family: "Prompt", sans-serif;
+  font-weight: 900;
+  font-style: normal;
+}
+
+.prompt-thin-italic {
+  font-family: "Prompt", sans-serif;
+  font-weight: 100;
+  font-style: italic;
+}
+
+.prompt-extralight-italic {
+  font-family: "Prompt", sans-serif;
+  font-weight: 200;
+  font-style: italic;
+}
+
+.prompt-light-italic {
+  font-family: "Prompt", sans-serif;
+  font-weight: 300;
+  font-style: italic;
+}
+
+.prompt-regular-italic {
+  font-family: "Prompt", sans-serif;
+  font-weight: 400;
+  font-style: italic;
+}
+
+.prompt-medium-italic {
+  font-family: "Prompt", sans-serif;
+  font-weight: 500;
+  font-style: italic;
+}
+
+.prompt-semibold-italic {
+  font-family: "Prompt", sans-serif;
+  font-weight: 600;
+  font-style: italic;
+}
+
+.prompt-bold-italic {
+  font-family: "Prompt", sans-serif;
+  font-weight: 700;
+  font-style: italic;
+}
+
+.prompt-extrabold-italic {
+  font-family: "Prompt", sans-serif;
+  font-weight: 800;
+  font-style: italic;
+}
+
+.prompt-black-italic {
+  font-family: "Prompt", sans-serif;
+  font-weight: 900;
+  font-style: italic;
+}
+
+/* Cinzel Variable & Utility Classes */
+.font-cinzel {
+  font-family: "Cinzel", serif;
+}
+
+.cinzel-variable {
+  font-family: "Cinzel", serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+.cinzel-regular {
+  font-family: "Cinzel", serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.cinzel-medium {
+  font-family: "Cinzel", serif;
+  font-weight: 500;
+  font-style: normal;
+}
+
+.cinzel-semibold {
+  font-family: "Cinzel", serif;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.cinzel-bold {
+  font-family: "Cinzel", serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
+.cinzel-extrabold {
+  font-family: "Cinzel", serif;
+  font-weight: 800;
+  font-style: normal;
+}
+
+.cinzel-black {
+  font-family: "Cinzel", serif;
+  font-weight: 900;
+  font-style: normal;
+}
+
+/* ============================================================
+   Fredoka Variable & Utility Classes
+   ============================================================ */
+
+.font-fredoka {
+  font-family: "Fredoka", sans-serif;
+}
+
+.fredoka-variable {
+  font-family: "Fredoka", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-variation-settings: "wdth" 100;
+}
+
+.fredoka-light {
+  font-family: "Fredoka", sans-serif;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.fredoka-regular {
+  font-family: "Fredoka", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.fredoka-medium {
+  font-family: "Fredoka", sans-serif;
+  font-weight: 500;
+  font-style: normal;
+}
+
+.fredoka-semibold {
+  font-family: "Fredoka", sans-serif;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.fredoka-bold {
+  font-family: "Fredoka", sans-serif;
+  font-weight: 700;
+  font-style: normal;
 }

@@ -13,11 +13,11 @@ from app.api.v1.endpoints import (
     goals,
     dashboard,
     financial_health,
-    forecast,
     ai,
     reports,
     notifications,
     admin,
+    expense_prediction,
 )
 
 api_router = APIRouter()
@@ -30,8 +30,8 @@ api_router.include_router(budgets.router)
 api_router.include_router(goals.router)
 api_router.include_router(dashboard.router)
 api_router.include_router(financial_health.router)
-api_router.include_router(forecast.router)
 api_router.include_router(ai.router)
 api_router.include_router(reports.router)
 api_router.include_router(notifications.router)
 api_router.include_router(admin.router)
+api_router.include_router(expense_prediction.router)

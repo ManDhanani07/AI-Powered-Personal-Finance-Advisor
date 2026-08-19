@@ -19,8 +19,8 @@ const WEBSITE_CAPABILITIES = [
     color: 'text-emerald-400',
   },
   {
-    name: 'Meta Prophet ML Forecasting',
-    badge: '12-Month Predictive Cash Flow',
+    name: 'AI Expense Prediction Engine',
+    badge: 'Multi-Scale Quantile Outflows',
     icon: LineChart,
     color: 'text-teal-400',
   },

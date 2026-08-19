@@ -10,6 +10,9 @@ export default {
       fontFamily: {
         sans: ['Outfit', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
         outfit: ['Outfit', 'sans-serif'],
+        prompt: ['Prompt', 'sans-serif'],
+        fredoka: ['Fredoka', 'sans-serif'],
+        cinzel: ['Cinzel', 'serif'],
       },
       colors: {
         // MNC Dark Enterprise Palette — Emerald / Teal Primary

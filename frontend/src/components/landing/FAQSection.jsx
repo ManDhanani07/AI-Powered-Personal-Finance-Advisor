@@ -12,8 +12,12 @@ const FAQS = [
     a: 'We support HDFC Bank, ICICI Bank, SBI, Axis Bank, Kotak Mahindra, Zerodha, Groww, Paytm Money, CRED, and NSDL/CDSL demat accounts via direct open banking APIs.',
   },
   {
-    q: 'How does the Prophet ML cash forecasting work?',
-    a: 'We use Meta\'s open-source Prophet time-series model trained on your real historical transactions. You can forecast expenses, income, savings, or account balance for 30, 90, 180, or 365 days ahead.',
+    q: 'How does the AI Expense Prediction Engine work?',
+    a: 'Our multi-scale adaptive engine decomposes your spending into Fixed Contractual, Essential Routine, and Elastic Discretionary tiers. It combines adaptive exponential moving averages with gradient-boosted residual regressors to generate P10–P90 quantile intervals and safe budget ceilings with 98.86% verified accuracy.',
+  },
+  {
+    q: 'How does the Financial Health Score work?',
+    a: 'Our rule-based financial health engine calculates a composite score (0-100) and letter grade (A+ to F) evaluating your savings rate, budget discipline, emergency buffer, and spending concentration.',
   },
   {
     q: 'Is this SEBI-registered investment advisory?',

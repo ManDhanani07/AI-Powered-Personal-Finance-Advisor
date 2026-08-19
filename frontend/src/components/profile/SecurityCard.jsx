@@ -110,7 +110,7 @@ export const SecurityCard = ({ user }) => {
             <span>Danger Zone</span>
           </div>
           <p className="text-[11px] text-slate-600 dark:text-slate-400">
-            Permanently delete your user profile, financial records, and AI forecasts.
+            Permanently delete your user profile, financial records, and AI insights.
           </p>
           <button
             type="button"

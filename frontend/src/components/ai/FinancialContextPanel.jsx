@@ -13,14 +13,12 @@ import {
   X,
   Sparkles,
   Zap,
-  LineChart,
 } from 'lucide-react';
 import { formatCurrency, formatCompactFinancial } from '../../utils/formatters.js';
 
 export const FinancialContextPanel = ({
   summaryContext,
   healthData,
-  forecastData,
   isOpen = false,
   onClose,
 }) => {
@@ -89,18 +87,6 @@ export const FinancialContextPanel = ({
       text: `Savings rate could be improved (${savingsRate.toFixed(1)}%).`,
       icon: AlertTriangle,
     });
-  }
-
-  // Forecast Message
-  let forecastMessage = null;
-  let forecastHasData = false;
-
-  if (forecastData && (forecastData?.forecast_summary || forecastData?.monthly_expense_forecast?.length > 0)) {
-    forecastHasData = true;
-    forecastMessage = forecastData?.forecast_summary || forecastData?.smart_warning || 'Expenses expected to remain stable.';
-  } else if (summaryContext?.forecast_summary) {
-    forecastHasData = true;
-    forecastMessage = summaryContext.forecast_summary;
   }
 
   const ContentBody = (
@@ -273,29 +259,6 @@ export const FinancialContextPanel = ({
               </div>
             );
           })}
-        </div>
-      </div>
-
-      {/* Forecast Status */}
-      <div className="space-y-1.5 border-t border-zinc-800/80 pt-3">
-        <h4 className="text-[10px] font-black uppercase tracking-wider text-slate-400 font-outfit flex items-center space-x-1.5">
-          <LineChart className="w-3 h-3 text-cyan-400" />
-          <span>Forecast</span>
-        </h4>
-        <div className="rounded-xl border border-zinc-800 bg-[#101117] p-2.5 text-[11px] space-y-1">
-          {forecastHasData && forecastMessage ? (
-            <div className="space-y-0.5">
-              <span className="text-[9px] font-bold uppercase text-cyan-400 flex items-center space-x-1 font-outfit">
-                <Sparkles className="w-3 h-3 text-cyan-400" />
-                <span>Prophet Model</span>
-              </span>
-              <p className="text-slate-200 leading-relaxed font-sans text-[11px]">{forecastMessage}</p>
-            </div>
-          ) : (
-            <p className="text-slate-400 italic text-[10px] leading-relaxed">
-              More historical transaction data is needed to generate a reliable forecast.
-            </p>
-          )}
         </div>
       </div>
     </div>

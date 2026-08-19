@@ -41,13 +41,12 @@ export const ConversationSidebar = ({
   });
 
   const SidebarContent = (
-    <div className="flex flex-col h-full min-h-0 bg-[#0C0D10] text-slate-100 font-sans border-r border-zinc-800/80 p-3.5 space-y-3.5 overflow-hidden">
+    <div className="flex flex-col h-full min-h-0 bg-[#0C0D10] text-slate-100 font-sans border-r border-zinc-800/80 p-4 space-y-3.5 overflow-hidden">
       {/* Top Prominent ChatGPT-Style AI Logo Header */}
-      <div className="flex items-center justify-between shrink-0 border-b border-zinc-800/80 pb-3 pt-1">
+      <div className="flex items-center justify-between shrink-0 border-b border-zinc-800/80 pb-3.5 pt-1.5">
         <div className="flex items-center space-x-3 min-w-0">
-          <div className="relative group shrink-0">
-            <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 opacity-40 blur-sm group-hover:opacity-70 transition-opacity" />
-            <div className="relative w-9 h-9 rounded-2xl bg-gradient-to-br from-emerald-400 via-teal-400 to-cyan-400 flex items-center justify-center text-slate-950 font-black shadow-[0_0_20px_rgba(16,185,129,0.4)]">
+          <div className="relative shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 via-teal-400 to-cyan-400 flex items-center justify-center text-slate-950 font-black">
               <Sparkles className="w-5 h-5 text-slate-950 stroke-[2.5]" />
             </div>
           </div>

@@ -3,7 +3,7 @@ Dashboard Repository for aggregating financial data across multiple tables.
 Provides optimized queries for dashboard metrics, charts, and analytics.
 """
 
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Tuple
 from uuid import UUID
 from datetime import datetime, date
 from decimal import Decimal
@@ -116,6 +116,27 @@ class DashboardRepository:
         except Exception as ex:
             logger.error(f"Error calculating monthly totals for user {user_id}: {ex}")
             raise DatabaseException(f"Failed to calculate monthly totals: {ex}")
+
+    async def get_latest_active_month(self, user_id: UUID) -> Optional[Tuple[int, int]]:
+        """
+        Returns the latest (month, year) with recorded transactions for the user.
+        If no transactions exist, returns None.
+        """
+        try:
+            query = select(func.max(Transaction.transaction_date)).where(
+                and_(
+                    Transaction.user_id == user_id,
+                    Transaction.is_deleted == False
+                )
+            )
+            result = await self.db.execute(query)
+            max_date = result.scalar()
+            if max_date:
+                return max_date.month, max_date.year
+            return None
+        except Exception as ex:
+            logger.error(f"Error fetching latest active month for user {user_id}: {ex}")
+            return None
 
     async def get_cash_flow_by_month(
         self, user_id: UUID, start_date: datetime, end_date: datetime

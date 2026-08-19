@@ -206,7 +206,10 @@ export const AuthProvider = ({ children }) => {
     resetPassword,
     changePassword,
     loadCurrentUser,
+    saveAuthState,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
+
+export default AuthProvider;

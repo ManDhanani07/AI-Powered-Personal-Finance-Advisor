@@ -16,10 +16,15 @@ export const ChatWindow = ({
   onToggleLeftSidebar,
   isLeftSidebarCollapsed,
 }) => {
-  const messagesEndRef = useRef(null);
+  const scrollContainerRef = useRef(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        top: scrollContainerRef.current.scrollHeight,
+        behavior: 'smooth',
+      });
+    }
   };
 
   useEffect(() => {
@@ -29,7 +34,7 @@ export const ChatWindow = ({
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-[#07070A]/60 relative min-h-0 h-full min-w-0">
       {/* Center Chat Header Bar */}
-      <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-zinc-800/80 bg-[#0B0C10] shrink-0 z-20">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800/80 bg-[#0B0C10] shrink-0 z-20">
         <div className="flex items-center space-x-2.5 min-w-0">
           <button
             onClick={onToggleLeftSidebar}
@@ -53,7 +58,10 @@ export const ChatWindow = ({
       </div>
 
       {/* Main Scrollable Messages Container */}
-      <div className="flex-1 overflow-y-auto p-3 sm:p-4 min-h-0 min-w-0 custom-scrollbar overscroll-contain scroll-smooth flex flex-col">
+      <div
+        ref={scrollContainerRef}
+        className="flex-1 overflow-y-auto p-3 sm:p-4 min-h-0 min-w-0 custom-scrollbar overscroll-contain scroll-smooth flex flex-col"
+      >
         {messages.length === 0 ? (
           <div className="my-auto space-y-3 py-2">
             <EmptyChatState />
@@ -74,8 +82,6 @@ export const ChatWindow = ({
         )}
 
         {loading && <TypingIndicator />}
-
-        <div ref={messagesEndRef} />
       </div>
 
       {/* Bottom Flush Sticky Input Section (mt-auto locks to absolute bottom) */}

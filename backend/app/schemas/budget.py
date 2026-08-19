@@ -97,7 +97,6 @@ class BudgetIntelligenceResponse(BaseModel):
     analysis_card: Dict[str, Any]
     why_explanation: Dict[str, Any]
     reallocation_options: Dict[str, Any]
-    meta_prophet_forecast: Dict[str, Any]
     financial_health_impact: Dict[str, Any]
     goal_impact: Dict[str, Any]
     ai_recommendations: List[str]

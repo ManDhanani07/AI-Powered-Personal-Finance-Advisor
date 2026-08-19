@@ -220,13 +220,13 @@ export const FeatureExploreModal = ({ feature, isOpen, onClose, onOpenLogin }) =
                   </div>
                 )}
 
-                {/* 4. AI FORECAST ENGINE DEMO */}
-                {feature.title === 'AI Forecast Engine' && (
+                {/* 4. AI EXPENSE PREDICTION DEMO */}
+                {(feature.title === 'AI Expense Prediction' || feature.title === 'AI Expense Prediction Engine' || feature.title === 'Executive Reports & Analytics') && (
                   <div className="space-y-3">
                     <div className="space-y-1.5">
                       <div className="flex justify-between text-xs">
-                        <span className="text-slate-300">Simulated Monthly Income Growth Rate:</span>
-                        <span className="font-extrabold text-purple-400 font-mono">+{forecastGrowth}% MoM</span>
+                        <span className="text-slate-300">Simulated Income Growth Rate:</span>
+                        <span className="font-extrabold text-emerald-400 font-mono">+{forecastGrowth}% Surplus</span>
                       </div>
                       <input
                         type="range"
@@ -234,20 +234,20 @@ export const FeatureExploreModal = ({ feature, isOpen, onClose, onOpenLogin }) =
                         max="30"
                         value={forecastGrowth}
                         onChange={(e) => setForecastGrowth(Number(e.target.value))}
-                        className="w-full accent-purple-500 cursor-pointer"
+                        className="w-full accent-emerald-500 cursor-pointer"
                       />
                     </div>
 
                     <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 grid grid-cols-2 gap-3 text-xs font-mono">
                       <div>
-                        <span className="text-slate-400 text-[10px] uppercase block">6-Month Projected Wealth</span>
+                        <span className="text-slate-400 text-[10px] uppercase block">Predicted Routine Spend (P50)</span>
                         <span className="font-extrabold text-white text-sm">
-                          {formatCurrency(65300 * 6 * (1 + forecastGrowth / 100))}
+                          {formatCurrency(45000 * (1 - forecastGrowth / 200))}
                         </span>
                       </div>
                       <div>
-                        <span className="text-slate-400 text-[10px] uppercase block">Prophet Model Accuracy</span>
-                        <span className="font-extrabold text-emerald-400 text-sm">96.4% Confidence</span>
+                        <span className="text-slate-400 text-[10px] uppercase block">Multi-Scale Model Accuracy</span>
+                        <span className="font-extrabold text-emerald-400 text-sm">98.86% WPA (R²: 0.999)</span>
                       </div>
                     </div>
                   </div>

@@ -39,7 +39,7 @@ const Categories = lazy(() => import('../pages/categories/Categories.jsx'));
 const Budgets = lazy(() => import('../pages/budgets/Budgets.jsx'));
 const Goals = lazy(() => import('../pages/goals/Goals.jsx'));
 const FinancialHealth = lazy(() => import('../pages/financial-health/FinancialHealth.jsx'));
-const ForecastPage = lazy(() => import('../pages/forecast/ForecastPage.jsx'));
+const ExpensePredictionPage = lazy(() => import('../pages/expense-prediction/ExpensePredictionPage.jsx'));
 const ReportsPage = lazy(() => import('../pages/reports/ReportsPage.jsx'));
 const AiAdvisorPage = lazy(() => import('../pages/ai/AiAdvisorPage.jsx'));
 const NotificationsPage = lazy(() => import('../pages/notifications/NotificationsPage.jsx'));
@@ -61,24 +61,6 @@ const AdminSettings = lazy(() => import('../pages/admin/AdminSettings.jsx'));
 const LandingPage = lazy(() => import('../pages/landing/LandingPage.jsx'));
 
 export const AppRoutes = () => {
-  // Preload critical core routes in idle time for zero-latency page transitions
-  useEffect(() => {
-    const preloadCore = () => {
-      import('../pages/dashboard/Dashboard.jsx');
-      import('../pages/transactions/Transactions.jsx');
-      import('../pages/budgets/Budgets.jsx');
-      import('../pages/goals/Goals.jsx');
-      import('../pages/financial-health/FinancialHealth.jsx');
-      import('../pages/ai/AiAdvisorPage.jsx');
-    };
-
-    if ('requestIdleCallback' in window) {
-      window.requestIdleCallback(preloadCore);
-    } else {
-      setTimeout(preloadCore, 1200);
-    }
-  }, []);
-
   return (
     <Suspense fallback={<RouteLoadingFallback />}>
       <Routes>
@@ -203,8 +185,8 @@ export const AppRoutes = () => {
           <Route path={ROUTES.BUDGETS} element={<Budgets />} />
           <Route path={ROUTES.GOALS} element={<Goals />} />
           <Route path={ROUTES.FINANCIAL_HEALTH} element={<FinancialHealth />} />
+          <Route path={ROUTES.EXPENSE_PREDICTION} element={<ExpensePredictionPage />} />
           <Route path={ROUTES.REPORTS} element={<ReportsPage />} />
-          <Route path={ROUTES.FORECAST} element={<ForecastPage />} />
           <Route path={ROUTES.AI_ADVISOR} element={<AiAdvisorPage />} />
           <Route path={ROUTES.NOTIFICATIONS} element={<NotificationsPage />} />
 

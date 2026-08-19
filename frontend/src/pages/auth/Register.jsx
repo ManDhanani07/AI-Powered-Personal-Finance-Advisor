@@ -17,8 +17,8 @@ const HIGHLIGHTS = [
   },
   {
     icon: LineChart,
-    title: 'Prophet ML Forecast',
-    desc: '12-month predictive cash flow forecasting & risk matrix.',
+    title: 'AI Expense Prediction',
+    desc: 'Multi-scale adaptive ML forecasting & safe budget buffer.',
     color: 'text-teal-400',
   },
   {

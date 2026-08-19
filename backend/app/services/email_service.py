@@ -83,7 +83,7 @@ class EmailService:
             <div class="content">
               <div class="greeting">Welcome aboard, {first_name}!</div>
               <div class="badge">✓ Account Successfully Activated</div>
-              <p>Your AI Wealth OS Workspace is now fully active. You now have access to continuous real-time ledger tracking, AI recommendations powered by Google Gemini, Meta Prophet cash flow forecasting, and automated budget anomaly alerts.</p>
+              <p>Your AI Wealth OS Workspace is now fully active. You now have access to continuous real-time ledger tracking, AI recommendations powered by Google Gemini, real-time financial health scoring, and automated budget anomaly alerts.</p>
 
               <div class="card">
                 <div class="card-title">🔐 Account Security Overview</div>

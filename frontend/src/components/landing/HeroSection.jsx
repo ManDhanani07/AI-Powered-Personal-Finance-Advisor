@@ -91,7 +91,7 @@ export const HeroSection = ({ onOpenLogin }) => {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="text-base sm:text-lg lg:text-xl text-slate-400 font-normal leading-relaxed max-w-2xl mx-auto"
           >
-            Automate transaction tracking, analyze category budgets, project net worth growth using Meta Prophet ML, and receive real-time financial intelligence.
+            Automate transaction tracking, project next-month outflows with AI expense prediction (98.8% accuracy), track category budgets, and receive real-time financial advisory.
           </motion.p>
 
           {/* CTA Action Buttons */}

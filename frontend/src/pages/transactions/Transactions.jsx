@@ -217,17 +217,20 @@ export const Transactions = () => {
     loadSummary();
   };
 
-  const handleDeleteConfirm = async () => {
-    if (!deletingTransaction) return;
-    try {
-      await transactionService.deleteTransaction(deletingTransaction.id);
-      toast.success('Transaction deleted successfully.', { icon: '🗑️' });
-      setIsDeleteOpen(false);
-      loadTransactions();
-      loadSummary();
-    } catch (err) {
-      toast.error(err.message || 'Failed to delete transaction.');
+  const handleDeleteSuccess = (deletedId) => {
+    const targetId = deletedId || deletingTransaction?.id;
+    if (targetId) {
+      setTransactions((prev) => prev.filter((t) => t.id !== targetId));
+      setTotalItems((prev) => Math.max(0, prev - 1));
+      try {
+        sessionStorage.removeItem('tx_cache_items');
+        sessionStorage.removeItem('tx_cache_summary');
+      } catch (e) {}
     }
+    setIsDeleteOpen(false);
+    setDeletingTransaction(null);
+    loadTransactions(true);
+    loadSummary();
   };
 
 
@@ -386,8 +389,12 @@ export const Transactions = () => {
 
       <DeleteTransactionModal
         isOpen={isDeleteOpen}
-        onClose={() => setIsDeleteOpen(false)}
-        onConfirm={handleDeleteConfirm}
+        onClose={() => {
+          setIsDeleteOpen(false);
+          setDeletingTransaction(null);
+        }}
+        onSuccess={handleDeleteSuccess}
+        onConfirm={handleDeleteSuccess}
         transaction={deletingTransaction}
       />
 

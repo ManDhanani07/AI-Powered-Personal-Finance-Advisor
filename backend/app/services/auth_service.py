@@ -47,6 +47,37 @@ OTP_MAX_ATTEMPTS = 5
 OTP_RESEND_COOLDOWN_SECONDS = 60
 
 
+import re
+
+DISPOSABLE_DOMAINS = {
+    "tempmail.com", "temp-mail.org", "10minutemail.com", "mailinator.com",
+    "guerrillamail.com", "throwawaymail.com", "yopmail.com", "trashmail.com",
+    "fake.com", "dummy.com", "example.com", "test.com", "sample.com", "invalid.com",
+    "mailnesia.com", "dispostable.com", "sharklasers.com", "getairmail.com",
+    "generator.email", "nada.ltd", "burnermail.io", "mohmal.com"
+}
+
+DUMMY_LOCAL_PATTERNS = re.compile(
+    r"^(test|dummy|fake|asdf|qwerty|sample|temp|null|undefined|admin|root|nobody|abc|xyz|aaa|bbb|ccc|123|1234|12345)[0-9]*$",
+    re.IGNORECASE
+)
+
+def validate_email_authenticity(email: str) -> None:
+    """
+    Validates that the email is a genuine, deliverable user email address
+    and rejects placeholder, disposable, and dummy test accounts.
+    """
+    if not email or "@" not in email:
+        raise BadRequestException("Please enter a valid email address.")
+    local_part, domain = email.strip().lower().split("@", 1)
+
+    if domain in DISPOSABLE_DOMAINS:
+        raise BadRequestException(f"The domain '@{domain}' is a temporary/disposable email service. Please use a genuine personal or work email address.")
+
+    if DUMMY_LOCAL_PATTERNS.match(local_part):
+        raise BadRequestException(f"'{email}' is a placeholder or test address. Please sign up with your real email address so you can receive the 6-digit verification code.")
+
+
 def mask_email(email: str) -> str:
     """Mask email for safe client exposure: j•••••e@domain.com"""
     if not email or "@" not in email:
@@ -76,6 +107,8 @@ class AuthService:
         and dispatch verification email.
         """
         email = payload.email.strip().lower()
+        validate_email_authenticity(email)
+
         existing_user = await self.user_repository.get_by_email(email)
         if existing_user:
             if existing_user.email_verified:
@@ -212,6 +245,7 @@ class AuthService:
         Resend a fresh 6-digit OTP code with 60-second cooldown rate limiting.
         """
         clean_email = email.strip().lower()
+        validate_email_authenticity(clean_email)
         purpose_upper = purpose.strip().upper()
 
         if not self.email_verification_repository:
@@ -380,9 +414,12 @@ class AuthService:
             expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         )
 
-    async def forgot_password(self, email: str) -> Dict[str, Any]:
-        """Generate 6-digit OTP for password reset and send email."""
+    async def request_password_reset(self, email: str) -> Dict[str, Any]:
+        """
+        Request password reset 6-digit OTP code sent via email.
+        """
         email_clean = email.strip().lower()
+        validate_email_authenticity(email_clean)
         user = await self.user_repository.get_by_email(email_clean)
         if not user:
             # Do not reveal email existence to prevent user enumeration attacks
@@ -428,6 +465,8 @@ class AuthService:
             "verification_required": True,
             "email": mask_email(email_clean),
         }
+
+    forgot_password = request_password_reset
 
     async def verify_password_reset_otp(self, email: str, otp: str) -> Dict[str, Any]:
         """Verify 6-digit password reset OTP and issue a short-lived reset token."""

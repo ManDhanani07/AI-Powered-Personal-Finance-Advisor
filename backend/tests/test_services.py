@@ -5,7 +5,7 @@ Tests all 8 domain service classes, business validations, helper calculations, a
 
 import sys
 import asyncio
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from decimal import Decimal
 from pathlib import Path
 
@@ -21,7 +21,6 @@ from app.repositories import (
     TransactionRepository,
     BudgetRepository,
     GoalRepository,
-    ForecastRepository,
     FinancialHealthRepository,
     ChatHistoryRepository,
 )
@@ -31,7 +30,6 @@ from app.services import (
     TransactionService,
     BudgetService,
     GoalService,
-    ForecastService,
     FinancialHealthService,
     ChatHistoryService,
 )
@@ -49,7 +47,6 @@ async def run_service_tests():
         tx_repo = TransactionRepository(db)
         budget_repo = BudgetRepository(db)
         goal_repo = GoalRepository(db)
-        forecast_repo = ForecastRepository(db)
         health_repo = FinancialHealthRepository(db)
         chat_repo = ChatHistoryRepository(db)
 
@@ -57,10 +54,9 @@ async def run_service_tests():
         user_service = UserService(user_repo)
         cat_service = CategoryService(cat_repo)
         tx_service = TransactionService(tx_repo, user_repo, cat_repo, budget_repo)
-        budget_service = BudgetService(budget_repo, user_repo, cat_repo)
-        goal_service = GoalService(goal_repo, user_repo)
-        forecast_service = ForecastService(forecast_repo, user_repo)
-        health_service = FinancialHealthService(health_repo, user_repo)
+        budget_service = BudgetService(budget_repo, cat_repo)
+        goal_service = GoalService(goal_repo)
+        health_service = FinancialHealthService(health_repo)
         chat_service = ChatHistoryService(chat_repo, user_repo)
 
         # 1. CategoryService Test
@@ -92,19 +88,20 @@ async def run_service_tests():
             logger.info("[UserService Validation] Successfully caught duplicate email exception.")
 
         # 3. BudgetService Test & Remaining Calculation
-        budget = await budget_service.create_budget({
-            "user_id": user.id,
-            "category_id": food_cat.id,
-            "budget_name": "Food & Dining Budget",
-            "budget_amount": Decimal("10000.00"),
-            "spent_amount": Decimal("0.00"),
-            "start_date": date.today().replace(day=1),
-            "end_date": date.today(),
-        })
+        budget = await budget_service.create_budget(
+            user.id,
+            {
+                "category_id": food_cat.id,
+                "budget_name": "Food & Dining Budget",
+                "budget_amount": Decimal("10000.00"),
+                "spent_amount": Decimal("0.00"),
+                "start_date": date.today().replace(day=1),
+                "end_date": date.today() + timedelta(days=30),
+            },
+        )
         logger.info(f"[BudgetService] Created budget {budget.id} (Remaining: ₹{budget.remaining_amount})")
 
-        rem_budget = await budget_service.calculate_remaining_budget(budget.id)
-        assert rem_budget == Decimal("10000.00"), "Remaining budget should equal 10000.00"
+        assert budget.remaining_amount == Decimal("10000.00"), "Remaining budget should equal 10000.00"
 
         # 4. TransactionService Test & Automatic Budget Impact Update
         income_tx = await tx_service.create_transaction({
@@ -125,9 +122,11 @@ async def run_service_tests():
         })
         logger.info(f"[TransactionService] Created Income ₹{income_tx.amount} & Expense ₹{expense_tx.amount}")
 
-        # Check net balance helper
-        net_balance = await tx_service.calculate_net_balance(user.id)
-        logger.info(f"[TransactionService Helper] Calculated Net Balance: ₹{net_balance}")
+        # Check net balance
+        total_inc = await tx_repo.get_total_income(user.id)
+        total_exp = await tx_repo.get_total_expense(user.id)
+        net_balance = total_inc - total_exp
+        logger.info(f"[TransactionService Net Balance] Calculated Net Balance: ₹{net_balance}")
         assert net_balance == Decimal("97500.00"), "Net balance should be 100000 - 2500 = 97500.00"
 
         # Verify budget was automatically updated by transaction service
@@ -136,53 +135,27 @@ async def run_service_tests():
         assert updated_budget.spent_amount == Decimal("2500.00"), "Budget spent should be updated to 2500.00"
 
         # 5. GoalService Test & Progress Helper
-        goal = await goal_service.create_goal({
-            "user_id": user.id,
-            "goal_name": "Car Down Payment",
-            "target_amount": Decimal("200000.00"),
-            "current_amount": Decimal("50000.00"),
-            "target_date": date.today(),
-        })
-        logger.info(f"[GoalService] Created Goal: {goal.goal_name}")
-
-        progress = await goal_service.calculate_goal_progress(goal.id)
-        logger.info(f"[GoalService Helper] Progress: {progress['progress_percentage']}% (Remaining: ₹{progress['remaining_amount']})")
-        assert progress["progress_percentage"] == 25.0, "Progress should be 25.0%"
+        goal = await goal_service.create_goal(
+            user.id,
+            {
+                "goal_name": "Car Down Payment",
+                "target_amount": Decimal("200000.00"),
+                "current_amount": Decimal("50000.00"),
+                "target_date": date.today() + timedelta(days=180),
+            },
+        )
+        logger.info(f"[GoalService] Created Goal: {goal.goal_name} (Completion: {goal.completion_percentage}%)")
+        assert goal.completion_percentage == 25.0, "Progress should be 25.0%"
 
         # Add goal contribution
-        updated_goal = await goal_service.add_goal_contribution(goal.id, Decimal("50000.00"))
-        new_progress = await goal_service.calculate_goal_progress(goal.id)
-        logger.info(f"[Goal Contribution] New Progress: {new_progress['progress_percentage']}%")
-        assert new_progress["progress_percentage"] == 50.0, "New progress should be 50.0%"
+        updated_goal = await goal_service.update_goal(goal.id, user.id, {"current_amount": Decimal("100000.00")})
+        logger.info(f"[Goal Contribution] New Progress: {updated_goal.completion_percentage}%")
+        assert updated_goal.completion_percentage == 50.0, "New progress should be 50.0%"
 
-        # 6. ForecastService Test
-        forecast = await forecast_service.save_forecast({
-            "user_id": user.id,
-            "forecast_type": "PROPHET_TIME_SERIES",
-            "prediction_json": {"next_month_balance": 105000},
-        })
-        logger.info(f"[ForecastService] Saved forecast record {forecast.id}")
-
-        # 7. FinancialHealthService Test & Validation
-        health = await health_service.save_health_score({
-            "user_id": user.id,
-            "health_score": Decimal("88.00"),
-            "income_score": Decimal("95.00"),
-            "saving_score": Decimal("80.00"),
-            "budget_score": Decimal("90.00"),
-            "expense_score": Decimal("87.00"),
-        })
-        logger.info(f"[FinancialHealthService] Saved health score: {health.health_score}")
-
-        # Invalid health score validation test (>100)
-        try:
-            await health_service.save_health_score({
-                "user_id": user.id,
-                "health_score": Decimal("150.00"),
-            })
-            assert False, "Should have raised BadRequestException for health score > 100"
-        except BadRequestException:
-            logger.info("[FinancialHealth Validation] Successfully caught invalid health score > 100.")
+        # 6. FinancialHealthService Test
+        health_resp = await health_service.calculate_health_score(user.id)
+        logger.info(f"[FinancialHealthService] Calculated dynamic health score: {health_resp.overall_score} (Grade: {health_resp.grade})")
+        assert health_resp.overall_score >= 0.0, "Health score must be calculated non-negative"
 
         # 8. ChatHistoryService Test
         chat = await chat_service.save_chat_message({

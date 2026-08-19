@@ -1,6 +1,6 @@
 """
 Budget Service providing intelligent budget tracking, spending utilization calculations,
-reallocation, transaction validation, Prophet ML forecasting, and automated threshold alerts.
+reallocation, transaction validation, and automated threshold alerts.
 """
 
 from typing import Dict, Any, List, Optional
@@ -15,7 +15,6 @@ from app.repositories.transaction_repository import TransactionRepository
 from app.repositories.goal_repository import GoalRepository
 from app.repositories.financial_health_repository import FinancialHealthRepository
 from app.repositories.notification_repository import NotificationRepository
-from app.services.forecast_service import ForecastService
 from app.services.financial_health_service import FinancialHealthService
 from app.services.base import BaseService
 from app.exceptions.custom_exceptions import BadRequestException, NotFoundException
@@ -30,7 +29,6 @@ class BudgetService(BaseService[BudgetRepository]):
         transaction_repository: Optional[TransactionRepository] = None,
         goal_repository: Optional[GoalRepository] = None,
         financial_health_repository: Optional[FinancialHealthRepository] = None,
-        forecast_service: Optional[ForecastService] = None,
         notification_repository: Optional[NotificationRepository] = None,
         financial_health_service: Optional[FinancialHealthService] = None,
     ):
@@ -40,7 +38,6 @@ class BudgetService(BaseService[BudgetRepository]):
         self.tx_repo = transaction_repository
         self.goal_repo = goal_repository
         self.health_repo = financial_health_repository
-        self.forecast_service = forecast_service
         self.notif_repo = notification_repository
         self.health_service = financial_health_service
 
@@ -356,7 +353,7 @@ class BudgetService(BaseService[BudgetRepository]):
         """
         Comprehensive Intelligent Budget Management System analysis.
         Computes live PostgreSQL totals, Exceeded Banner, Why Explanations, Reallocation options,
-        Meta Prophet Forecasts, Financial Health Impact, Goal Impact, and AI Recommendations.
+        Financial Health Impact, Goal Impact, and AI Recommendations.
         """
         res = await self.budget_repository.get_by_user(user_id=user_id, page_size=500)
         budgets = res.items
@@ -486,16 +483,7 @@ class BudgetService(BaseService[BudgetRepository]):
         reallocation_possible = len(surplus_cats) > 0
         reallocation_msg = None if reallocation_possible else "No available budget can be reallocated."
 
-        # 4. Meta Prophet Integration (Fast Extrapolation)
-        prophet_forecast = {
-            "expected_monthly_expense": round(total_spent * 1.15, 2),
-            "forecast_increase_pct": 15.0 if is_exceeded else 2.5,
-            "forecasted_savings": max(0.0, total_allocated - (total_spent * 1.15)),
-            "forecasted_cash_flow": total_allocated - (total_spent * 1.15),
-            "message": f"Based on current spending, your expected monthly expense is ₹{total_spent * 1.15:,.2f}.",
-        }
-
-        # 5. Financial Health Score Impact (Dynamic Single Source of Truth)
+        # 4. Financial Health Score Impact (Dynamic Single Source of Truth)
         curr_health_score = 0.0
         prev_health_score = 0.0
         health_reasons = []
@@ -608,7 +596,6 @@ class BudgetService(BaseService[BudgetRepository]):
                 "surplus_categories": surplus_cats,
                 "message": reallocation_msg,
             },
-            "meta_prophet_forecast": prophet_forecast,
             "financial_health_impact": {
                 "previous_score": prev_health_score,
                 "current_score": curr_health_score,

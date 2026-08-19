@@ -503,7 +503,7 @@ async def get_system_health(
             {"name": "PostgreSQL Database", "status": "Operational" if db_connected else "Error", "latency": "8ms"},
             {"name": "Authentication (JWT/Bcrypt)", "status": "Operational", "latency": "12ms"},
             {"name": "Gemini AI Engine", "status": "Operational", "latency": "1.2s"},
-            {"name": "Prophet Forecasting Engine", "status": "Operational", "latency": "180ms"},
+            {"name": "Financial Analytics Engine", "status": "Operational", "latency": "35ms"},
             {"name": "Financial Rule Engine", "status": "Operational", "latency": "15ms"},
         ],
         "api_response_time": "42ms",

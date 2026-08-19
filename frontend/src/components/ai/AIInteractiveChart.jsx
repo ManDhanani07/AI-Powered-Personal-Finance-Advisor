@@ -252,13 +252,12 @@ export const AIInteractiveChart = ({ chartData }) => {
     );
   }
 
-  // 4. Monthly Trajectory / Savings Trend / Forecast Area & Line Chart
-  if (type === 'monthly_trajectory' || type === 'area' || type === 'trend' || type === 'savings_trend' || type === 'savings_projection' || type === 'forecast_trend' || type === 'forecast_line' || type === 'forecast' || type === 'income_trend' || type === 'expense_trend') {
+  // 4. Monthly Trajectory / Savings Trend / Expense Trend Area & Line Chart
+  if (type === 'monthly_trajectory' || type === 'area' || type === 'trend' || type === 'savings_trend' || type === 'savings_projection' || type === 'income_trend' || type === 'expense_trend') {
     const trendItems = data || [];
     const isSavingsChart = type === 'savings_trend' || type === 'savings_projection' || (trendItems[0] && trendItems[0].savings !== undefined);
     const isIncomeChart = type === 'income_trend' || (trendItems[0] && trendItems[0].income !== undefined && trendItems[0].expense === undefined && trendItems[0].expenses === undefined);
     const isExpenseChart = type === 'expense_trend' || (trendItems[0] && (trendItems[0].expense !== undefined || trendItems[0].expenses !== undefined) && trendItems[0].income === undefined);
-    const isForecastChart = type === 'forecast' || type === 'forecast_trend' || type === 'forecast_line' || (trendItems[0] && (trendItems[0].forecast !== undefined || trendItems[0].historical !== undefined));
     const randomId = Math.random().toString(36).substring(2, 7);
 
     return (
@@ -266,13 +265,8 @@ export const AIInteractiveChart = ({ chartData }) => {
         <div className="flex items-center justify-between border-b border-zinc-800/80 pb-2">
           <h4 className="text-xs font-black text-white uppercase tracking-wider font-outfit flex items-center gap-2">
             <TrendingUp className={`w-4 h-4 ${isExpenseChart ? 'text-rose-400' : 'text-emerald-400'}`} />
-            <span>{title || (isForecastChart ? 'Meta Prophet Spending Forecast' : (isSavingsChart ? 'Monthly Savings Trajectory' : (isIncomeChart ? 'Monthly Income Trend' : (isExpenseChart ? 'Monthly Expense Trajectory' : 'Monthly Financial Trajectory'))))}</span>
+            <span>{title || (isSavingsChart ? 'Monthly Savings Trajectory' : (isIncomeChart ? 'Monthly Income Trend' : (isExpenseChart ? 'Monthly Expense Trajectory' : 'Monthly Financial Trajectory')))}</span>
           </h4>
-          {isForecastChart && (
-            <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 font-bold text-[10px] font-outfit">
-              Prophet AI Model
-            </span>
-          )}
         </div>
 
         <div className="h-60 w-full pt-2">
@@ -291,48 +285,18 @@ export const AIInteractiveChart = ({ chartData }) => {
                   <stop offset="5%" stopColor="#06B6D4" stopOpacity={0.5} />
                   <stop offset="95%" stopColor="#06B6D4" stopOpacity={0.0} />
                 </linearGradient>
-                <linearGradient id={`gradFcst_${randomId}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0.0} />
-                </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#27272A" vertical={false} />
               <XAxis dataKey={trendItems[0]?.period !== undefined ? "period" : "month"} stroke="#71717A" tick={{ fill: '#A1A1AA', fontSize: 11, fontWeight: 'bold' }} />
               <YAxis
                 stroke="#71717A"
                 width={55}
-                domain={isForecastChart ? ['dataMin - 10000', 'dataMax + 10000'] : ['auto', 'auto']}
+                domain={['auto', 'auto']}
                 tick={{ fill: '#A1A1AA', fontSize: 10, fontWeight: 'bold' }}
                 tickFormatter={(val) => `₹${(val / 1000).toFixed(0)}k`}
               />
               <Tooltip content={<CustomTooltip />} />
-              {isForecastChart ? (
-                <>
-                  <Area
-                    type="monotone"
-                    dataKey="forecast"
-                    name="Prophet Forecast"
-                    stroke="#8B5CF6"
-                    strokeWidth={3}
-                    fillOpacity={1}
-                    fill={`url(#gradFcst_${randomId})`}
-                    dot={{ r: 6, fill: '#8B5CF6', stroke: '#1e1b4b', strokeWidth: 2 }}
-                    activeDot={{ r: 8, fill: '#A78BFA' }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="historical"
-                    name="Historical Actual"
-                    stroke="#10B981"
-                    strokeWidth={3}
-                    fillOpacity={0.2}
-                    fill={`url(#gradInc_${randomId})`}
-                    dot={{ r: 6, fill: '#10B981', stroke: '#064e3b', strokeWidth: 2 }}
-                    activeDot={{ r: 8, fill: '#34D399' }}
-                    connectNulls
-                  />
-                </>
-              ) : isSavingsChart ? (
+              {isSavingsChart ? (
                 <Area type="monotone" dataKey={trendItems[0]?.projected_total !== undefined ? "projected_total" : (trendItems[0]?.savings !== undefined ? "savings" : "amount")} name="Savings" stroke="#06B6D4" strokeWidth={3} fillOpacity={1} fill={`url(#gradSav_${randomId})`} dot={{ r: 5, fill: '#06B6D4', stroke: '#083344', strokeWidth: 2 }} activeDot={{ r: 7 }} />
               ) : isIncomeChart ? (
                 <Area type="monotone" dataKey="income" name="Income" stroke="#10B981" strokeWidth={3} fillOpacity={1} fill={`url(#gradInc_${randomId})`} dot={{ r: 5, fill: '#10B981', stroke: '#064e3b', strokeWidth: 2 }} activeDot={{ r: 7 }} />

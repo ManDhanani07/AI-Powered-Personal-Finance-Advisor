@@ -13,6 +13,8 @@ from app.repositories.goal_repository import GoalRepository
 from app.repositories.dashboard_repository import DashboardRepository
 from app.repositories.financial_health_repository import FinancialHealthRepository
 from app.repositories.notification_repository import NotificationRepository
+from app.repositories.email_verification_repository import EmailVerificationRepository
+from app.repositories.chat_history_repository import ChatHistoryRepository
 
 from app.services.auth_service import AuthService
 from app.services.transaction_service import TransactionService
@@ -21,13 +23,10 @@ from app.services.budget_service import BudgetService
 from app.services.goal_service import GoalService
 from app.services.dashboard_service import DashboardService
 from app.services.financial_health_service import FinancialHealthService
-
-
-from app.repositories.forecast_repository import ForecastRepository
-from app.services.forecast_service import ForecastService
-from app.repositories.chat_history_repository import ChatHistoryRepository
 from app.services.chat_history_service import ChatHistoryService
 from app.services.gemini_service import GeminiService
+from app.services.csv_import_service import CsvImportService
+from app.services.expense_prediction_service import ExpensePredictionService
 
 
 def get_user_repository(db: AsyncSession = Depends(get_db)) -> UserRepository:
@@ -48,9 +47,6 @@ def get_budget_repository(db: AsyncSession = Depends(get_db)) -> BudgetRepositor
 
 def get_goal_repository(db: AsyncSession = Depends(get_db)) -> GoalRepository:
     return GoalRepository(db)
-
-
-from app.repositories.email_verification_repository import EmailVerificationRepository
 
 
 def get_email_verification_repository(db: AsyncSession = Depends(get_db)) -> EmailVerificationRepository:
@@ -74,11 +70,8 @@ def get_budget_service(db: AsyncSession = Depends(get_db)) -> BudgetService:
     tx_repo = TransactionRepository(db)
     goal_repo = GoalRepository(db)
     health_repo = FinancialHealthRepository(db)
-    user_repo = UserRepository(db)
-    forecast_repo = ForecastRepository(db)
     notif_repo = NotificationRepository(db)
 
-    forecast_svc = ForecastService(forecast_repo, tx_repo, user_repo)
     health_svc = FinancialHealthService(health_repo)
 
     return BudgetService(
@@ -87,7 +80,6 @@ def get_budget_service(db: AsyncSession = Depends(get_db)) -> BudgetService:
         transaction_repository=tx_repo,
         goal_repository=goal_repo,
         financial_health_repository=health_repo,
-        forecast_service=forecast_svc,
         notification_repository=notif_repo,
         financial_health_service=health_svc,
     )
@@ -129,17 +121,6 @@ def get_financial_health_service(db: AsyncSession = Depends(get_db)) -> Financia
     return FinancialHealthService(repo)
 
 
-def get_forecast_service(db: AsyncSession = Depends(get_db)) -> ForecastService:
-    forecast_repo = ForecastRepository(db)
-    tx_repo = TransactionRepository(db)
-    user_repo = UserRepository(db)
-    return ForecastService(
-        forecast_repository=forecast_repo,
-        transaction_repository=tx_repo,
-        user_repository=user_repo,
-    )
-
-
 def get_chat_history_service(db: AsyncSession = Depends(get_db)) -> ChatHistoryService:
     chat_repo = ChatHistoryRepository(db)
     user_repo = UserRepository(db)
@@ -154,9 +135,7 @@ def get_gemini_service(db: AsyncSession = Depends(get_db)) -> GeminiService:
     goal_repo = GoalRepository(db)
     dash_repo = DashboardRepository(db)
     health_repo = FinancialHealthRepository(db)
-    forecast_repo = ForecastRepository(db)
 
-    forecast_svc = ForecastService(forecast_repo, tx_repo, user_repo)
     health_svc = FinancialHealthService(health_repo)
 
     return GeminiService(
@@ -167,15 +146,15 @@ def get_gemini_service(db: AsyncSession = Depends(get_db)) -> GeminiService:
         goal_repository=goal_repo,
         dashboard_repository=dash_repo,
         financial_health_repository=health_repo,
-        forecast_service=forecast_svc,
         health_service=health_svc,
     )
-
-
-from app.services.csv_import_service import CsvImportService
 
 
 def get_csv_import_service(db: AsyncSession = Depends(get_db)) -> CsvImportService:
     return CsvImportService(db)
 
 
+def get_expense_prediction_service(db: AsyncSession = Depends(get_db)) -> ExpensePredictionService:
+    tx_repo = TransactionRepository(db)
+    cat_repo = CategoryRepository(db)
+    return ExpensePredictionService(transaction_repository=tx_repo, category_repository=cat_repo)

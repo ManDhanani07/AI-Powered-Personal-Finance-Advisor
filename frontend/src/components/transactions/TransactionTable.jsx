@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import {
   ArrowUpDown,
   MoreHorizontal,
@@ -68,18 +69,20 @@ const getCategoryColor = (categoryName, dbColor) => {
 
 // ── Sort Header Button ────────────────────────────────────────────────────────
 
-const SortHeader = ({ label, field, sortField, sortOrder, onSort }) => {
+const SortHeader = ({ label, field, sortField, sortOrder, onSort, align = 'left' }) => {
   const isActive = sortField === field;
   return (
     <button
       type="button"
       onClick={() => onSort(field)}
-      className={`flex items-center gap-1 transition-colors ${
+      className={`flex items-center gap-1.5 transition-colors cursor-pointer ${
+        align === 'right' ? 'justify-end ml-auto text-right' : 'justify-start'
+      } ${
         isActive ? 'text-white' : 'text-slate-500 hover:text-slate-300'
       }`}
     >
       <span>{label}</span>
-      <ArrowUpDown className={`h-3 w-3 ${isActive ? 'text-indigo-400' : ''}`} />
+      <ArrowUpDown className={`h-3 w-3 ${isActive ? 'text-emerald-400' : 'text-slate-600'}`} />
     </button>
   );
 };
@@ -88,42 +91,95 @@ const SortHeader = ({ label, field, sortField, sortOrder, onSort }) => {
 
 const RowMenu = ({ tx, onView, onEdit, onDuplicate, onDelete }) => {
   const [open, setOpen] = useState(false);
-  const ref = useRef(null);
+  const [menuPos, setMenuPos] = useState({ top: 0, left: 0 });
+  const buttonRef = useRef(null);
+  const menuRef = useRef(null);
+
+  const toggleMenu = (e) => {
+    e.stopPropagation();
+    if (!open && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      const menuHeight = 150;
+      const menuWidth = 160;
+      const spaceBelow = window.innerHeight - rect.bottom;
+
+      let top = rect.bottom + 4;
+      if (spaceBelow < menuHeight && rect.top > menuHeight) {
+        top = rect.top - menuHeight - 4;
+      }
+
+      let left = rect.right - menuWidth;
+      if (left < 10) left = 10;
+
+      setMenuPos({ top, left });
+      setOpen(true);
+    } else {
+      setOpen(false);
+    }
+  };
 
   useEffect(() => {
     if (!open) return;
-    const handler = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    const handleClickOutside = (e) => {
+      if (
+        menuRef.current && !menuRef.current.contains(e.target) &&
+        buttonRef.current && !buttonRef.current.contains(e.target)
+      ) {
+        setOpen(false);
+      }
     };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    const handleScroll = () => setOpen(false);
+
+    document.addEventListener('mousedown', handleClickOutside);
+    window.addEventListener('scroll', handleScroll, true);
+    window.addEventListener('resize', handleScroll);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('scroll', handleScroll, true);
+      window.removeEventListener('resize', handleScroll);
+    };
   }, [open]);
 
   return (
-    <div ref={ref} className="relative" onClick={(e) => e.stopPropagation()}>
+    <div className="relative inline-flex items-center justify-end" onClick={(e) => e.stopPropagation()}>
       <button
+        ref={buttonRef}
         type="button"
-        onClick={() => setOpen((p) => !p)}
-        className="p-1.5 rounded-md text-slate-600 hover:text-slate-300 hover:bg-zinc-800 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+        onClick={toggleMenu}
+        className={`p-1.5 rounded-md text-slate-500 hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer ${
+          open ? 'opacity-100 text-white bg-zinc-800' : 'opacity-0 group-hover:opacity-100 focus:opacity-100'
+        }`}
         title="Actions"
       >
         <MoreHorizontal className="w-4 h-4" />
       </button>
 
-      {open && (
-        <div className="absolute right-0 top-full mt-1 w-40 rounded-xl border border-zinc-800 bg-zinc-950 shadow-2xl z-50 py-1">
-          <MenuItem icon={Eye} label="View Details" onClick={() => { onView(tx); setOpen(false); }} />
-          <MenuItem icon={Edit3} label="Edit" onClick={() => { onEdit(tx); setOpen(false); }} />
-          <MenuItem icon={Copy} label="Duplicate" onClick={() => { onDuplicate(tx); setOpen(false); }} />
-          <div className="my-1 border-t border-zinc-800" />
-          <MenuItem
-            icon={Trash2}
-            label="Delete"
-            danger
-            onClick={() => { onDelete(tx); setOpen(false); }}
-          />
-        </div>
-      )}
+      {open &&
+        createPortal(
+          <div
+            ref={menuRef}
+            style={{
+              position: 'fixed',
+              top: `${menuPos.top}px`,
+              left: `${menuPos.left}px`,
+              zIndex: 99999,
+            }}
+            onClick={(e) => e.stopPropagation()}
+            className="w-40 rounded-xl border border-zinc-800 bg-[#09090B] shadow-2xl py-1 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-100"
+          >
+            <MenuItem icon={Eye} label="View Details" onClick={() => { onView(tx); setOpen(false); }} />
+            <MenuItem icon={Edit3} label="Edit" onClick={() => { onEdit(tx); setOpen(false); }} />
+            <MenuItem icon={Copy} label="Duplicate" onClick={() => { onDuplicate(tx); setOpen(false); }} />
+            <div className="my-1 border-t border-zinc-800" />
+            <MenuItem
+              icon={Trash2}
+              label="Delete"
+              danger
+              onClick={() => { onDelete(tx); setOpen(false); }}
+            />
+          </div>,
+          document.body
+        )}
     </div>
   );
 };
@@ -264,8 +320,8 @@ export const TransactionTable = ({
               Status
             </th>
             {/* Amount */}
-            <th className="py-3 px-3 pr-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500 text-right">
-              <SortHeader label="Amount" field="amount" sortField={sortField} sortOrder={sortOrder} onSort={onSortChange} />
+            <th className="py-3 px-3 pr-4 text-[11px] font-semibold uppercase tracking-wider text-right">
+              <SortHeader label="Amount" field="amount" sortField={sortField} sortOrder={sortOrder} onSort={onSortChange} align="right" />
             </th>
             {/* Actions */}
             <th className="py-3 px-3 w-10" />

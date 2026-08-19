@@ -35,7 +35,8 @@ const PLANS = [
     features: [
       'Full AI Auto Categorization Engine',
       'Bank Account Aggregator Direct Sync',
-      'Prophet ML 12-Month Cash Forecasting',
+      'AI Expense Prediction & What-If Simulator',
+      'Executive Financial Analytics & Reports',
       'Unlimited Budgets & Savings Goals',
       'AI Risk & Overspending Anomaly Alerts',
       'Multi-Currency Aggregator (INR/USD)',

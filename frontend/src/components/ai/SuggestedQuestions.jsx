@@ -50,9 +50,9 @@ export const QUICK_ACTIONS = [
     borderColor: 'border-amber-500/30 hover:border-amber-400 hover:shadow-[0_0_15px_rgba(245,158,11,0.25)]',
   },
   {
-    label: 'Prophet Forecast',
-    prompt: 'Forecast my upcoming expenses for the next 1 to 3 months and show expected savings.',
-    icon: LineChart,
+    label: 'Budget Intelligence',
+    prompt: 'Analyze my envelope budgets and tell me if any category is close to exceeding its monthly limit.',
+    icon: Wallet,
     color: 'text-indigo-400',
     borderColor: 'border-indigo-500/30 hover:border-indigo-400 hover:shadow-[0_0_15px_rgba(99,102,241,0.25)]',
   },

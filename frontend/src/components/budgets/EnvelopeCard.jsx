@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import {
   Sliders,
   AlertTriangle,
@@ -7,85 +6,67 @@ import {
   CheckCircle2,
   Edit3,
   Trash2,
-  Tag,
-  TrendingUp,
 } from 'lucide-react';
 import * as Icons from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters.js';
 
-// Vibrant 8-theme color cycle for budget cards
-const COLOR_THEMES = [
+// Curated professional fintech palette across categories
+const CATEGORY_THEMES = [
   {
-    border: 'border-indigo-500/30 hover:border-indigo-500/60',
-    bg: 'bg-gradient-to-b from-indigo-500/[0.08] to-transparent',
-    iconBg: 'bg-gradient-to-br from-indigo-500 to-blue-600 shadow-indigo-500/25',
+    iconBox: 'bg-indigo-500/15 border-indigo-500/30 text-indigo-400',
     accentText: 'text-indigo-400',
-    barGradient: 'from-indigo-500 to-blue-500',
-    glow: 'shadow-[0_0_15px_rgba(99,102,241,0.35)]',
-    pill: 'bg-indigo-500/15 text-indigo-300 border-indigo-500/30',
+    barFill: 'bg-indigo-500',
+    badge: 'bg-indigo-500/10 border-indigo-500/20 text-indigo-300',
+    remainingText: 'text-indigo-300',
   },
   {
-    border: 'border-emerald-500/30 hover:border-emerald-500/60',
-    bg: 'bg-gradient-to-b from-emerald-500/[0.08] to-transparent',
-    iconBg: 'bg-gradient-to-br from-emerald-500 to-teal-600 shadow-emerald-500/25',
-    accentText: 'text-emerald-400',
-    barGradient: 'from-emerald-500 to-teal-400',
-    glow: 'shadow-[0_0_15px_rgba(16,185,129,0.35)]',
-    pill: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
-  },
-  {
-    border: 'border-rose-500/30 hover:border-rose-500/60',
-    bg: 'bg-gradient-to-b from-rose-500/[0.08] to-transparent',
-    iconBg: 'bg-gradient-to-br from-rose-500 to-pink-600 shadow-rose-500/25',
-    accentText: 'text-rose-400',
-    barGradient: 'from-rose-500 to-pink-500',
-    glow: 'shadow-[0_0_15px_rgba(244,63,94,0.35)]',
-    pill: 'bg-rose-500/15 text-rose-300 border-rose-500/30',
-  },
-  {
-    border: 'border-amber-500/30 hover:border-amber-500/60',
-    bg: 'bg-gradient-to-b from-amber-500/[0.08] to-transparent',
-    iconBg: 'bg-gradient-to-br from-amber-500 to-orange-600 shadow-amber-500/25',
-    accentText: 'text-amber-400',
-    barGradient: 'from-amber-500 to-orange-500',
-    glow: 'shadow-[0_0_15px_rgba(245,158,11,0.35)]',
-    pill: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
-  },
-  {
-    border: 'border-purple-500/30 hover:border-purple-500/60',
-    bg: 'bg-gradient-to-b from-purple-500/[0.08] to-transparent',
-    iconBg: 'bg-gradient-to-br from-purple-500 to-violet-600 shadow-purple-500/25',
-    accentText: 'text-purple-400',
-    barGradient: 'from-purple-500 to-violet-500',
-    glow: 'shadow-[0_0_15px_rgba(168,85,247,0.35)]',
-    pill: 'bg-purple-500/15 text-purple-300 border-purple-500/30',
-  },
-  {
-    border: 'border-cyan-500/30 hover:border-cyan-500/60',
-    bg: 'bg-gradient-to-b from-cyan-500/[0.08] to-transparent',
-    iconBg: 'bg-gradient-to-br from-cyan-500 to-sky-600 shadow-cyan-500/25',
+    iconBox: 'bg-cyan-500/15 border-cyan-500/30 text-cyan-400',
     accentText: 'text-cyan-400',
-    barGradient: 'from-cyan-500 to-sky-500',
-    glow: 'shadow-[0_0_15px_rgba(6,182,212,0.35)]',
-    pill: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30',
+    barFill: 'bg-cyan-500',
+    badge: 'bg-cyan-500/10 border-cyan-500/20 text-cyan-300',
+    remainingText: 'text-cyan-300',
   },
   {
-    border: 'border-fuchsia-500/30 hover:border-fuchsia-500/60',
-    bg: 'bg-gradient-to-b from-fuchsia-500/[0.08] to-transparent',
-    iconBg: 'bg-gradient-to-br from-fuchsia-500 to-pink-600 shadow-fuchsia-500/25',
-    accentText: 'text-fuchsia-400',
-    barGradient: 'from-fuchsia-500 to-pink-500',
-    glow: 'shadow-[0_0_15px_rgba(217,70,239,0.35)]',
-    pill: 'bg-fuchsia-500/15 text-fuchsia-300 border-fuchsia-500/30',
+    iconBox: 'bg-purple-500/15 border-purple-500/30 text-purple-400',
+    accentText: 'text-purple-400',
+    barFill: 'bg-purple-500',
+    badge: 'bg-purple-500/10 border-purple-500/20 text-purple-300',
+    remainingText: 'text-purple-300',
   },
   {
-    border: 'border-teal-500/30 hover:border-teal-500/60',
-    bg: 'bg-gradient-to-b from-teal-500/[0.08] to-transparent',
-    iconBg: 'bg-gradient-to-br from-teal-500 to-emerald-600 shadow-teal-500/25',
+    iconBox: 'bg-amber-500/15 border-amber-500/30 text-amber-400',
+    accentText: 'text-amber-400',
+    barFill: 'bg-amber-500',
+    badge: 'bg-amber-500/10 border-amber-500/20 text-amber-300',
+    remainingText: 'text-amber-300',
+  },
+  {
+    iconBox: 'bg-rose-500/15 border-rose-500/30 text-rose-400',
+    accentText: 'text-rose-400',
+    barFill: 'bg-rose-500',
+    badge: 'bg-rose-500/10 border-rose-500/20 text-rose-300',
+    remainingText: 'text-rose-300',
+  },
+  {
+    iconBox: 'bg-teal-500/15 border-teal-500/30 text-teal-400',
     accentText: 'text-teal-400',
-    barGradient: 'from-teal-500 to-emerald-500',
-    glow: 'shadow-[0_0_15px_rgba(20,184,166,0.35)]',
-    pill: 'bg-teal-500/15 text-teal-300 border-teal-500/30',
+    barFill: 'bg-teal-500',
+    badge: 'bg-teal-500/10 border-teal-500/20 text-teal-300',
+    remainingText: 'text-teal-300',
+  },
+  {
+    iconBox: 'bg-sky-500/15 border-sky-500/30 text-sky-400',
+    accentText: 'text-sky-400',
+    barFill: 'bg-sky-500',
+    badge: 'bg-sky-500/10 border-sky-500/20 text-sky-300',
+    remainingText: 'text-sky-300',
+  },
+  {
+    iconBox: 'bg-fuchsia-500/15 border-fuchsia-500/30 text-fuchsia-400',
+    accentText: 'text-fuchsia-400',
+    barFill: 'bg-fuchsia-500',
+    badge: 'bg-fuchsia-500/10 border-fuchsia-500/20 text-fuchsia-300',
+    remainingText: 'text-fuchsia-300',
   },
 ];
 
@@ -103,10 +84,10 @@ export const EnvelopeCard = ({ budget, onEdit, onQuickEdit, onDelete, index = 0 
 
   // Pick theme based on index or hash of category name
   const themeIndex = (typeof index === 'number' && index >= 0)
-    ? index % COLOR_THEMES.length
-    : Math.abs(catName.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)) % COLOR_THEMES.length;
+    ? index % CATEGORY_THEMES.length
+    : Math.abs(catName.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)) % CATEGORY_THEMES.length;
   
-  const theme = COLOR_THEMES[themeIndex];
+  const theme = CATEGORY_THEMES[themeIndex];
 
   const isOver = pct >= 100;
   const isWarning = pct >= 80 && pct < 100;
@@ -120,28 +101,41 @@ export const EnvelopeCard = ({ budget, onEdit, onQuickEdit, onDelete, index = 0 
     statusText = `On track for month`;
   }
 
+  // Dynamic progress fill: Warning (Amber), Over (Rose), or Category Signature Color
+  const barColor = isOver
+    ? 'bg-rose-500'
+    : isWarning
+    ? 'bg-amber-400'
+    : theme.barFill;
+
+  // Status pill style
+  const pillStyle = isOver
+    ? 'bg-rose-500/10 border-rose-500/20 text-rose-400'
+    : isWarning
+    ? 'bg-amber-500/10 border-amber-500/20 text-amber-400'
+    : theme.badge;
+
   return (
-    <motion.div
-      whileHover={{ y: -4, transition: { duration: 0.2 } }}
-      className={`rounded-2xl border ${theme.border} ${theme.bg} bg-zinc-950/90 p-5 shadow-xl flex flex-col justify-between space-y-4 relative overflow-hidden backdrop-blur-md transition-all group`}
+    <div
+      className="rounded-2xl border border-zinc-800/90 bg-[#0c0c0e] hover:border-zinc-700/90 p-5 flex flex-col justify-between space-y-4 transition-colors group"
     >
-      {/* Top Bar: Colorful Icon Badge + Titles + Actions */}
+      {/* Top Bar: Icon Badge + Titles + Actions */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center space-x-3 min-w-0">
-          <div className={`w-11 h-11 rounded-xl ${theme.iconBg} flex items-center justify-center text-white font-bold shadow-lg shrink-0`}>
-            <IconComp className="w-5 h-5" />
+          <div className={`w-10 h-10 rounded-xl border ${theme.iconBox} flex items-center justify-center shrink-0`}>
+            <IconComp className="w-4 h-4" />
           </div>
 
           <div className="min-w-0">
-            <h4 className="text-sm font-extrabold text-white font-outfit truncate tracking-tight">
+            <h4 className="text-sm font-bold text-white font-outfit truncate tracking-tight">
               {budget.budget_name || catName}
             </h4>
             <div className="flex items-center space-x-1.5 mt-0.5">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">
                 {budget.period || 'MONTHLY'}
               </span>
-              <span className="text-slate-600">•</span>
-              <span className={`text-[10px] font-bold font-mono ${theme.accentText}`}>
+              <span className="text-zinc-600">•</span>
+              <span className={`text-[10px] font-bold font-mono ${isOver ? 'text-rose-400' : isWarning ? 'text-amber-400' : theme.accentText}`}>
                 {pct.toFixed(0)}% used
               </span>
             </div>
@@ -152,21 +146,21 @@ export const EnvelopeCard = ({ budget, onEdit, onQuickEdit, onDelete, index = 0 
         <div className="flex items-center space-x-1 shrink-0">
           <button
             onClick={() => onEdit && onEdit(budget)}
-            className="p-1.5 rounded-lg border border-zinc-800 bg-zinc-900/80 hover:bg-zinc-800 text-slate-400 hover:text-indigo-300 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg border border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer"
             title="Edit Details"
           >
             <Edit3 className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={() => onQuickEdit && onQuickEdit(budget)}
-            className="p-1.5 rounded-lg border border-zinc-800 bg-zinc-900/80 hover:bg-zinc-800 text-slate-400 hover:text-emerald-300 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg border border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-400 hover:text-cyan-400 transition-colors cursor-pointer"
             title="Adjust Slider"
           >
             <Sliders className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={() => onDelete && onDelete(budget)}
-            className="p-1.5 rounded-lg border border-rose-500/20 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg border border-zinc-800 bg-zinc-900/60 hover:bg-rose-500/10 hover:border-rose-500/30 text-zinc-400 hover:text-rose-400 transition-colors cursor-pointer"
             title="Delete Envelope"
           >
             <Trash2 className="w-3.5 h-3.5" />
@@ -178,61 +172,51 @@ export const EnvelopeCard = ({ budget, onEdit, onQuickEdit, onDelete, index = 0 
       <div className="space-y-2">
         <div className="flex items-baseline justify-between">
           <div>
-            <span className="text-xs text-slate-500 font-bold uppercase block text-[10px]">Spent</span>
-            <span className="text-xl font-black text-white font-outfit">
+            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block font-outfit">Spent</span>
+            <span className="text-lg font-bold text-white font-outfit">
               {formatCurrency(spent)}
             </span>
           </div>
           <div className="text-right">
-            <span className="text-xs text-slate-500 font-bold uppercase block text-[10px]">Remaining</span>
-            <span className={`text-sm font-black font-outfit ${isOver ? 'text-rose-400' : theme.accentText}`}>
+            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block font-outfit">Remaining</span>
+            <span className={`text-sm font-bold font-outfit ${isOver ? 'text-rose-400' : theme.remainingText}`}>
               {formatCurrency(remaining)}
             </span>
           </div>
         </div>
 
-        {/* Progress Bar with Gradient and subtle glow */}
-        <div className="h-2.5 w-full rounded-full bg-zinc-900 overflow-hidden p-0.5 border border-zinc-800/80">
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${safePct}%` }}
-            transition={{ duration: 0.6, ease: 'easeOut' }}
-            className={`h-full rounded-full bg-gradient-to-r ${
-              isOver ? 'from-rose-500 to-pink-500' : isWarning ? 'from-amber-500 to-orange-500' : theme.barGradient
-            } ${isOver ? 'shadow-[0_0_12px_rgba(244,63,94,0.6)]' : theme.glow}`}
+        {/* Progress Bar (Crisp, zero glow/shadow) */}
+        <div className="h-2 w-full rounded-full bg-zinc-800/80 overflow-hidden">
+          <div
+            style={{ width: `${safePct}%` }}
+            className={`h-full rounded-full ${barColor} transition-all duration-300`}
           />
         </div>
       </div>
 
       {/* Footer Pill & Quick Reallocate Link */}
-      <div className="flex items-center justify-between pt-1 border-t border-zinc-900">
+      <div className="flex items-center justify-between pt-2 border-t border-zinc-800/60">
         <div
-          className={`inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
-            isOver
-              ? 'bg-rose-500/15 text-rose-400 border-rose-500/30'
-              : isWarning
-              ? 'bg-amber-500/15 text-amber-400 border-amber-500/30'
-              : theme.pill
-          }`}
+          className={`inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${pillStyle}`}
         >
           {isOver ? (
-            <AlertTriangle className="w-3 h-3 text-rose-400 shrink-0" />
+            <AlertTriangle className="w-3 h-3 shrink-0 text-rose-400" />
           ) : isWarning ? (
-            <Flame className="w-3 h-3 text-amber-400 shrink-0" />
+            <Flame className="w-3 h-3 shrink-0 text-amber-400" />
           ) : (
-            <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" />
+            <CheckCircle2 className="w-3 h-3 shrink-0 text-emerald-400" />
           )}
           <span className="truncate">{statusText}</span>
         </div>
 
         <button
           onClick={() => onQuickEdit && onQuickEdit(budget)}
-          className={`text-[11px] font-bold ${theme.accentText} hover:underline font-outfit cursor-pointer`}
+          className={`text-[11px] font-semibold ${theme.accentText} hover:underline font-outfit cursor-pointer transition-colors`}
         >
           Reallocate
         </button>
       </div>
-    </motion.div>
+    </div>
   );
 };
 

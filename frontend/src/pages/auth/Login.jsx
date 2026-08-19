@@ -16,7 +16,7 @@ const STATS = [
 
 const HIGHLIGHTS = [
   { icon: Cpu, title: 'Gemini AI Copilot', desc: 'Autonomous transaction auto-tagging & real-time insights.', color: 'text-emerald-400' },
-  { icon: TrendingUp, title: 'Prophet ML Forecast', desc: '12-month cash flow forecasting & overspending risk matrix.', color: 'text-teal-400' },
+  { icon: TrendingUp, title: 'AI Expense Prediction', desc: 'Multi-scale adaptive ML forecasting & safe budget buffer.', color: 'text-teal-400' },
   { icon: Globe2, title: 'RBI-Compliant AA API', desc: 'Bank-grade encrypted aggregator sync across Indian banks.', color: 'text-cyan-400' },
 ];
 

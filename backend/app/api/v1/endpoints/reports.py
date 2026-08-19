@@ -142,17 +142,6 @@ async def get_financial_health_report(
     return APIResponse(success=True, message="Financial health report retrieved successfully.", data=data)
 
 
-@router.get("/forecast-summary")
-async def get_forecast_summary_report(
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
-):
-    """GET /api/v1/reports/forecast-summary - Time-series forecast performance report."""
-    service = ReportService(db)
-    data = await service.get_forecast_report(user_id=current_user.id)
-    return APIResponse(success=True, message="Forecast summary report retrieved successfully.", data=data)
-
-
 @router.get("/export")
 async def export_report_file(
     export_format: str = Query("csv", alias="format"),

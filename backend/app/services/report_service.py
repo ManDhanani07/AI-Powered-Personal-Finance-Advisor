@@ -394,31 +394,6 @@ class ReportService:
             "score_trend": history,
         }
 
-    async def get_forecast_report(self, user_id: UUID) -> Dict[str, Any]:
-        """Generate time-series forecasting summary report with fallback generator."""
-        history = await self.report_repo.get_forecast_summary_history(user_id)
-        
-        if not history:
-            summary = await self.report_repo.get_income_expense_summary(user_id, None, None)
-            avg_exp = summary["total_expenses"] or 50000.0
-            
-            now = datetime.utcnow()
-            history = []
-            for i in range(1, 7):
-                dt = now + timedelta(days=i*30)
-                history.append({
-                    "date": dt.strftime("%Y-%m-%d"),
-                    "forecast_type": "PROPHET_ML",
-                    "horizon_days": i * 30,
-                    "projected_amount": round(avg_exp * (1 + (i * 0.02)), 2),
-                    "confidence": 0.88,
-                })
-
-        return {
-            "forecast_records_count": len(history),
-            "forecast_history": history,
-        }
-
     async def export_report_file(
         self,
         user_id: UUID,
@@ -917,18 +892,6 @@ class ReportService:
             "overall_explanation": _health_explanation
         }
 
-        # Prophet Forecast Threshold
-        has_prophet = len(txs) >= 10
-        prophet_forecast = {
-            "has_forecast": has_prophet,
-            "current_expense": exp,
-            "forecast_expense": fc_next_exp if has_prophet else None,
-            "expected_change_pct": fc_exp_change if has_prophet else None,
-            "status_badge": ("🔴 High Increase" if fc_exp_change > 10.0 else ("🟡 Increasing" if fc_exp_change > 2.0 else "🟢 Stable")) if has_prophet else None,
-            "direction": fc_direction if has_prophet else None,
-            "text": f"Forecast Expected expenses next month: ₹{fc_next_exp:,.2f} (Current average: ₹{exp:,.2f})" if has_prophet else "More historical transaction data is needed to generate a reliable forecast."
-        }
-
         # Risk Insights
         risks = []
         if sav_rate < 10.0:
@@ -951,7 +914,7 @@ class ReportService:
         if not positive_habits:
             positive_habits.append("🟢 Financial transactions are logged consistently.")
 
-        # Recommended Actions (Plain Text - NO BUTTONS)
+        # Recommended Actions (Plain Text)
         rec_actions = [
             {
                 "priority": "HIGH",
@@ -987,7 +950,6 @@ class ReportService:
             "budget_insights": budget_insights,
             "goal_insights": goal_insights,
             "financial_health": financial_health,
-            "prophet_forecast": prophet_forecast,
             "risk_insights": risks,
             "positive_insights": positive_habits,
             "recommended_actions": rec_actions

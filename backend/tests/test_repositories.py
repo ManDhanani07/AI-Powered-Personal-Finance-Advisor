@@ -15,13 +15,13 @@ if str(backend_dir) not in sys.path:
     sys.path.insert(0, str(backend_dir))
 
 from app.database.session import AsyncSessionLocal
+from app.models.financial_health_history import FinancialHealthHistory
 from app.repositories import (
     UserRepository,
     CategoryRepository,
     TransactionRepository,
     BudgetRepository,
     GoalRepository,
-    ForecastRepository,
     FinancialHealthRepository,
     ChatHistoryRepository,
 )
@@ -113,26 +113,18 @@ async def run_repository_tests():
         })
         logger.info(f"[GoalRepository] Created goal: {new_goal.goal_name} (Progress: ₹{new_goal.current_amount}/₹{new_goal.target_amount})")
 
-        # 6. ForecastRepository Test
-        forecast_repo = ForecastRepository(db)
-        new_forecast = await forecast_repo.create({
-            "user_id": new_user.id,
-            "forecast_type": "PROPHET_TIME_SERIES",
-            "forecast_period": "MONTHLY",
-            "prediction_json": {"trend": [1000, 1200, 1400], "forecast_next_month": 1500},
-        })
-        logger.info(f"[ForecastRepository] Saved forecast record ID: {new_forecast.id}")
-
-        # 7. FinancialHealthRepository Test
+        # 6. FinancialHealthRepository Test
         health_repo = FinancialHealthRepository(db)
-        new_health = await health_repo.create({
-            "user_id": new_user.id,
-            "health_score": Decimal("85.50"),
-            "income_score": Decimal("90.00"),
-            "saving_score": Decimal("80.00"),
-            "budget_score": Decimal("85.00"),
-            "expense_score": Decimal("87.00"),
-        })
+        new_health = await health_repo.save_history(
+            FinancialHealthHistory(
+                user_id=new_user.id,
+                health_score=Decimal("85.50"),
+                income_score=Decimal("90.00"),
+                saving_score=Decimal("80.00"),
+                budget_score=Decimal("85.00"),
+                expense_score=Decimal("87.00"),
+            )
+        )
         logger.info(f"[FinancialHealthRepository] Saved health score record ID: {new_health.id} (Score: {new_health.health_score})")
 
         # 8. ChatHistoryRepository Test

@@ -29,10 +29,10 @@ const STEPS = [
     dotColor: 'bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.8)]',
   },
   {
-    id: 'forecast',
+    id: 'expense-prediction',
     stepNum: '4',
-    title: 'Prophet ML Forecast',
-    desc: 'Train Meta Prophet machine learning time-series models on your history to project cash flow 12 months ahead.',
+    title: 'AI Expense Prediction',
+    desc: 'Multi-scale adaptive ML forecasting next-month spending, P10–P90 quantile intervals, and safe budget ceilings.',
     gradient: 'bg-gradient-to-r from-purple-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent',
     dotColor: 'bg-purple-400 shadow-[0_0_10px_rgba(192,132,252,0.8)]',
   },

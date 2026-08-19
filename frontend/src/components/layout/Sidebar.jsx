@@ -9,6 +9,7 @@ import {
   Activity,
   FileBarChart,
   LineChart,
+  BrainCircuit,
   Bell,
   Bot,
   Settings,
@@ -25,8 +26,8 @@ const NAV_ITEMS = [
   { label: 'Budgets', path: ROUTES.BUDGETS, icon: PieChart },
   { label: 'Goals', path: ROUTES.GOALS, icon: Target },
   { label: 'Health Score', path: ROUTES.FINANCIAL_HEALTH, icon: Activity },
+  { label: 'Expense Prediction', path: ROUTES.EXPENSE_PREDICTION, icon: BrainCircuit },
   { label: 'Reports', path: ROUTES.REPORTS, icon: FileBarChart },
-  { label: 'Forecast', path: ROUTES.FORECAST, icon: LineChart },
   { label: 'Notifications', path: ROUTES.NOTIFICATIONS || '/notifications', icon: Bell },
   { label: 'AI Advisor', path: ROUTES.AI_ADVISOR, icon: Bot },
   { label: 'Settings', path: ROUTES.SETTINGS, icon: Settings },
@@ -48,7 +49,7 @@ export const Sidebar = ({ isCollapsed, onToggleCollapse }) => {
     <>
       {/* Desktop & Tablet Sidebar (≥ 768px) */}
       <aside
-        className={`hidden md:flex flex-col sticky top-[72px] h-[calc(100vh-72px)] bg-[#000000] border-r border-[#18181b] transition-all duration-200 z-30 ${
+        className={`hidden md:flex flex-col h-full bg-[#000000] border-r border-[#18181b] transition-all duration-200 z-30 ${
           isCollapsed ? 'w-[68px]' : 'w-[240px]'
         }`}
       >

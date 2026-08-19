@@ -14,7 +14,6 @@ from app.models.category import Category
 from app.models.budget import Budget
 from app.models.goal import Goal
 from app.models.financial_health_history import FinancialHealthHistory
-from app.models.forecast_history import ForecastHistory
 
 
 class ReportRepository:

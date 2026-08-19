@@ -85,14 +85,6 @@ export const reportService = {
   },
 
   /**
-   * Fetch forecast performance summary report
-   */
-  async getForecastSummaryReport() {
-    const response = await apiClient.get('/reports/forecast-summary');
-    return response.data;
-  },
-
-  /**
    * Download exported report file (PDF, Excel, CSV)
    */
   async downloadReportFile(format = 'csv', type = 'executive', filter = 'this_month', customStart = null, customEnd = null) {
@@ -140,9 +132,6 @@ export const reportService = {
   },
   getHealthScoreTrend() {
     return this.getFinancialHealthReport();
-  },
-  getForecastData() {
-    return this.getForecastSummaryReport();
   },
   getBudgetPerformance() {
     return this.getBudgetAnalysis();

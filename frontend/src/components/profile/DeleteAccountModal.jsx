@@ -72,7 +72,7 @@ export const DeleteAccountModal = ({ isOpen, onClose }) => {
 
           <div className="py-3 text-xs text-slate-600 dark:text-slate-400 space-y-2">
             <p>
-              This will permanently delete your account, transaction histories, budgets, goals, and AI forecasts from our servers.
+              This will permanently delete your account, transaction histories, budgets, goals, and AI insights from our servers.
             </p>
           </div>
 

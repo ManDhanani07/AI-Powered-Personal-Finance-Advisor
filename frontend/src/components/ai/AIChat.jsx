@@ -204,7 +204,7 @@ export const AIChat = () => {
         document.getElementById(`msg-a-${item.id}`) ||
         document.getElementById(`msg-${item.id}`);
       if (targetEl) {
-        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }
     }, 100);
   };

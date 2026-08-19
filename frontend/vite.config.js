@@ -5,6 +5,22 @@ import path from 'path';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      'framer-motion',
+      'lucide-react',
+      'recharts',
+      '@tanstack/react-query',
+      'axios',
+      'clsx',
+      'tailwind-merge',
+      'react-hook-form',
+      'react-toastify',
+    ],
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
