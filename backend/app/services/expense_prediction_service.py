@@ -120,14 +120,25 @@ class ExpensePredictionService:
             tx_dt = tx.transaction_date or now
             ym_key = tx_dt.strftime("%Y-%m")
             if ym_key not in monthly_groups:
-                monthly_groups[ym_key] = {"income": 0.0, "expense": 0.0, "routine": 0.0}
+                monthly_groups[ym_key] = {"income": 0.0, "expense": 0.0, "clean_expense": 0.0, "routine": 0.0}
 
             if tx_type == "Income":
                 monthly_groups[ym_key]["income"] += amt
             else:
                 monthly_groups[ym_key]["expense"] += amt
+                
+                # Isolate rare non-recurring life-event shocks from baseline history series
+                cat_lower = cat_name.lower()
+                is_shock = any(shock_k in cat_lower for shock_k in self.engine.shock_cats) or (amt > 15000 and not is_rec and cat_lower not in self.engine.fixed_cats)
+                if not is_shock:
+                    monthly_groups[ym_key]["clean_expense"] += amt
+                else:
+                    # Retain base routine living allowance for medical or routine living categories
+                    if cat_lower in self.engine.routine_cats:
+                        monthly_groups[ym_key]["clean_expense"] += min(amt, 5000.0)
+                
                 # Track routine
-                if cat_name.lower() in self.engine.routine_cats or cat_name.lower() in self.engine.fixed_cats:
+                if cat_lower in self.engine.routine_cats or cat_lower in self.engine.fixed_cats:
                     monthly_groups[ym_key]["routine"] += amt
 
         # 3. Sort monthly history
@@ -148,7 +159,7 @@ class ExpensePredictionService:
             # Prior historical months leading up to the latest month
             prior_yms = sorted_ym[:-1]
             hist_incomes = [monthly_groups[k]["income"] for k in prior_yms if monthly_groups[k]["income"] > 0]
-            hist_spends = [monthly_groups[k]["expense"] for k in prior_yms]
+            hist_spends = [monthly_groups[k]["clean_expense"] if monthly_groups[k].get("clean_expense", 0.0) > 0 else monthly_groups[k]["expense"] for k in prior_yms]
 
             # If the latest data month is completed / imported, use 30 days active
             if latest_ym != current_ym_str:

@@ -133,9 +133,10 @@ class FinancialAdvisorEngine:
         cat_net['amount'] = cat_net['amount'].apply(lambda x: max(0.0, float(x)))
 
         pos_amounts = cat_net[cat_net['amount'] > 0]['amount']
-        p75 = float(pos_amounts.quantile(0.75)) if len(pos_amounts) > 0 else 5000.0
-        p50 = float(pos_amounts.median()) if len(pos_amounts) > 0 else 2000.0
-        shock_thresh = max(12000.0, p75 + 1.6 * (p75 - p50 + 1.0))
+        user_scale = max(float(cat_net['amount'].sum()), 1000.0)
+        p75 = float(pos_amounts.quantile(0.75)) if len(pos_amounts) > 0 else user_scale * 0.40
+        p50 = float(pos_amounts.median()) if len(pos_amounts) > 0 else user_scale * 0.20
+        shock_thresh = max(user_scale * 0.35, p75 + 1.6 * (p75 - p50 + 1.0))
 
         # Classify categories
         is_fixed = (cat_net['rec_clean'] == True) | (cat_net['cat_clean'].isin(self.fixed_cats))
@@ -153,7 +154,7 @@ class FinancialAdvisorEngine:
         # If a variable category experienced a one-off shock but belongs to routine living (e.g. hospitalization), retain essential baseline
         for _, r in var_df[is_shock].iterrows():
             if r['cat_clean'] in self.routine_cats:
-                base_allotted = min(float(r['amount']), 5000.0)
+                base_allotted = min(float(r['amount']), max(1500.0, user_scale * 0.12))
                 routine_spend += base_allotted
                 shock_amt = max(0.0, shock_amt - base_allotted)
 
@@ -295,6 +296,10 @@ class FinancialAdvisorEngine:
                 # Post Q4 / January Normalization:
                 # Reverts from holiday/year-end Q4 surge to steady annualized baseline
                 pred_anchor = 0.50 * trimmed_mean + 0.30 * clean_user_med + 0.20 * roll_med_6
+            elif target_month == 2:
+                # February Post-Holiday Continuation:
+                # Clean steady annualized routine baseline
+                pred_anchor = 0.45 * trimmed_mean + 0.35 * clean_user_med + 0.20 * roll_med_6
             elif delta_pct > 0.12 or (target_month == 12 and delta_pct > 0.08):
                 if target_month == 12 and delta_pct > 0.08:
                     macro_anchor = 0.40 * roll_med_6 + 0.35 * clean_user_med + 0.25 * roll_mean_6
