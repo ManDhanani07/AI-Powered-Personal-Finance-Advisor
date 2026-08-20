@@ -1,8 +1,6 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Bell, CheckCheck, ExternalLink, Sparkles, Check } from 'lucide-react';
+import { Bell, CheckCheck, Sparkles, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { ROUTES } from '../../constants/index.js';
 
 export const NotificationDropdown = ({
   unreadCount = 0,
@@ -98,18 +96,6 @@ export const NotificationDropdown = ({
             </div>
           ))
         )}
-      </div>
-
-      {/* Footer */}
-      <div className="p-3 border-t border-border-subtle bg-bg-card/40 text-center">
-        <Link
-          to={ROUTES.NOTIFICATIONS || '/notifications'}
-          onClick={onClose}
-          className="inline-flex items-center justify-center space-x-1.5 text-xs font-bold text-primary-400 hover:text-primary-300 transition-colors"
-        >
-          <span>View All Notifications</span>
-          <ExternalLink className="w-3 h-3" />
-        </Link>
       </div>
     </motion.div>
   );

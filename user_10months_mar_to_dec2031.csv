@@ -1,0 +1,333 @@
+transaction_id,user_id,merchant,description,amount,category,transaction_type,payment_method,account_type,transaction_date,currency,location,recurring
+TXN700001,USR30891,Brightpath Analytics Pvt Ltd - Salary,Monthly salary credit,100000,Salary,income,Net Banking,Savings Account,2031-03-01,INR,Bengaluru,Yes
+TXN700002,USR30891,Netflix,Monthly subscription,199,Subscriptions,expense,Credit Card,Credit Card,2031-03-02,INR,Bengaluru,Yes
+TXN700003,USR30891,Spotify Premium,Monthly subscription,119,Subscriptions,expense,Credit Card,Credit Card,2031-03-02,INR,Bengaluru,Yes
+TXN700004,USR30891,Reddy Estate - Landlord,Monthly house rent,20000,Housing & Rent,expense,Net Banking,Savings Account,2031-03-03,INR,Bengaluru,Yes
+TXN700005,USR30891,YouTube Premium,Monthly subscription,149,Subscriptions,expense,Credit Card,Credit Card,2031-03-04,INR,Bengaluru,Yes
+TXN700006,USR30891,BESCOM Electricity,Electricity bill payment,1176.62,Utilities,expense,UPI,Savings Account,2031-03-05,INR,Bengaluru,Yes
+TXN700007,USR30891,Manipal Diagnostic Lab,Pharmacy / clinic payment,241.72,Healthcare,expense,UPI,Savings Account,2031-03-05,INR,Bengaluru,No
+TXN700008,USR30891,Phoenix Mall,Online/offline shopping purchase,3092.07,Shopping,expense,UPI,Savings Account,2031-03-05,INR,Bengaluru,No
+TXN700009,USR30891,ACT Fibernet,Broadband monthly bill,1099,Utilities,expense,UPI,Savings Account,2031-03-06,INR,Bengaluru,Yes
+TXN700010,USR30891,BWSSB Water Bill,Water bill payment,417.51,Utilities,expense,Net Banking,Savings Account,2031-03-07,INR,Bengaluru,Yes
+TXN700011,USR30891,Bajaj Finserv Laptop EMI,Laptop purchase EMI,4500,EMI,expense,Net Banking,Savings Account,2031-03-08,INR,Bengaluru,Yes
+TXN700012,USR30891,Coursera Subscription,Online course payment,1039.22,Education,expense,Credit Card,Credit Card,2031-03-08,INR,Bengaluru,No
+TXN700013,USR30891,Great Learning Course,Online course payment,1157.63,Education,expense,Credit Card,Credit Card,2031-03-08,INR,Bengaluru,No
+TXN700014,USR30891,Fiverr Freelance Order,Freelance project payment received,10085.43,Freelancing,income,UPI,Savings Account,2031-03-10,INR,Bengaluru,No
+TXN700015,USR30891,Star Health Insurance,Health insurance premium,2200,Insurance,expense,Net Banking,Savings Account,2031-03-10,INR,Bengaluru,Yes
+TXN700016,USR30891,Apollo Pharmacy,Pharmacy / clinic payment,1067.88,Healthcare,expense,UPI,Savings Account,2031-03-10,INR,Bengaluru,No
+TXN700017,USR30891,RD Auto-Debit - ICICI Bank,Recurring deposit auto-transfer,3000,Savings,expense,Net Banking,Savings Account,2031-03-12,INR,Bengaluru,Yes
+TXN700018,USR30891,Zerodha - SIP Mutual Fund,Monthly SIP investment,3500,Investment,expense,Net Banking,Savings Account,2031-03-15,INR,Bengaluru,Yes
+TXN700019,USR30891,Local ATM Withdrawal,Miscellaneous expense,292.13,Other,expense,Cash,Savings Account,2031-03-16,INR,Bengaluru,No
+TXN700020,USR30891,GST Payment - Freelance,Advance tax / GST payment,1725.69,Tax,expense,Net Banking,Savings Account,2031-03-20,INR,Bengaluru,Yes
+TXN700021,USR30891,Manipal Diagnostic Lab,Pharmacy / clinic payment,805.91,Healthcare,expense,Debit Card,Savings Account,2031-03-21,INR,Bengaluru,No
+TXN700022,USR30891,Goa Beach Resort Booking,Travel booking,1831.62,Travel,expense,Net Banking,Savings Account,2031-03-21,INR,Bengaluru,No
+TXN700023,USR30891,Third Wave Coffee,Food order / dining,182.83,Food & Dining,expense,Cash,Savings Account,2031-03-23,INR,Bengaluru,No
+TXN700024,USR30891,Manipal Diagnostic Lab,Pharmacy / clinic payment,520.93,Healthcare,expense,Cash,Savings Account,2031-03-23,INR,Bengaluru,No
+TXN700025,USR30891,Local Gaming Cafe,Entertainment purchase,774.08,Entertainment,expense,Credit Card,Credit Card,2031-03-24,INR,Bengaluru,No
+TXN700026,USR30891,Tata 1mg,Pharmacy / clinic payment,1466.57,Healthcare,expense,Debit Card,Savings Account,2031-03-26,INR,Bengaluru,No
+TXN700027,USR30891,Ola Cabs,Ride / fuel expense,516.74,Transportation,expense,Cash,Savings Account,2031-03-26,INR,Bengaluru,No
+TXN700028,USR30891,BookMyShow,Entertainment purchase,722.37,Entertainment,expense,Credit Card,Credit Card,2031-03-27,INR,Bengaluru,No
+TXN700029,USR30891,Flipkart,Online/offline shopping purchase,2556.27,Shopping,expense,UPI,Savings Account,2031-03-27,INR,Bengaluru,No
+TXN700030,USR30891,Rapido,Ride / fuel expense,1126.66,Transportation,expense,Credit Card,Credit Card,2031-03-27,INR,Bengaluru,No
+TXN700031,USR30891,Myntra,Online/offline shopping purchase,1122.96,Shopping,expense,Debit Card,Savings Account,2031-03-28,INR,Bengaluru,No
+TXN700032,USR30891,Coursera Subscription,Online course payment,676.36,Education,expense,Credit Card,Credit Card,2031-03-29,INR,Bengaluru,No
+TXN701001,USR30891,Brightpath Analytics Pvt Ltd - Salary,Monthly salary credit,100000,Salary,income,Net Banking,Savings Account,2031-04-01,INR,Bengaluru,Yes
+TXN701002,USR30891,PVR Cinemas,Entertainment purchase,774.3,Entertainment,expense,Credit Card,Credit Card,2031-04-01,INR,Bengaluru,No
+TXN701003,USR30891,PVR Cinemas,Entertainment purchase,337.68,Entertainment,expense,Credit Card,Credit Card,2031-04-01,INR,Bengaluru,No
+TXN701004,USR30891,Netflix,Monthly subscription,199,Subscriptions,expense,Credit Card,Credit Card,2031-04-02,INR,Bengaluru,Yes
+TXN701005,USR30891,Spotify Premium,Monthly subscription,119,Subscriptions,expense,Credit Card,Credit Card,2031-04-02,INR,Bengaluru,Yes
+TXN701006,USR30891,BookMyShow,Entertainment purchase,381.59,Entertainment,expense,UPI,Savings Account,2031-04-02,INR,Bengaluru,No
+TXN701007,USR30891,Reddy Estate - Landlord,Monthly house rent,20000,Housing & Rent,expense,Net Banking,Savings Account,2031-04-03,INR,Bengaluru,Yes
+TXN701008,USR30891,PVR Cinemas,Entertainment purchase,714.33,Entertainment,expense,Credit Card,Credit Card,2031-04-03,INR,Bengaluru,No
+TXN701009,USR30891,YouTube Premium,Monthly subscription,149,Subscriptions,expense,Credit Card,Credit Card,2031-04-04,INR,Bengaluru,Yes
+TXN701010,USR30891,BESCOM Electricity,Electricity bill payment,1137.27,Utilities,expense,UPI,Savings Account,2031-04-05,INR,Bengaluru,Yes
+TXN701011,USR30891,ACT Fibernet,Broadband monthly bill,1099,Utilities,expense,UPI,Savings Account,2031-04-06,INR,Bengaluru,Yes
+TXN701012,USR30891,BWSSB Water Bill,Water bill payment,367.69,Utilities,expense,Net Banking,Savings Account,2031-04-07,INR,Bengaluru,Yes
+TXN701013,USR30891,Amazon.in,Online/offline shopping purchase,2015.12,Shopping,expense,Debit Card,Savings Account,2031-04-07,INR,Bengaluru,No
+TXN701014,USR30891,Apollo Pharmacy,Pharmacy / clinic payment,396.3,Healthcare,expense,Cash,Savings Account,2031-04-07,INR,Bengaluru,No
+TXN701015,USR30891,Bajaj Finserv Laptop EMI,Laptop purchase EMI,4500,EMI,expense,Net Banking,Savings Account,2031-04-08,INR,Bengaluru,Yes
+TXN701016,USR30891,Courier - Delhivery,Miscellaneous expense,260.28,Other,expense,Cash,Savings Account,2031-04-09,INR,Bengaluru,No
+TXN701017,USR30891,MakeMyTrip,Travel booking,3633.77,Travel,expense,Net Banking,Savings Account,2031-04-09,INR,Bengaluru,No
+TXN701018,USR30891,Star Health Insurance,Health insurance premium,2200,Insurance,expense,Net Banking,Savings Account,2031-04-10,INR,Bengaluru,Yes
+TXN701019,USR30891,RD Auto-Debit - ICICI Bank,Recurring deposit auto-transfer,3000,Savings,expense,Net Banking,Savings Account,2031-04-12,INR,Bengaluru,Yes
+TXN701020,USR30891,Domino's Pizza,Food order / dining,836.15,Food & Dining,expense,Credit Card,Credit Card,2031-04-12,INR,Bengaluru,No
+TXN701021,USR30891,Apollo Pharmacy,Pharmacy / clinic payment,1397.01,Healthcare,expense,Debit Card,Savings Account,2031-04-13,INR,Bengaluru,No
+TXN701022,USR30891,Courier - Delhivery,Miscellaneous expense,416.58,Other,expense,UPI,Savings Account,2031-04-13,INR,Bengaluru,No
+TXN701023,USR30891,Stationery Shop,Miscellaneous expense,769.1,Other,expense,Cash,Savings Account,2031-04-14,INR,Bengaluru,No
+TXN701024,USR30891,Fiverr Freelance Order,Freelance project payment received,6751.44,Freelancing,income,Net Banking,Savings Account,2031-04-15,INR,Bengaluru,No
+TXN701025,USR30891,Zerodha - SIP Mutual Fund,Monthly SIP investment,3500,Investment,expense,Net Banking,Savings Account,2031-04-15,INR,Bengaluru,Yes
+TXN701026,USR30891,Mutual Fund Redemption Gain,Investment payout received,2263.15,Investments,income,Net Banking,Savings Account,2031-04-16,INR,Bengaluru,No
+TXN701027,USR30891,Apollo Pharmacy,Pharmacy / clinic payment,963.58,Healthcare,expense,UPI,Savings Account,2031-04-16,INR,Bengaluru,No
+TXN701028,USR30891,Flipkart,Online/offline shopping purchase,554.31,Shopping,expense,Debit Card,Savings Account,2031-04-17,INR,Bengaluru,No
+TXN701029,USR30891,Local ATM Withdrawal,Miscellaneous expense,729.3,Other,expense,Cash,Savings Account,2031-04-19,INR,Bengaluru,No
+TXN701030,USR30891,GST Payment - Freelance,Advance tax / GST payment,1554.76,Tax,expense,Net Banking,Savings Account,2031-04-20,INR,Bengaluru,Yes
+TXN701031,USR30891,Local Kirana Store,Grocery purchase,2773.04,Groceries,expense,Debit Card,Savings Account,2031-04-25,INR,Bengaluru,No
+TXN701032,USR30891,Side Business Sales Revenue,Business sales revenue received,4804.21,Business,income,UPI,Savings Account,2031-04-26,INR,Bengaluru,No
+TXN701033,USR30891,Local Kirana Store,Grocery purchase,1086.31,Groceries,expense,Cash,Savings Account,2031-04-26,INR,Bengaluru,No
+TXN701034,USR30891,Coursera Subscription,Online course payment,1739.95,Education,expense,Credit Card,Credit Card,2031-04-26,INR,Bengaluru,No
+TXN702001,USR30891,Brightpath Analytics Pvt Ltd - Salary,Monthly salary credit,100000,Salary,income,Net Banking,Savings Account,2031-05-01,INR,Bengaluru,Yes
+TXN702002,USR30891,Netflix,Monthly subscription,199,Subscriptions,expense,Credit Card,Credit Card,2031-05-02,INR,Bengaluru,Yes
+TXN702003,USR30891,Spotify Premium,Monthly subscription,119,Subscriptions,expense,Credit Card,Credit Card,2031-05-02,INR,Bengaluru,Yes
+TXN702004,USR30891,Reddy Estate - Landlord,Monthly house rent,20000,Housing & Rent,expense,Net Banking,Savings Account,2031-05-03,INR,Bengaluru,Yes
+TXN702005,USR30891,YouTube Premium,Monthly subscription,149,Subscriptions,expense,Credit Card,Credit Card,2031-05-04,INR,Bengaluru,Yes
+TXN702006,USR30891,OYO Rooms,Travel booking,3929.95,Travel,expense,Credit Card,Credit Card,2031-05-04,INR,Bengaluru,No
+TXN702007,USR30891,Local Gaming Cafe,Entertainment purchase,554.8,Entertainment,expense,Credit Card,Credit Card,2031-05-04,INR,Bengaluru,No
+TXN702008,USR30891,BESCOM Electricity,Electricity bill payment,1318.01,Utilities,expense,UPI,Savings Account,2031-05-05,INR,Bengaluru,Yes
+TXN702009,USR30891,ACT Fibernet,Broadband monthly bill,1099,Utilities,expense,UPI,Savings Account,2031-05-06,INR,Bengaluru,Yes
+TXN702010,USR30891,PVR Cinemas,Entertainment purchase,330.55,Entertainment,expense,UPI,Savings Account,2031-05-06,INR,Bengaluru,No
+TXN702011,USR30891,Coursera Subscription,Online course payment,1562.51,Education,expense,Credit Card,Credit Card,2031-05-06,INR,Bengaluru,No
+TXN702012,USR30891,Coursera Subscription,Online course payment,711.51,Education,expense,Credit Card,Credit Card,2031-05-06,INR,Bengaluru,No
+TXN702013,USR30891,BWSSB Water Bill,Water bill payment,312.61,Utilities,expense,Net Banking,Savings Account,2031-05-07,INR,Bengaluru,Yes
+TXN702014,USR30891,Rapido,Ride / fuel expense,1244.6,Transportation,expense,Cash,Savings Account,2031-05-07,INR,Bengaluru,No
+TXN702015,USR30891,Bajaj Finserv Laptop EMI,Laptop purchase EMI,4500,EMI,expense,Net Banking,Savings Account,2031-05-08,INR,Bengaluru,Yes
+TXN702016,USR30891,OYO Rooms,Travel booking,1249.37,Travel,expense,Net Banking,Savings Account,2031-05-09,INR,Bengaluru,No
+TXN702017,USR30891,Local Gaming Cafe,Entertainment purchase,511.83,Entertainment,expense,UPI,Savings Account,2031-05-09,INR,Bengaluru,No
+TXN702018,USR30891,Star Health Insurance,Health insurance premium,2200,Insurance,expense,Net Banking,Savings Account,2031-05-10,INR,Bengaluru,Yes
+TXN702019,USR30891,Courier - Delhivery,Miscellaneous expense,214.48,Other,expense,UPI,Savings Account,2031-05-10,INR,Bengaluru,No
+TXN702020,USR30891,RD Auto-Debit - ICICI Bank,Recurring deposit auto-transfer,3000,Savings,expense,Net Banking,Savings Account,2031-05-12,INR,Bengaluru,Yes
+TXN702021,USR30891,Ola Cabs,Ride / fuel expense,276.37,Transportation,expense,Credit Card,Credit Card,2031-05-12,INR,Bengaluru,No
+TXN702022,USR30891,Side Business Sales Revenue,Business sales revenue received,7125.58,Business,income,Net Banking,Savings Account,2031-05-14,INR,Bengaluru,No
+TXN702023,USR30891,Zerodha - SIP Mutual Fund,Monthly SIP investment,3500,Investment,expense,Net Banking,Savings Account,2031-05-15,INR,Bengaluru,Yes
+TXN702024,USR30891,More Supermarket,Grocery purchase,2718.95,Groceries,expense,UPI,Savings Account,2031-05-17,INR,Bengaluru,No
+TXN702025,USR30891,WazirX Staking Payout,Crypto staking reward credited,1138.24,Crypto Staking Yield,income,Net Banking,Savings Account,2031-05-18,INR,Bengaluru,Yes
+TXN702026,USR30891,Manipal Diagnostic Lab,Annual full body health checkup,4376.19,Healthcare,expense,UPI,Savings Account,2031-05-18,INR,Bengaluru,No
+TXN702027,USR30891,GST Payment - Freelance,Advance tax / GST payment,1263.93,Tax,expense,Net Banking,Savings Account,2031-05-20,INR,Bengaluru,Yes
+TXN702028,USR30891,Udemy,Online course payment,497.62,Education,expense,Credit Card,Credit Card,2031-05-20,INR,Bengaluru,No
+TXN702029,USR30891,Courier - Delhivery,Miscellaneous expense,205.99,Other,expense,Cash,Savings Account,2031-05-25,INR,Bengaluru,No
+TXN702030,USR30891,Myntra,Online/offline shopping purchase,2770.85,Shopping,expense,UPI,Savings Account,2031-05-28,INR,Bengaluru,No
+TXN702031,USR30891,Local ATM Withdrawal,Miscellaneous expense,584.93,Other,expense,UPI,Savings Account,2031-05-29,INR,Bengaluru,No
+TXN702032,USR30891,Local Kirana Store,Grocery purchase,932.69,Groceries,expense,Cash,Savings Account,2031-05-29,INR,Bengaluru,No
+TXN702033,USR30891,More Supermarket,Grocery purchase,2009.85,Groceries,expense,UPI,Savings Account,2031-05-29,INR,Bengaluru,No
+TXN702034,USR30891,Amazon.in,Online/offline shopping purchase,550.09,Shopping,expense,Credit Card,Credit Card,2031-05-31,INR,Bengaluru,No
+TXN703001,USR30891,Brightpath Analytics Pvt Ltd - Salary,Monthly salary credit,100000,Salary,income,Net Banking,Savings Account,2031-06-01,INR,Bengaluru,Yes
+TXN703002,USR30891,Netflix,Monthly subscription,199,Subscriptions,expense,Credit Card,Credit Card,2031-06-02,INR,Bengaluru,Yes
+TXN703003,USR30891,Spotify Premium,Monthly subscription,119,Subscriptions,expense,Credit Card,Credit Card,2031-06-02,INR,Bengaluru,Yes
+TXN703004,USR30891,Reddy Estate - Landlord,Monthly house rent,20000,Housing & Rent,expense,Net Banking,Savings Account,2031-06-03,INR,Bengaluru,Yes
+TXN703005,USR30891,YouTube Premium,Monthly subscription,149,Subscriptions,expense,Credit Card,Credit Card,2031-06-04,INR,Bengaluru,Yes
+TXN703006,USR30891,Flipkart,Online/offline shopping purchase,2947.8,Shopping,expense,Credit Card,Credit Card,2031-06-04,INR,Bengaluru,No
+TXN703007,USR30891,Namma Metro,Ride / fuel expense,191.16,Transportation,expense,Credit Card,Credit Card,2031-06-04,INR,Bengaluru,No
+TXN703008,USR30891,BESCOM Electricity,Electricity bill payment,1597.85,Utilities,expense,UPI,Savings Account,2031-06-05,INR,Bengaluru,Yes
+TXN703009,USR30891,Coursera Subscription,Online course payment,1720.03,Education,expense,Credit Card,Credit Card,2031-06-05,INR,Bengaluru,No
+TXN703010,USR30891,ACT Fibernet,Broadband monthly bill,1099,Utilities,expense,UPI,Savings Account,2031-06-06,INR,Bengaluru,Yes
+TXN703011,USR30891,BWSSB Water Bill,Water bill payment,354.9,Utilities,expense,Net Banking,Savings Account,2031-06-07,INR,Bengaluru,Yes
+TXN703012,USR30891,Flipkart,Online/offline shopping purchase,2655.63,Shopping,expense,Debit Card,Savings Account,2031-06-07,INR,Bengaluru,No
+TXN703013,USR30891,Coursera Subscription,Online course payment,1248.62,Education,expense,Credit Card,Credit Card,2031-06-07,INR,Bengaluru,No
+TXN703014,USR30891,Bajaj Finserv Laptop EMI,Laptop purchase EMI,4500,EMI,expense,Net Banking,Savings Account,2031-06-08,INR,Bengaluru,Yes
+TXN703015,USR30891,Domino's Pizza,Food order / dining,402.84,Food & Dining,expense,Credit Card,Credit Card,2031-06-08,INR,Bengaluru,No
+TXN703016,USR30891,Udemy,Online course payment,2313.68,Education,expense,Credit Card,Credit Card,2031-06-09,INR,Bengaluru,No
+TXN703017,USR30891,Star Health Insurance,Health insurance premium,2200,Insurance,expense,Net Banking,Savings Account,2031-06-10,INR,Bengaluru,Yes
+TXN703018,USR30891,Manipal Diagnostic Lab,Pharmacy / clinic payment,963.57,Healthcare,expense,Debit Card,Savings Account,2031-06-10,INR,Bengaluru,No
+TXN703019,USR30891,Coursera Subscription,Online course payment,1172.87,Education,expense,Credit Card,Credit Card,2031-06-10,INR,Bengaluru,No
+TXN703020,USR30891,RD Auto-Debit - ICICI Bank,Recurring deposit auto-transfer,3000,Savings,expense,Net Banking,Savings Account,2031-06-12,INR,Bengaluru,Yes
+TXN703021,USR30891,IndiGo Airlines,Vacation flight booking,4046.06,Travel,expense,Credit Card,Credit Card,2031-06-14,INR,Bengaluru,No
+TXN703022,USR30891,Stationery Shop,Miscellaneous expense,326.7,Other,expense,UPI,Savings Account,2031-06-14,INR,Bengaluru,No
+TXN703023,USR30891,Zerodha - SIP Mutual Fund,Monthly SIP investment,3500,Investment,expense,Net Banking,Savings Account,2031-06-15,INR,Bengaluru,Yes
+TXN703024,USR30891,Goa Beach Resort Booking,Vacation resort stay,4107.1,Travel,expense,Net Banking,Savings Account,2031-06-15,INR,Bengaluru,No
+TXN703025,USR30891,BigBasket,Grocery purchase,765.68,Groceries,expense,Cash,Savings Account,2031-06-16,INR,Bengaluru,No
+TXN703026,USR30891,Etsy Shop Payout,Business sales revenue received,8163.73,Business,income,Net Banking,Savings Account,2031-06-17,INR,Bengaluru,No
+TXN703027,USR30891,Fiverr Freelance Order,Freelance project payment received,8290.99,Freelancing,income,UPI,Savings Account,2031-06-18,INR,Bengaluru,No
+TXN703028,USR30891,GST Payment - Freelance,Advance tax / GST payment,1040.15,Tax,expense,Net Banking,Savings Account,2031-06-20,INR,Bengaluru,Yes
+TXN703029,USR30891,IRCTC,Travel booking,3921.96,Travel,expense,Credit Card,Credit Card,2031-06-20,INR,Bengaluru,No
+TXN703030,USR30891,More Supermarket,Grocery purchase,1545.44,Groceries,expense,Cash,Savings Account,2031-06-21,INR,Bengaluru,No
+TXN703031,USR30891,Namma Metro,Ride / fuel expense,1360.89,Transportation,expense,Cash,Savings Account,2031-06-21,INR,Bengaluru,No
+TXN703032,USR30891,Courier - Delhivery,Miscellaneous expense,541.49,Other,expense,Cash,Savings Account,2031-06-22,INR,Bengaluru,No
+TXN703033,USR30891,BookMyShow,Entertainment purchase,563.2,Entertainment,expense,Credit Card,Credit Card,2031-06-22,INR,Bengaluru,No
+TXN703034,USR30891,Third Wave Coffee,Food order / dining,351.17,Food & Dining,expense,Cash,Savings Account,2031-06-25,INR,Bengaluru,No
+TXN703035,USR30891,Mutual Fund Redemption Gain,Investment payout received,834.32,Investments,income,Net Banking,Savings Account,2031-06-28,INR,Bengaluru,No
+TXN703036,USR30891,Uber,Ride / fuel expense,1027.95,Transportation,expense,Cash,Savings Account,2031-06-30,INR,Bengaluru,No
+TXN704001,USR30891,Brightpath Analytics Pvt Ltd - Salary,Monthly salary credit,104000,Salary,income,Net Banking,Savings Account,2031-07-01,INR,Bengaluru,Yes
+TXN704002,USR30891,Netflix,Monthly subscription,199,Subscriptions,expense,Credit Card,Credit Card,2031-07-02,INR,Bengaluru,Yes
+TXN704003,USR30891,Spotify Premium,Monthly subscription,119,Subscriptions,expense,Credit Card,Credit Card,2031-07-02,INR,Bengaluru,Yes
+TXN704004,USR30891,Reddy Estate - Landlord,Monthly house rent,20000,Housing & Rent,expense,Net Banking,Savings Account,2031-07-03,INR,Bengaluru,Yes
+TXN704005,USR30891,YouTube Premium,Monthly subscription,149,Subscriptions,expense,Credit Card,Credit Card,2031-07-04,INR,Bengaluru,Yes
+TXN704006,USR30891,Rapido,Ride / fuel expense,671.78,Transportation,expense,Cash,Savings Account,2031-07-04,INR,Bengaluru,No
+TXN704007,USR30891,BESCOM Electricity,Electricity bill payment,1190.85,Utilities,expense,UPI,Savings Account,2031-07-05,INR,Bengaluru,Yes
+TXN704008,USR30891,Flipkart,Online/offline shopping purchase,3193.13,Shopping,expense,UPI,Savings Account,2031-07-05,INR,Bengaluru,No
+TXN704009,USR30891,ACT Fibernet,Broadband monthly bill,1099,Utilities,expense,UPI,Savings Account,2031-07-06,INR,Bengaluru,Yes
+TXN704010,USR30891,Local Restaurant,Food order / dining,347.28,Food & Dining,expense,UPI,Savings Account,2031-07-06,INR,Bengaluru,No
+TXN704011,USR30891,Courier - Delhivery,Miscellaneous expense,488.79,Other,expense,Cash,Savings Account,2031-07-06,INR,Bengaluru,No
+TXN704012,USR30891,Third Wave Coffee,Food order / dining,275.73,Food & Dining,expense,Credit Card,Credit Card,2031-07-06,INR,Bengaluru,No
+TXN704013,USR30891,BWSSB Water Bill,Water bill payment,270.66,Utilities,expense,Net Banking,Savings Account,2031-07-07,INR,Bengaluru,Yes
+TXN704014,USR30891,Great Learning Course,Online course payment,2307.3,Education,expense,Credit Card,Credit Card,2031-07-07,INR,Bengaluru,No
+TXN704015,USR30891,Bajaj Finserv Laptop EMI,Laptop purchase EMI,4500,EMI,expense,Net Banking,Savings Account,2031-07-08,INR,Bengaluru,Yes
+TXN704016,USR30891,Star Health Insurance,Health insurance premium,2200,Insurance,expense,Net Banking,Savings Account,2031-07-10,INR,Bengaluru,Yes
+TXN704017,USR30891,Upwork Client Payment,Freelance project payment received,10806.61,Freelancing,income,Net Banking,Savings Account,2031-07-11,INR,Bengaluru,No
+TXN704018,USR30891,Amazon.in,Online/offline shopping purchase,2307.77,Shopping,expense,UPI,Savings Account,2031-07-11,INR,Bengaluru,No
+TXN704019,USR30891,RD Auto-Debit - ICICI Bank,Recurring deposit auto-transfer,3000,Savings,expense,Net Banking,Savings Account,2031-07-12,INR,Bengaluru,Yes
+TXN704020,USR30891,Courier - Delhivery,Miscellaneous expense,874.31,Other,expense,Cash,Savings Account,2031-07-14,INR,Bengaluru,No
+TXN704021,USR30891,Zerodha - SIP Mutual Fund,Monthly SIP investment,3500,Investment,expense,Net Banking,Savings Account,2031-07-15,INR,Bengaluru,Yes
+TXN704022,USR30891,Local ATM Withdrawal,Miscellaneous expense,110.68,Other,expense,Cash,Savings Account,2031-07-16,INR,Bengaluru,No
+TXN704023,USR30891,Local Kirana Store,Grocery purchase,939.85,Groceries,expense,Debit Card,Savings Account,2031-07-18,INR,Bengaluru,No
+TXN704024,USR30891,GST Payment - Freelance,Advance tax / GST payment,1157.82,Tax,expense,Net Banking,Savings Account,2031-07-20,INR,Bengaluru,Yes
+TXN704025,USR30891,Tata 1mg,Pharmacy / clinic payment,382.34,Healthcare,expense,Cash,Savings Account,2031-07-21,INR,Bengaluru,No
+TXN704026,USR30891,WazirX Staking Payout,Crypto staking reward credited,593.55,Crypto Staking Yield,income,Net Banking,Savings Account,2031-07-22,INR,Bengaluru,Yes
+TXN704027,USR30891,BookMyShow,Entertainment purchase,352.35,Entertainment,expense,Credit Card,Credit Card,2031-07-22,INR,Bengaluru,No
+TXN704028,USR30891,Phoenix Mall,Online/offline shopping purchase,1670.38,Shopping,expense,UPI,Savings Account,2031-07-24,INR,Bengaluru,No
+TXN704029,USR30891,PVR Cinemas,Entertainment purchase,656.85,Entertainment,expense,UPI,Savings Account,2031-07-27,INR,Bengaluru,No
+TXN704030,USR30891,Stationery Shop,Miscellaneous expense,717.16,Other,expense,Cash,Savings Account,2031-07-27,INR,Bengaluru,No
+TXN704031,USR30891,Phoenix Mall,Online/offline shopping purchase,1340.93,Shopping,expense,Credit Card,Credit Card,2031-07-27,INR,Bengaluru,No
+TXN704032,USR30891,DMart,Grocery purchase,2162.86,Groceries,expense,Debit Card,Savings Account,2031-07-28,INR,Bengaluru,No
+TXN704033,USR30891,Local Kirana Store,Grocery purchase,2541.94,Groceries,expense,Debit Card,Savings Account,2031-07-31,INR,Bengaluru,No
+TXN705001,USR30891,Brightpath Analytics Pvt Ltd - Salary,Monthly salary credit,104000,Salary,income,Net Banking,Savings Account,2031-08-01,INR,Bengaluru,Yes
+TXN705002,USR30891,Netflix,Monthly subscription,199,Subscriptions,expense,Credit Card,Credit Card,2031-08-02,INR,Bengaluru,Yes
+TXN705003,USR30891,Spotify Premium,Monthly subscription,119,Subscriptions,expense,Credit Card,Credit Card,2031-08-02,INR,Bengaluru,Yes
+TXN705004,USR30891,Reddy Estate - Landlord,Monthly house rent,20000,Housing & Rent,expense,Net Banking,Savings Account,2031-08-03,INR,Bengaluru,Yes
+TXN705005,USR30891,IRCTC,Travel booking,2374.27,Travel,expense,Net Banking,Savings Account,2031-08-03,INR,Bengaluru,No
+TXN705006,USR30891,YouTube Premium,Monthly subscription,149,Subscriptions,expense,Credit Card,Credit Card,2031-08-04,INR,Bengaluru,Yes
+TXN705007,USR30891,BESCOM Electricity,Electricity bill payment,1183.11,Utilities,expense,UPI,Savings Account,2031-08-05,INR,Bengaluru,Yes
+TXN705008,USR30891,WazirX Staking Payout,Crypto staking reward credited,2157.28,Crypto Staking Yield,income,UPI,Savings Account,2031-08-06,INR,Bengaluru,Yes
+TXN705009,USR30891,ACT Fibernet,Broadband monthly bill,1099,Utilities,expense,UPI,Savings Account,2031-08-06,INR,Bengaluru,Yes
+TXN705010,USR30891,BWSSB Water Bill,Water bill payment,427.24,Utilities,expense,Net Banking,Savings Account,2031-08-07,INR,Bengaluru,Yes
+TXN705011,USR30891,Flipkart,Online/offline shopping purchase,2479.98,Shopping,expense,Debit Card,Savings Account,2031-08-07,INR,Bengaluru,No
+TXN705012,USR30891,Bajaj Finserv Laptop EMI,Laptop purchase EMI,4500,EMI,expense,Net Banking,Savings Account,2031-08-08,INR,Bengaluru,Yes
+TXN705013,USR30891,Phoenix Mall,Online/offline shopping purchase,2321.84,Shopping,expense,Credit Card,Credit Card,2031-08-08,INR,Bengaluru,No
+TXN705014,USR30891,Ola Cabs,Ride / fuel expense,552.45,Transportation,expense,Cash,Savings Account,2031-08-09,INR,Bengaluru,No
+TXN705015,USR30891,Fiverr Freelance Order,Freelance project payment received,4167.48,Freelancing,income,Net Banking,Savings Account,2031-08-10,INR,Bengaluru,No
+TXN705016,USR30891,Star Health Insurance,Health insurance premium,2200,Insurance,expense,Net Banking,Savings Account,2031-08-10,INR,Bengaluru,Yes
+TXN705017,USR30891,RD Auto-Debit - ICICI Bank,Recurring deposit auto-transfer,3000,Savings,expense,Net Banking,Savings Account,2031-08-12,INR,Bengaluru,Yes
+TXN705018,USR30891,Zerodha - Dividend Payout,Investment payout received,2191.96,Investments,income,Net Banking,Savings Account,2031-08-13,INR,Bengaluru,No
+TXN705019,USR30891,Apollo Hospital,Emergency hospitalization - medical treatment,18112.34,Healthcare,expense,Credit Card,Credit Card,2031-08-13,INR,Bengaluru,No
+TXN705020,USR30891,Zerodha - SIP Mutual Fund,Monthly SIP investment,3500,Investment,expense,Net Banking,Savings Account,2031-08-15,INR,Bengaluru,Yes
+TXN705021,USR30891,Great Learning Course,Online course payment,737.46,Education,expense,Credit Card,Credit Card,2031-08-18,INR,Bengaluru,No
+TXN705022,USR30891,DMart,Grocery purchase,2483.9,Groceries,expense,Debit Card,Savings Account,2031-08-18,INR,Bengaluru,No
+TXN705023,USR30891,Local Gaming Cafe,Entertainment purchase,490.39,Entertainment,expense,UPI,Savings Account,2031-08-19,INR,Bengaluru,No
+TXN705024,USR30891,Zomato,Food order / dining,964.32,Food & Dining,expense,UPI,Savings Account,2031-08-19,INR,Bengaluru,No
+TXN705025,USR30891,Stationery Shop,Miscellaneous expense,826.44,Other,expense,Cash,Savings Account,2031-08-19,INR,Bengaluru,No
+TXN705026,USR30891,GST Payment - Freelance,Advance tax / GST payment,1149.97,Tax,expense,Net Banking,Savings Account,2031-08-20,INR,Bengaluru,Yes
+TXN705027,USR30891,MakeMyTrip,Travel booking,1463.1,Travel,expense,Credit Card,Credit Card,2031-08-21,INR,Bengaluru,No
+TXN705028,USR30891,DMart,Grocery purchase,2067.29,Groceries,expense,Debit Card,Savings Account,2031-08-21,INR,Bengaluru,No
+TXN705029,USR30891,Uber,Ride / fuel expense,156.24,Transportation,expense,Credit Card,Credit Card,2031-08-22,INR,Bengaluru,No
+TXN705030,USR30891,Manipal Diagnostic Lab,Pharmacy / clinic payment,1398.06,Healthcare,expense,UPI,Savings Account,2031-08-22,INR,Bengaluru,No
+TXN705031,USR30891,Udemy,Online course payment,1693.24,Education,expense,Credit Card,Credit Card,2031-08-23,INR,Bengaluru,No
+TXN705032,USR30891,Great Learning Course,Online course payment,1285.2,Education,expense,Credit Card,Credit Card,2031-08-23,INR,Bengaluru,No
+TXN705033,USR30891,Domino's Pizza,Food order / dining,675.17,Food & Dining,expense,Credit Card,Credit Card,2031-08-29,INR,Bengaluru,No
+TXN705034,USR30891,BigBasket,Grocery purchase,2597.51,Groceries,expense,Cash,Savings Account,2031-08-30,INR,Bengaluru,No
+TXN706001,USR30891,Brightpath Analytics Pvt Ltd - Salary,Monthly salary credit,104000,Salary,income,Net Banking,Savings Account,2031-09-01,INR,Bengaluru,Yes
+TXN706002,USR30891,BigBasket,Grocery purchase,317.82,Groceries,expense,UPI,Savings Account,2031-09-01,INR,Bengaluru,No
+TXN706003,USR30891,Netflix,Monthly subscription,199,Subscriptions,expense,Credit Card,Credit Card,2031-09-02,INR,Bengaluru,Yes
+TXN706004,USR30891,Spotify Premium,Monthly subscription,119,Subscriptions,expense,Credit Card,Credit Card,2031-09-02,INR,Bengaluru,Yes
+TXN706005,USR30891,Myntra,Online/offline shopping purchase,2170.17,Shopping,expense,Debit Card,Savings Account,2031-09-02,INR,Bengaluru,No
+TXN706006,USR30891,Reddy Estate - Landlord,Monthly house rent,20000,Housing & Rent,expense,Net Banking,Savings Account,2031-09-03,INR,Bengaluru,Yes
+TXN706007,USR30891,YouTube Premium,Monthly subscription,149,Subscriptions,expense,Credit Card,Credit Card,2031-09-04,INR,Bengaluru,Yes
+TXN706008,USR30891,Local Kirana Store,Grocery purchase,2662.5,Groceries,expense,UPI,Savings Account,2031-09-04,INR,Bengaluru,No
+TXN706009,USR30891,BESCOM Electricity,Electricity bill payment,1363.59,Utilities,expense,UPI,Savings Account,2031-09-05,INR,Bengaluru,Yes
+TXN706010,USR30891,Manipal Diagnostic Lab,Pharmacy / clinic payment,566.61,Healthcare,expense,Cash,Savings Account,2031-09-05,INR,Bengaluru,No
+TXN706011,USR30891,ACT Fibernet,Broadband monthly bill,1099,Utilities,expense,UPI,Savings Account,2031-09-06,INR,Bengaluru,Yes
+TXN706012,USR30891,BWSSB Water Bill,Water bill payment,412.21,Utilities,expense,Net Banking,Savings Account,2031-09-07,INR,Bengaluru,Yes
+TXN706013,USR30891,Swiggy,Food order / dining,355.21,Food & Dining,expense,UPI,Savings Account,2031-09-07,INR,Bengaluru,No
+TXN706014,USR30891,Bajaj Finserv Laptop EMI,Laptop purchase EMI,4500,EMI,expense,Net Banking,Savings Account,2031-09-08,INR,Bengaluru,Yes
+TXN706015,USR30891,BigBasket,Grocery purchase,2549.05,Groceries,expense,Cash,Savings Account,2031-09-08,INR,Bengaluru,No
+TXN706016,USR30891,IRCTC,Travel booking,1851.08,Travel,expense,Net Banking,Savings Account,2031-09-08,INR,Bengaluru,No
+TXN706017,USR30891,Upwork Client Payment,Freelance project payment received,9131.74,Freelancing,income,UPI,Savings Account,2031-09-09,INR,Bengaluru,No
+TXN706018,USR30891,Etsy Shop Payout,Business sales revenue received,3839.85,Business,income,Net Banking,Savings Account,2031-09-09,INR,Bengaluru,No
+TXN706019,USR30891,MakeMyTrip,Travel booking,3097.67,Travel,expense,Credit Card,Credit Card,2031-09-09,INR,Bengaluru,No
+TXN706020,USR30891,Star Health Insurance,Health insurance premium,2200,Insurance,expense,Net Banking,Savings Account,2031-09-10,INR,Bengaluru,Yes
+TXN706021,USR30891,RD Auto-Debit - ICICI Bank,Recurring deposit auto-transfer,3000,Savings,expense,Net Banking,Savings Account,2031-09-12,INR,Bengaluru,Yes
+TXN706022,USR30891,Local ATM Withdrawal,Miscellaneous expense,821.39,Other,expense,Cash,Savings Account,2031-09-12,INR,Bengaluru,No
+TXN706023,USR30891,Flipkart,Online/offline shopping purchase,2980.39,Shopping,expense,Credit Card,Credit Card,2031-09-14,INR,Bengaluru,No
+TXN706024,USR30891,Zerodha - SIP Mutual Fund,Monthly SIP investment,3500,Investment,expense,Net Banking,Savings Account,2031-09-15,INR,Bengaluru,Yes
+TXN706025,USR30891,Zerodha - Dividend Payout,Investment payout received,1130.96,Investments,income,Net Banking,Savings Account,2031-09-17,INR,Bengaluru,No
+TXN706026,USR30891,GST Payment - Freelance,Advance tax / GST payment,853.65,Tax,expense,Net Banking,Savings Account,2031-09-20,INR,Bengaluru,Yes
+TXN706027,USR30891,PVR Cinemas,Entertainment purchase,661.63,Entertainment,expense,UPI,Savings Account,2031-09-20,INR,Bengaluru,No
+TXN706028,USR30891,Great Learning Course,Online course payment,1571.68,Education,expense,Credit Card,Credit Card,2031-09-21,INR,Bengaluru,No
+TXN706029,USR30891,Local ATM Withdrawal,Miscellaneous expense,722.59,Other,expense,Cash,Savings Account,2031-09-22,INR,Bengaluru,No
+TXN706030,USR30891,Apollo Pharmacy,Pharmacy / clinic payment,911.97,Healthcare,expense,Cash,Savings Account,2031-09-22,INR,Bengaluru,No
+TXN706031,USR30891,BookMyShow,Entertainment purchase,870.53,Entertainment,expense,UPI,Savings Account,2031-09-24,INR,Bengaluru,No
+TXN706032,USR30891,Local ATM Withdrawal,Miscellaneous expense,870.86,Other,expense,Cash,Savings Account,2031-09-25,INR,Bengaluru,No
+TXN706033,USR30891,Apollo Pharmacy,Pharmacy / clinic payment,1218.38,Healthcare,expense,Debit Card,Savings Account,2031-09-25,INR,Bengaluru,No
+TXN706034,USR30891,Local Gaming Cafe,Entertainment purchase,484.98,Entertainment,expense,UPI,Savings Account,2031-09-26,INR,Bengaluru,No
+TXN707001,USR30891,Brightpath Analytics Pvt Ltd - Salary,Monthly salary credit,104000,Salary,income,Net Banking,Savings Account,2031-10-01,INR,Bengaluru,Yes
+TXN707002,USR30891,PVR Cinemas,Entertainment purchase,388.21,Entertainment,expense,UPI,Savings Account,2031-10-01,INR,Bengaluru,No
+TXN707003,USR30891,Netflix,Monthly subscription,199,Subscriptions,expense,Credit Card,Credit Card,2031-10-02,INR,Bengaluru,Yes
+TXN707004,USR30891,Spotify Premium,Monthly subscription,119,Subscriptions,expense,Credit Card,Credit Card,2031-10-02,INR,Bengaluru,Yes
+TXN707005,USR30891,Reddy Estate - Landlord,Monthly house rent,20000,Housing & Rent,expense,Net Banking,Savings Account,2031-10-03,INR,Bengaluru,Yes
+TXN707006,USR30891,YouTube Premium,Monthly subscription,149,Subscriptions,expense,Credit Card,Credit Card,2031-10-04,INR,Bengaluru,Yes
+TXN707007,USR30891,Stationery Shop,Miscellaneous expense,423.65,Other,expense,Cash,Savings Account,2031-10-04,INR,Bengaluru,No
+TXN707008,USR30891,BESCOM Electricity,Electricity bill payment,1416.01,Utilities,expense,UPI,Savings Account,2031-10-05,INR,Bengaluru,Yes
+TXN707009,USR30891,ACT Fibernet,Broadband monthly bill,1099,Utilities,expense,UPI,Savings Account,2031-10-06,INR,Bengaluru,Yes
+TXN707010,USR30891,Ola Cabs,Ride / fuel expense,746.08,Transportation,expense,Credit Card,Credit Card,2031-10-06,INR,Bengaluru,No
+TXN707011,USR30891,BWSSB Water Bill,Water bill payment,285.49,Utilities,expense,Net Banking,Savings Account,2031-10-07,INR,Bengaluru,Yes
+TXN707012,USR30891,Bajaj Finserv Laptop EMI,Laptop purchase EMI,4500,EMI,expense,Net Banking,Savings Account,2031-10-08,INR,Bengaluru,Yes
+TXN707013,USR30891,Udemy,Online course payment,865.21,Education,expense,Credit Card,Credit Card,2031-10-08,INR,Bengaluru,No
+TXN707014,USR30891,Star Health Insurance,Health insurance premium,2200,Insurance,expense,Net Banking,Savings Account,2031-10-10,INR,Bengaluru,Yes
+TXN707015,USR30891,BigBasket,Grocery purchase,1253.13,Groceries,expense,UPI,Savings Account,2031-10-10,INR,Bengaluru,No
+TXN707016,USR30891,Tata 1mg,Pharmacy / clinic payment,846.0,Healthcare,expense,Debit Card,Savings Account,2031-10-10,INR,Bengaluru,No
+TXN707017,USR30891,Stationery Shop,Miscellaneous expense,383.46,Other,expense,Cash,Savings Account,2031-10-11,INR,Bengaluru,No
+TXN707018,USR30891,Zomato,Food order / dining,769.99,Food & Dining,expense,Credit Card,Credit Card,2031-10-11,INR,Bengaluru,No
+TXN707019,USR30891,Upwork Client Payment,Freelance project payment received,5952.73,Freelancing,income,Net Banking,Savings Account,2031-10-12,INR,Bengaluru,No
+TXN707020,USR30891,RD Auto-Debit - ICICI Bank,Recurring deposit auto-transfer,3000,Savings,expense,Net Banking,Savings Account,2031-10-12,INR,Bengaluru,Yes
+TXN707021,USR30891,Zerodha - SIP Mutual Fund,Monthly SIP investment,3500,Investment,expense,Net Banking,Savings Account,2031-10-15,INR,Bengaluru,Yes
+TXN707022,USR30891,Local Restaurant,Food order / dining,359.6,Food & Dining,expense,Credit Card,Credit Card,2031-10-17,INR,Bengaluru,No
+TXN707023,USR30891,Local Gaming Cafe,Entertainment purchase,471.49,Entertainment,expense,Credit Card,Credit Card,2031-10-19,INR,Bengaluru,No
+TXN707024,USR30891,GST Payment - Freelance,Advance tax / GST payment,1036.87,Tax,expense,Net Banking,Savings Account,2031-10-20,INR,Bengaluru,Yes
+TXN707025,USR30891,IRCTC,Travel booking,3850.54,Travel,expense,Net Banking,Savings Account,2031-10-20,INR,Bengaluru,No
+TXN707026,USR30891,Courier - Delhivery,Miscellaneous expense,789.18,Other,expense,Cash,Savings Account,2031-10-20,INR,Bengaluru,No
+TXN707027,USR30891,Phoenix Mall,Festival season shopping - Diwali,5874.68,Shopping,expense,Credit Card,Credit Card,2031-10-22,INR,Bengaluru,No
+TXN707028,USR30891,Rapido,Ride / fuel expense,1146.9,Transportation,expense,UPI,Savings Account,2031-10-22,INR,Bengaluru,No
+TXN707029,USR30891,HP Petrol Pump,Ride / fuel expense,1391.34,Transportation,expense,Cash,Savings Account,2031-10-22,INR,Bengaluru,No
+TXN707030,USR30891,Courier - Delhivery,Miscellaneous expense,600.75,Other,expense,UPI,Savings Account,2031-10-22,INR,Bengaluru,No
+TXN707031,USR30891,Courier - Delhivery,Miscellaneous expense,448.19,Other,expense,Cash,Savings Account,2031-10-23,INR,Bengaluru,No
+TXN707032,USR30891,Great Learning Course,Online course payment,858.36,Education,expense,Credit Card,Credit Card,2031-10-23,INR,Bengaluru,No
+TXN707033,USR30891,Amazon.in,Festival gifts and decor purchase,2398.21,Shopping,expense,UPI,Savings Account,2031-10-24,INR,Bengaluru,No
+TXN707034,USR30891,WazirX Staking Payout,Crypto staking reward credited,1296.26,Crypto Staking Yield,income,UPI,Savings Account,2031-10-26,INR,Bengaluru,Yes
+TXN707035,USR30891,BigBasket,Grocery purchase,2453.76,Groceries,expense,Cash,Savings Account,2031-10-26,INR,Bengaluru,No
+TXN708001,USR30891,Brightpath Analytics Pvt Ltd - Salary,Monthly salary credit,104000,Salary,income,Net Banking,Savings Account,2031-11-01,INR,Bengaluru,Yes
+TXN708002,USR30891,Netflix,Monthly subscription,199,Subscriptions,expense,Credit Card,Credit Card,2031-11-02,INR,Bengaluru,Yes
+TXN708003,USR30891,Spotify Premium,Monthly subscription,119,Subscriptions,expense,Credit Card,Credit Card,2031-11-02,INR,Bengaluru,Yes
+TXN708004,USR30891,Reddy Estate - Landlord,Monthly house rent,20000,Housing & Rent,expense,Net Banking,Savings Account,2031-11-03,INR,Bengaluru,Yes
+TXN708005,USR30891,Myntra,Online/offline shopping purchase,547.21,Shopping,expense,Credit Card,Credit Card,2031-11-03,INR,Bengaluru,No
+TXN708006,USR30891,YouTube Premium,Monthly subscription,149,Subscriptions,expense,Credit Card,Credit Card,2031-11-04,INR,Bengaluru,Yes
+TXN708007,USR30891,Coursera Subscription,Online course payment,574.84,Education,expense,Credit Card,Credit Card,2031-11-04,INR,Bengaluru,No
+TXN708008,USR30891,BESCOM Electricity,Electricity bill payment,1025.03,Utilities,expense,UPI,Savings Account,2031-11-05,INR,Bengaluru,Yes
+TXN708009,USR30891,Local Kirana Store,Grocery purchase,1519.1,Groceries,expense,UPI,Savings Account,2031-11-05,INR,Bengaluru,No
+TXN708010,USR30891,ACT Fibernet,Broadband monthly bill,1099,Utilities,expense,UPI,Savings Account,2031-11-06,INR,Bengaluru,Yes
+TXN708011,USR30891,IndiGo Airlines,Travel booking,4242.47,Travel,expense,Credit Card,Credit Card,2031-11-06,INR,Bengaluru,No
+TXN708012,USR30891,BWSSB Water Bill,Water bill payment,276.53,Utilities,expense,Net Banking,Savings Account,2031-11-07,INR,Bengaluru,Yes
+TXN708013,USR30891,Bajaj Finserv Laptop EMI,Laptop purchase EMI,4500,EMI,expense,Net Banking,Savings Account,2031-11-08,INR,Bengaluru,Yes
+TXN708014,USR30891,Manipal Diagnostic Lab,Pharmacy / clinic payment,830.74,Healthcare,expense,Cash,Savings Account,2031-11-08,INR,Bengaluru,No
+TXN708015,USR30891,Star Health Insurance,Health insurance premium,2200,Insurance,expense,Net Banking,Savings Account,2031-11-10,INR,Bengaluru,Yes
+TXN708016,USR30891,Coursera Subscription,Online course payment,1374.98,Education,expense,Credit Card,Credit Card,2031-11-11,INR,Bengaluru,No
+TXN708017,USR30891,RD Auto-Debit - ICICI Bank,Recurring deposit auto-transfer,3000,Savings,expense,Net Banking,Savings Account,2031-11-12,INR,Bengaluru,Yes
+TXN708018,USR30891,Courier - Delhivery,Miscellaneous expense,200.39,Other,expense,UPI,Savings Account,2031-11-12,INR,Bengaluru,No
+TXN708019,USR30891,Stationery Shop,Miscellaneous expense,156.11,Other,expense,Cash,Savings Account,2031-11-13,INR,Bengaluru,No
+TXN708020,USR30891,More Supermarket,Grocery purchase,1055.74,Groceries,expense,UPI,Savings Account,2031-11-13,INR,Bengaluru,No
+TXN708021,USR30891,WazirX Staking Payout,Crypto staking reward credited,976.44,Crypto Staking Yield,income,Net Banking,Savings Account,2031-11-14,INR,Bengaluru,Yes
+TXN708022,USR30891,Zerodha - SIP Mutual Fund,Monthly SIP investment,3500,Investment,expense,Net Banking,Savings Account,2031-11-15,INR,Bengaluru,Yes
+TXN708023,USR30891,Local Kirana Store,Grocery purchase,2168.76,Groceries,expense,Cash,Savings Account,2031-11-15,INR,Bengaluru,No
+TXN708024,USR30891,DMart,Grocery purchase,958.66,Groceries,expense,UPI,Savings Account,2031-11-16,INR,Bengaluru,No
+TXN708025,USR30891,Fiverr Freelance Order,Freelance project payment received,10572.69,Freelancing,income,UPI,Savings Account,2031-11-19,INR,Bengaluru,No
+TXN708026,USR30891,GST Payment - Freelance,Advance tax / GST payment,1634.59,Tax,expense,Net Banking,Savings Account,2031-11-20,INR,Bengaluru,Yes
+TXN708027,USR30891,Uber,Ride / fuel expense,133.04,Transportation,expense,UPI,Savings Account,2031-11-20,INR,Bengaluru,No
+TXN708028,USR30891,Phoenix Mall,Festival season shopping - Diwali,5725.81,Shopping,expense,Credit Card,Credit Card,2031-11-22,INR,Bengaluru,No
+TXN708029,USR30891,Amazon.in,Festival gifts and decor purchase,2243.4,Shopping,expense,UPI,Savings Account,2031-11-24,INR,Bengaluru,No
+TXN708030,USR30891,Local Kirana Store,Grocery purchase,2755.44,Groceries,expense,Cash,Savings Account,2031-11-24,INR,Bengaluru,No
+TXN708031,USR30891,Manipal Diagnostic Lab,Pharmacy / clinic payment,1486.14,Healthcare,expense,Cash,Savings Account,2031-11-24,INR,Bengaluru,No
+TXN708032,USR30891,Udemy,Online course payment,1554.18,Education,expense,Credit Card,Credit Card,2031-11-25,INR,Bengaluru,No
+TXN708033,USR30891,Stationery Shop,Miscellaneous expense,595.03,Other,expense,Cash,Savings Account,2031-11-26,INR,Bengaluru,No
+TXN708034,USR30891,IRCTC,Travel booking,4165.39,Travel,expense,Net Banking,Savings Account,2031-11-29,INR,Bengaluru,No
+TXN709001,USR30891,Brightpath Analytics Pvt Ltd - Salary,Monthly salary credit,104000,Salary,income,Net Banking,Savings Account,2031-12-01,INR,Bengaluru,Yes
+TXN709002,USR30891,Netflix,Monthly subscription,199,Subscriptions,expense,Credit Card,Credit Card,2031-12-02,INR,Bengaluru,Yes
+TXN709003,USR30891,Spotify Premium,Monthly subscription,119,Subscriptions,expense,Credit Card,Credit Card,2031-12-02,INR,Bengaluru,Yes
+TXN709004,USR30891,MakeMyTrip,Travel booking,1328.34,Travel,expense,Credit Card,Credit Card,2031-12-02,INR,Bengaluru,No
+TXN709005,USR30891,Reddy Estate - Landlord,Monthly house rent,20000,Housing & Rent,expense,Net Banking,Savings Account,2031-12-03,INR,Bengaluru,Yes
+TXN709006,USR30891,YouTube Premium,Monthly subscription,149,Subscriptions,expense,Credit Card,Credit Card,2031-12-04,INR,Bengaluru,Yes
+TXN709007,USR30891,BESCOM Electricity,Electricity bill payment,1339.39,Utilities,expense,UPI,Savings Account,2031-12-05,INR,Bengaluru,Yes
+TXN709008,USR30891,Uber,Ride / fuel expense,645.43,Transportation,expense,Cash,Savings Account,2031-12-05,INR,Bengaluru,No
+TXN709009,USR30891,ACT Fibernet,Broadband monthly bill,1099,Utilities,expense,UPI,Savings Account,2031-12-06,INR,Bengaluru,Yes
+TXN709010,USR30891,BWSSB Water Bill,Water bill payment,269.41,Utilities,expense,Net Banking,Savings Account,2031-12-07,INR,Bengaluru,Yes
+TXN709011,USR30891,Bajaj Finserv Laptop EMI,Laptop purchase EMI,4500,EMI,expense,Net Banking,Savings Account,2031-12-08,INR,Bengaluru,Yes
+TXN709012,USR30891,Star Health Insurance,Health insurance premium,2200,Insurance,expense,Net Banking,Savings Account,2031-12-10,INR,Bengaluru,Yes
+TXN709013,USR30891,RD Auto-Debit - ICICI Bank,Recurring deposit auto-transfer,3000,Savings,expense,Net Banking,Savings Account,2031-12-12,INR,Bengaluru,Yes
+TXN709014,USR30891,Swiggy,Food order / dining,658.32,Food & Dining,expense,UPI,Savings Account,2031-12-14,INR,Bengaluru,No
+TXN709015,USR30891,Namma Metro,Ride / fuel expense,41.45,Transportation,expense,Cash,Savings Account,2031-12-14,INR,Bengaluru,No
+TXN709016,USR30891,Zerodha - SIP Mutual Fund,Monthly SIP investment,3500,Investment,expense,Net Banking,Savings Account,2031-12-15,INR,Bengaluru,Yes
+TXN709017,USR30891,BigBasket,Grocery purchase,267.37,Groceries,expense,Debit Card,Savings Account,2031-12-15,INR,Bengaluru,No
+TXN709018,USR30891,BookMyShow,Entertainment purchase,496.26,Entertainment,expense,UPI,Savings Account,2031-12-17,INR,Bengaluru,No
+TXN709019,USR30891,Manyavar Wedding Collection,Wedding outfit shopping,12245.23,Shopping,expense,Credit Card,Credit Card,2031-12-18,INR,Bengaluru,No
+TXN709020,USR30891,GST Payment - Freelance,Advance tax / GST payment,1746.86,Tax,expense,Net Banking,Savings Account,2031-12-20,INR,Bengaluru,Yes
+TXN709021,USR30891,Grand Palace Banquet Hall,Wedding venue booking advance payment,33314.69,Other,expense,Net Banking,Savings Account,2031-12-20,INR,Bengaluru,No
+TXN709022,USR30891,Upwork Client Payment,Freelance project payment received,9453.36,Freelancing,income,UPI,Savings Account,2031-12-21,INR,Bengaluru,No
+TXN709023,USR30891,Coin DCX Staking Reward,Crypto staking reward credited,1023.62,Crypto Staking Yield,income,UPI,Savings Account,2031-12-21,INR,Bengaluru,Yes
+TXN709024,USR30891,Royal Caterers,Wedding catering advance payment,11161.95,Other,expense,Net Banking,Savings Account,2031-12-25,INR,Bengaluru,No
+TXN709025,USR30891,Ola Cabs,Ride / fuel expense,44.77,Transportation,expense,UPI,Savings Account,2031-12-25,INR,Bengaluru,No
+TXN709026,USR30891,Tata 1mg,Pharmacy / clinic payment,890.11,Healthcare,expense,UPI,Savings Account,2031-12-30,INR,Bengaluru,No

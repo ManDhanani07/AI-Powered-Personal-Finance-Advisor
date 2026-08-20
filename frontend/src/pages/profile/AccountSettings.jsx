@@ -1,15 +1,15 @@
 import React from 'react';
 import { PageContainer } from '../../components/layout/PageContainer.jsx';
-import ConnectedBanksPanel from '../../components/profile/ConnectedBanksPanel.jsx';
+import PreferencesCard from '../../components/profile/PreferencesCard.jsx';
 
 export const AccountSettings = () => {
   return (
     <PageContainer
-      title="Connected Bank Accounts"
-      description="Manage linked bank accounts and live data synchronization."
+      title="Financial & System Settings"
+      description="Manage default currency, target savings rates, and financial strategy."
     >
       <div className="max-w-5xl mx-auto space-y-6">
-        <ConnectedBanksPanel />
+        <PreferencesCard />
       </div>
     </PageContainer>
   );

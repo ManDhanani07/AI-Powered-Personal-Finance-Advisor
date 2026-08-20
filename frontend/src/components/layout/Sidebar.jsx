@@ -10,7 +10,6 @@ import {
   FileBarChart,
   LineChart,
   BrainCircuit,
-  Bell,
   Bot,
   Settings,
   ShieldCheck,
@@ -28,7 +27,6 @@ const NAV_ITEMS = [
   { label: 'Health Score', path: ROUTES.FINANCIAL_HEALTH, icon: Activity },
   { label: 'Expense Prediction', path: ROUTES.EXPENSE_PREDICTION, icon: BrainCircuit },
   { label: 'Reports', path: ROUTES.REPORTS, icon: FileBarChart },
-  { label: 'Notifications', path: ROUTES.NOTIFICATIONS || '/notifications', icon: Bell },
   { label: 'AI Advisor', path: ROUTES.AI_ADVISOR, icon: Bot },
   { label: 'Settings', path: ROUTES.SETTINGS, icon: Settings },
 ];

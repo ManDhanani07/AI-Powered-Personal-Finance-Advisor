@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Repeat, Calendar, CheckCircle2, Edit2 } from 'lucide-react';
+import { Plus, Repeat, Calendar, CheckCircle2, Edit2, Trash2 } from 'lucide-react';
 import LiquidProgressGauge from './LiquidProgressGauge.jsx';
 import { formatCurrency, formatDate } from '../../utils/formatters.js';
 
@@ -23,7 +23,7 @@ const PRIORITY_STYLES = {
   LOW:    'bg-slate-800     text-slate-400  border-zinc-700',
 };
 
-export const GoalVaultCard = ({ goal, onDeposit, onAutoSave, onEdit, index = 0 }) => {
+export const GoalVaultCard = ({ goal, onDeposit, onAutoSave, onEdit, onDelete, index = 0 }) => {
   const target  = parseFloat(goal.target_amount)  || 0;
   const current = parseFloat(goal.current_amount) || 0;
   const pct       = target > 0 ? Math.min((current / target) * 100, 100) : 0;
@@ -45,7 +45,7 @@ export const GoalVaultCard = ({ goal, onDeposit, onAutoSave, onEdit, index = 0 }
         style={{ background: palette.gauge, opacity: 0.6 }}
       />
 
-      {/* Top Row: Title + Priority + Edit */}
+      {/* Top Row: Title + Priority + Edit + Delete */}
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
@@ -70,10 +70,19 @@ export const GoalVaultCard = ({ goal, onDeposit, onAutoSave, onEdit, index = 0 }
           {onEdit && (
             <button
               onClick={() => onEdit(goal)}
-              className="p-1.5 rounded-lg text-slate-500 hover:text-slate-300 hover:bg-zinc-800 transition-colors"
+              className="p-1.5 rounded-lg text-slate-500 hover:text-slate-200 hover:bg-zinc-800 transition-colors cursor-pointer"
               title="Edit goal"
             >
               <Edit2 className="w-3.5 h-3.5" />
+            </button>
+          )}
+          {onDelete && (
+            <button
+              onClick={() => onDelete(goal)}
+              className="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
+              title="Delete goal"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
             </button>
           )}
         </div>

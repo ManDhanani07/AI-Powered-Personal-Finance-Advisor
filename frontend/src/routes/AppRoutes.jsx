@@ -42,7 +42,6 @@ const FinancialHealth = lazy(() => import('../pages/financial-health/FinancialHe
 const ExpensePredictionPage = lazy(() => import('../pages/expense-prediction/ExpensePredictionPage.jsx'));
 const ReportsPage = lazy(() => import('../pages/reports/ReportsPage.jsx'));
 const AiAdvisorPage = lazy(() => import('../pages/ai/AiAdvisorPage.jsx'));
-const NotificationsPage = lazy(() => import('../pages/notifications/NotificationsPage.jsx'));
 
 // Dynamic Lazy-Loaded Admin Portal Pages
 const AdminLayout = lazy(() => import('../pages/admin/AdminLayout.jsx'));
@@ -188,7 +187,6 @@ export const AppRoutes = () => {
           <Route path={ROUTES.EXPENSE_PREDICTION} element={<ExpensePredictionPage />} />
           <Route path={ROUTES.REPORTS} element={<ReportsPage />} />
           <Route path={ROUTES.AI_ADVISOR} element={<AiAdvisorPage />} />
-          <Route path={ROUTES.NOTIFICATIONS} element={<NotificationsPage />} />
 
           {/* Profile & Account Routes */}
           <Route path={ROUTES.PROFILE} element={<Profile />} />

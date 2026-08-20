@@ -236,6 +236,14 @@ export const TransactionForm = ({
         category: selectedCat || null,
       };
 
+      try {
+        sessionStorage.removeItem('tx_cache_items');
+        sessionStorage.removeItem('tx_cache_summary');
+      } catch (e) {}
+
+      window.dispatchEvent(new CustomEvent('ledger_updated', { detail: savedTx }));
+      window.dispatchEvent(new CustomEvent('transaction_added', { detail: savedTx }));
+
       if (onSuccess) onSuccess(savedTx);
       if (externalOnSubmit) externalOnSubmit(savedTx);
       onClose();

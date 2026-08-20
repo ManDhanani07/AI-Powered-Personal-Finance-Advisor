@@ -140,6 +140,7 @@ class ReportService:
         else:
             days_count = max(1, now.day)
 
+        total_inc = summary["total_income"]
         total_exp = summary["total_expenses"]
         avg_daily = round(total_exp / days_count, 2)
         avg_monthly = round(total_exp, 2)

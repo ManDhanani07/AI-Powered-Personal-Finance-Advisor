@@ -867,7 +867,7 @@ class GeminiService:
                     for p in health_res.parameters
                 ]
         except Exception as e:
-            logger.warn(f"[GeminiService] Could not calculate live health score: {e}")
+            logger.warning(f"[GeminiService] Could not calculate live health score: {e}")
 
         health_summary = {
             "score": fh_score,
@@ -1162,10 +1162,12 @@ class GeminiService:
                     try:
                         def _call_gemini_model():
                             candidate_models = [
+                                "gemini-3.6-flash",
+                                "gemini-3.7-flash",
+                                "gemini-flash-latest",
+                                "gemini-pro-latest",
+                                "gemini-2.5-flash",
                                 "gemini-1.5-flash",
-                                "gemini-2.0-flash",
-                                "gemini-1.5-flash-8b",
-                                "gemini-1.5-pro",
                             ]
                             last_err = None
                             for c_model in candidate_models:

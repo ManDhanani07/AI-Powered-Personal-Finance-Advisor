@@ -1,0 +1,252 @@
+transaction_id,user_id,merchant,description,amount,category,transaction_type,payment_method,account_type,transaction_date,currency,location,recurring
+TXN100001,USR40567,Vishal Retail Solutions Pvt Ltd - Salary,Monthly salary credit,52000,Salary,income,Net Banking,Savings Account,2036-01-01,INR,Lucknow,Yes
+TXN100002,USR40567,Netflix,Monthly subscription,199,Subscriptions,expense,Credit Card,Credit Card,2036-01-02,INR,Lucknow,Yes
+TXN100003,USR40567,Spotify Premium,Monthly subscription,119,Subscriptions,expense,Credit Card,Credit Card,2036-01-02,INR,Lucknow,Yes
+TXN100004,USR40567,Sharma Estate - Landlord,Monthly house rent,12000,Housing & Rent,expense,Net Banking,Savings Account,2036-01-03,INR,Lucknow,Yes
+TXN100005,USR40567,UPPCL Electricity,Electricity bill payment,872.39,Utilities,expense,UPI,Savings Account,2036-01-05,INR,Lucknow,Yes
+TXN100006,USR40567,Airtel Broadband,Broadband monthly bill,699,Utilities,expense,UPI,Savings Account,2036-01-06,INR,Lucknow,Yes
+TXN100007,USR40567,Jal Nigam Water Bill,Water bill payment,197.77,Utilities,expense,Net Banking,Savings Account,2036-01-07,INR,Lucknow,Yes
+TXN100008,USR40567,PVR Cinemas,Entertainment purchase,253.16,Entertainment,expense,UPI,Savings Account,2036-01-07,INR,Lucknow,No
+TXN100009,USR40567,Bajaj Finserv Phone EMI,Mobile phone EMI,2500,EMI,expense,Net Banking,Savings Account,2036-01-08,INR,Lucknow,Yes
+TXN100010,USR40567,MakeMyTrip,Travel booking,1558.95,Travel,expense,Credit Card,Credit Card,2036-01-08,INR,Lucknow,No
+TXN100011,USR40567,Star Health Insurance,Health insurance premium,1400,Insurance,expense,Net Banking,Savings Account,2036-01-10,INR,Lucknow,Yes
+TXN100012,USR40567,Courier - Delhivery,Miscellaneous expense,116.57,Other,expense,UPI,Savings Account,2036-01-11,INR,Lucknow,No
+TXN100013,USR40567,Coursera Subscription,Online course payment,1338.56,Education,expense,Credit Card,Credit Card,2036-01-11,INR,Lucknow,No
+TXN100014,USR40567,Groww - Dividend Payout,Investment payout received,744.19,Investments,income,Net Banking,Savings Account,2036-01-12,INR,Lucknow,No
+TXN100015,USR40567,RD Auto-Debit - SBI Bank,Recurring deposit auto-transfer,2000,Savings,expense,Net Banking,Savings Account,2036-01-12,INR,Lucknow,Yes
+TXN100016,USR40567,Coin DCX Staking Reward,Crypto staking reward credited,871.93,Crypto Staking Yield,income,UPI,Savings Account,2036-01-14,INR,Lucknow,Yes
+TXN100017,USR40567,Fiverr Freelance Order,Freelance project payment received,2791.9,Freelancing,income,Net Banking,Savings Account,2036-01-15,INR,Lucknow,No
+TXN100018,USR40567,Groww - SIP Investment,Monthly SIP investment,2000,Investment,expense,Net Banking,Savings Account,2036-01-15,INR,Lucknow,Yes
+TXN100019,USR40567,Coursera Subscription,Online course payment,1390.39,Education,expense,Credit Card,Credit Card,2036-01-17,INR,Lucknow,No
+TXN100020,USR40567,Domino's Pizza,Food order / dining,130.47,Food & Dining,expense,Cash,Savings Account,2036-01-19,INR,Lucknow,No
+TXN100021,USR40567,Income Tax Advance Payment,Advance tax payment,1140.69,Tax,expense,Net Banking,Savings Account,2036-01-20,INR,Lucknow,Yes
+TXN100022,USR40567,Redbus,Travel booking,1838.81,Travel,expense,Credit Card,Credit Card,2036-01-20,INR,Lucknow,No
+TXN100023,USR40567,Meena Bazaar,Online/offline shopping purchase,648.14,Shopping,expense,Debit Card,Savings Account,2036-01-20,INR,Lucknow,No
+TXN100024,USR40567,Zomato,Food order / dining,383.39,Food & Dining,expense,Credit Card,Credit Card,2036-01-22,INR,Lucknow,No
+TXN100025,USR40567,Local Kirana Store,Grocery purchase,962.6,Groceries,expense,UPI,Savings Account,2036-01-24,INR,Lucknow,No
+TXN100026,USR40567,BigBasket,Grocery purchase,211.24,Groceries,expense,Cash,Savings Account,2036-01-26,INR,Lucknow,No
+TXN100027,USR40567,Redbus,Travel booking,1377.12,Travel,expense,Credit Card,Credit Card,2036-01-28,INR,Lucknow,No
+TXN100028,USR40567,Swiggy,Food order / dining,379.65,Food & Dining,expense,Cash,Savings Account,2036-01-28,INR,Lucknow,No
+TXN101001,USR40567,Vishal Retail Solutions Pvt Ltd - Salary,Monthly salary credit,52000,Salary,income,Net Banking,Savings Account,2036-02-01,INR,Lucknow,Yes
+TXN101002,USR40567,Netflix,Monthly subscription,199,Subscriptions,expense,Credit Card,Credit Card,2036-02-02,INR,Lucknow,Yes
+TXN101003,USR40567,Spotify Premium,Monthly subscription,119,Subscriptions,expense,Credit Card,Credit Card,2036-02-02,INR,Lucknow,Yes
+TXN101004,USR40567,Sharma Estate - Landlord,Monthly house rent,12000,Housing & Rent,expense,Net Banking,Savings Account,2036-02-03,INR,Lucknow,Yes
+TXN101005,USR40567,Local Market,Online/offline shopping purchase,982.25,Shopping,expense,Credit Card,Credit Card,2036-02-04,INR,Lucknow,No
+TXN101006,USR40567,UPPCL Electricity,Electricity bill payment,616.69,Utilities,expense,UPI,Savings Account,2036-02-05,INR,Lucknow,Yes
+TXN101007,USR40567,Airtel Broadband,Broadband monthly bill,699,Utilities,expense,UPI,Savings Account,2036-02-06,INR,Lucknow,Yes
+TXN101008,USR40567,Coursera Subscription,Online course payment,1478.6,Education,expense,Credit Card,Credit Card,2036-02-06,INR,Lucknow,No
+TXN101009,USR40567,Jal Nigam Water Bill,Water bill payment,283.36,Utilities,expense,Net Banking,Savings Account,2036-02-07,INR,Lucknow,Yes
+TXN101010,USR40567,Bajaj Finserv Phone EMI,Mobile phone EMI,2500,EMI,expense,Net Banking,Savings Account,2036-02-08,INR,Lucknow,Yes
+TXN101011,USR40567,Amazon.in,Online/offline shopping purchase,1229.21,Shopping,expense,Debit Card,Savings Account,2036-02-09,INR,Lucknow,No
+TXN101012,USR40567,BigBasket,Grocery purchase,322.95,Groceries,expense,UPI,Savings Account,2036-02-09,INR,Lucknow,No
+TXN101013,USR40567,Star Health Insurance,Health insurance premium,1400,Insurance,expense,Net Banking,Savings Account,2036-02-10,INR,Lucknow,Yes
+TXN101014,USR40567,Rapido,Ride / fuel expense,64.94,Transportation,expense,Cash,Savings Account,2036-02-11,INR,Lucknow,No
+TXN101015,USR40567,RD Auto-Debit - SBI Bank,Recurring deposit auto-transfer,2000,Savings,expense,Net Banking,Savings Account,2036-02-12,INR,Lucknow,Yes
+TXN101016,USR40567,Local Shop Side Income,Side business income received,2033.86,Business,income,UPI,Savings Account,2036-02-13,INR,Lucknow,No
+TXN101017,USR40567,Groww - SIP Investment,Monthly SIP investment,2000,Investment,expense,Net Banking,Savings Account,2036-02-15,INR,Lucknow,Yes
+TXN101018,USR40567,Local Kirana Store,Grocery purchase,1154.42,Groceries,expense,Cash,Savings Account,2036-02-15,INR,Lucknow,No
+TXN101019,USR40567,Local Dhaba,Food order / dining,595.38,Food & Dining,expense,Cash,Savings Account,2036-02-16,INR,Lucknow,No
+TXN101020,USR40567,Udemy,Online course payment,958.66,Education,expense,Credit Card,Credit Card,2036-02-17,INR,Lucknow,No
+TXN101021,USR40567,Coin DCX Staking Reward,Crypto staking reward credited,336.96,Crypto Staking Yield,income,UPI,Savings Account,2036-02-20,INR,Lucknow,Yes
+TXN101022,USR40567,Income Tax Advance Payment,Advance tax payment,645.94,Tax,expense,Net Banking,Savings Account,2036-02-20,INR,Lucknow,Yes
+TXN101023,USR40567,City Bus Pass,Ride / fuel expense,553.42,Transportation,expense,Cash,Savings Account,2036-02-23,INR,Lucknow,No
+TXN101024,USR40567,Domino's Pizza,Food order / dining,385.16,Food & Dining,expense,Credit Card,Credit Card,2036-02-24,INR,Lucknow,No
+TXN101025,USR40567,BookMyShow,Entertainment purchase,174.31,Entertainment,expense,UPI,Savings Account,2036-02-24,INR,Lucknow,No
+TXN101026,USR40567,IRCTC,Travel booking,2256.22,Travel,expense,Net Banking,Savings Account,2036-02-26,INR,Lucknow,No
+TXN101027,USR40567,Local Clinic,Pharmacy / clinic payment,158.19,Healthcare,expense,UPI,Savings Account,2036-02-26,INR,Lucknow,No
+TXN101028,USR40567,Sabzi Mandi,Grocery purchase,1033.83,Groceries,expense,UPI,Savings Account,2036-02-26,INR,Lucknow,No
+TXN102001,USR40567,Vishal Retail Solutions Pvt Ltd - Salary,Monthly salary credit,53000,Salary,income,Net Banking,Savings Account,2036-03-01,INR,Lucknow,Yes
+TXN102002,USR40567,Netflix,Monthly subscription,199,Subscriptions,expense,Credit Card,Credit Card,2036-03-02,INR,Lucknow,Yes
+TXN102003,USR40567,Spotify Premium,Monthly subscription,119,Subscriptions,expense,Credit Card,Credit Card,2036-03-02,INR,Lucknow,Yes
+TXN102004,USR40567,Sharma Estate - Landlord,Monthly house rent,12000,Housing & Rent,expense,Net Banking,Savings Account,2036-03-03,INR,Lucknow,Yes
+TXN102005,USR40567,UPPCL Electricity,Electricity bill payment,547.45,Utilities,expense,UPI,Savings Account,2036-03-05,INR,Lucknow,Yes
+TXN102006,USR40567,Airtel Broadband,Broadband monthly bill,699,Utilities,expense,UPI,Savings Account,2036-03-06,INR,Lucknow,Yes
+TXN102007,USR40567,Jal Nigam Water Bill,Water bill payment,159.13,Utilities,expense,Net Banking,Savings Account,2036-03-07,INR,Lucknow,Yes
+TXN102008,USR40567,Sabzi Mandi,Grocery purchase,200.27,Groceries,expense,Cash,Savings Account,2036-03-07,INR,Lucknow,No
+TXN102009,USR40567,Bajaj Finserv Phone EMI,Mobile phone EMI,2500,EMI,expense,Net Banking,Savings Account,2036-03-08,INR,Lucknow,Yes
+TXN102010,USR40567,Flipkart,Online/offline shopping purchase,1230.6,Shopping,expense,Credit Card,Credit Card,2036-03-08,INR,Lucknow,No
+TXN102011,USR40567,Zomato,Food order / dining,303.87,Food & Dining,expense,Credit Card,Credit Card,2036-03-09,INR,Lucknow,No
+TXN102012,USR40567,Star Health Insurance,Health insurance premium,1400,Insurance,expense,Net Banking,Savings Account,2036-03-10,INR,Lucknow,Yes
+TXN102013,USR40567,Meena Bazaar,Online/offline shopping purchase,1721.02,Shopping,expense,Credit Card,Credit Card,2036-03-10,INR,Lucknow,No
+TXN102014,USR40567,RD Auto-Debit - SBI Bank,Recurring deposit auto-transfer,2000,Savings,expense,Net Banking,Savings Account,2036-03-12,INR,Lucknow,Yes
+TXN102015,USR40567,Coursera Subscription,Online course payment,1278.41,Education,expense,Credit Card,Credit Card,2036-03-12,INR,Lucknow,No
+TXN102016,USR40567,Local Shop Side Income,Side business income received,1786.57,Business,income,Net Banking,Savings Account,2036-03-14,INR,Lucknow,No
+TXN102017,USR40567,Groww - SIP Investment,Monthly SIP investment,2000,Investment,expense,Net Banking,Savings Account,2036-03-15,INR,Lucknow,Yes
+TXN102018,USR40567,City Bus Pass,Ride / fuel expense,52.18,Transportation,expense,Credit Card,Credit Card,2036-03-16,INR,Lucknow,No
+TXN102019,USR40567,BookMyShow,Entertainment purchase,159.2,Entertainment,expense,Credit Card,Credit Card,2036-03-17,INR,Lucknow,No
+TXN102020,USR40567,Coursera Subscription,Online course payment,1071.93,Education,expense,Credit Card,Credit Card,2036-03-18,INR,Lucknow,No
+TXN102021,USR40567,Groww - Dividend Payout,Investment payout received,525.16,Investments,income,Net Banking,Savings Account,2036-03-19,INR,Lucknow,No
+TXN102022,USR40567,IRCTC,Travel booking,2117.79,Travel,expense,Credit Card,Credit Card,2036-03-19,INR,Lucknow,No
+TXN102023,USR40567,Income Tax Advance Payment,Advance tax payment,1116.8,Tax,expense,Net Banking,Savings Account,2036-03-20,INR,Lucknow,Yes
+TXN102024,USR40567,Zomato,Food order / dining,527.98,Food & Dining,expense,Cash,Savings Account,2036-03-22,INR,Lucknow,No
+TXN102025,USR40567,Tata 1mg,Pharmacy / clinic payment,756.91,Healthcare,expense,Cash,Savings Account,2036-03-26,INR,Lucknow,No
+TXN102026,USR40567,Courier - Delhivery,Miscellaneous expense,259.8,Other,expense,UPI,Savings Account,2036-03-28,INR,Lucknow,No
+TXN102027,USR40567,Coin DCX Staking Reward,Crypto staking reward credited,276.98,Crypto Staking Yield,income,Net Banking,Savings Account,2036-03-29,INR,Lucknow,Yes
+TXN102028,USR40567,Stationery Shop,Miscellaneous expense,568.73,Other,expense,UPI,Savings Account,2036-03-30,INR,Lucknow,No
+TXN103001,USR40567,Vishal Retail Solutions Pvt Ltd - Salary,Monthly salary credit,53000,Salary,income,Net Banking,Savings Account,2036-04-01,INR,Lucknow,Yes
+TXN103002,USR40567,Netflix,Monthly subscription,199,Subscriptions,expense,Credit Card,Credit Card,2036-04-02,INR,Lucknow,Yes
+TXN103003,USR40567,Spotify Premium,Monthly subscription,119,Subscriptions,expense,Credit Card,Credit Card,2036-04-02,INR,Lucknow,Yes
+TXN103004,USR40567,PVR Cinemas,Entertainment purchase,295.02,Entertainment,expense,UPI,Savings Account,2036-04-02,INR,Lucknow,No
+TXN103005,USR40567,Sharma Estate - Landlord,Monthly house rent,12000,Housing & Rent,expense,Net Banking,Savings Account,2036-04-03,INR,Lucknow,Yes
+TXN103006,USR40567,Meena Bazaar,Online/offline shopping purchase,430.96,Shopping,expense,Debit Card,Savings Account,2036-04-04,INR,Lucknow,No
+TXN103007,USR40567,UPPCL Electricity,Electricity bill payment,680.85,Utilities,expense,UPI,Savings Account,2036-04-05,INR,Lucknow,Yes
+TXN103008,USR40567,Stationery Shop,Miscellaneous expense,268.78,Other,expense,UPI,Savings Account,2036-04-05,INR,Lucknow,No
+TXN103009,USR40567,Airtel Broadband,Broadband monthly bill,699,Utilities,expense,UPI,Savings Account,2036-04-06,INR,Lucknow,Yes
+TXN103010,USR40567,Jal Nigam Water Bill,Water bill payment,176.14,Utilities,expense,Net Banking,Savings Account,2036-04-07,INR,Lucknow,Yes
+TXN103011,USR40567,Udemy,Online course payment,927.45,Education,expense,Credit Card,Credit Card,2036-04-07,INR,Lucknow,No
+TXN103012,USR40567,Bajaj Finserv Phone EMI,Mobile phone EMI,2500,EMI,expense,Net Banking,Savings Account,2036-04-08,INR,Lucknow,Yes
+TXN103013,USR40567,Star Health Insurance,Health insurance premium,1400,Insurance,expense,Net Banking,Savings Account,2036-04-10,INR,Lucknow,Yes
+TXN103014,USR40567,RD Auto-Debit - SBI Bank,Recurring deposit auto-transfer,2000,Savings,expense,Net Banking,Savings Account,2036-04-12,INR,Lucknow,Yes
+TXN103015,USR40567,Meena Bazaar,Online/offline shopping purchase,322.43,Shopping,expense,UPI,Savings Account,2036-04-12,INR,Lucknow,No
+TXN103016,USR40567,Rapido,Ride / fuel expense,96.83,Transportation,expense,Credit Card,Credit Card,2036-04-14,INR,Lucknow,No
+TXN103017,USR40567,HP Petrol Pump,Ride / fuel expense,708.43,Transportation,expense,UPI,Savings Account,2036-04-14,INR,Lucknow,No
+TXN103018,USR40567,Groww - SIP Investment,Monthly SIP investment,2000,Investment,expense,Net Banking,Savings Account,2036-04-15,INR,Lucknow,Yes
+TXN103019,USR40567,Uber,Ride / fuel expense,542.26,Transportation,expense,Credit Card,Credit Card,2036-04-15,INR,Lucknow,No
+TXN103020,USR40567,Domino's Pizza,Food order / dining,370.99,Food & Dining,expense,UPI,Savings Account,2036-04-19,INR,Lucknow,No
+TXN103021,USR40567,Income Tax Advance Payment,Advance tax payment,569.56,Tax,expense,Net Banking,Savings Account,2036-04-20,INR,Lucknow,Yes
+TXN103022,USR40567,BigBasket,Grocery purchase,1697.06,Groceries,expense,Cash,Savings Account,2036-04-20,INR,Lucknow,No
+TXN103023,USR40567,Flipkart,Online/offline shopping purchase,607.79,Shopping,expense,UPI,Savings Account,2036-04-21,INR,Lucknow,No
+TXN103024,USR40567,Ola Cabs,Ride / fuel expense,730.41,Transportation,expense,Cash,Savings Account,2036-04-22,INR,Lucknow,No
+TXN103025,USR40567,City Bus Pass,Ride / fuel expense,884.16,Transportation,expense,UPI,Savings Account,2036-04-24,INR,Lucknow,No
+TXN103026,USR40567,Local Kirana Store,Grocery purchase,954.73,Groceries,expense,UPI,Savings Account,2036-04-30,INR,Lucknow,No
+TXN104001,USR40567,Vishal Retail Solutions Pvt Ltd - Salary,Monthly salary credit,55000,Salary,income,Net Banking,Savings Account,2036-05-01,INR,Lucknow,Yes
+TXN104002,USR40567,Local ATM Withdrawal,Miscellaneous expense,227.69,Other,expense,Cash,Savings Account,2036-05-01,INR,Lucknow,No
+TXN104003,USR40567,Netflix,Monthly subscription,199,Subscriptions,expense,Credit Card,Credit Card,2036-05-02,INR,Lucknow,Yes
+TXN104004,USR40567,Spotify Premium,Monthly subscription,119,Subscriptions,expense,Credit Card,Credit Card,2036-05-02,INR,Lucknow,Yes
+TXN104005,USR40567,PVR Cinemas,Entertainment purchase,312.98,Entertainment,expense,UPI,Savings Account,2036-05-02,INR,Lucknow,No
+TXN104006,USR40567,Sharma Estate - Landlord,Monthly house rent,12000,Housing & Rent,expense,Net Banking,Savings Account,2036-05-03,INR,Lucknow,Yes
+TXN104007,USR40567,UPPCL Electricity,Electricity bill payment,918.98,Utilities,expense,UPI,Savings Account,2036-05-05,INR,Lucknow,Yes
+TXN104008,USR40567,Airtel Broadband,Broadband monthly bill,699,Utilities,expense,UPI,Savings Account,2036-05-06,INR,Lucknow,Yes
+TXN104009,USR40567,Jal Nigam Water Bill,Water bill payment,287.63,Utilities,expense,Net Banking,Savings Account,2036-05-07,INR,Lucknow,Yes
+TXN104010,USR40567,Bajaj Finserv Phone EMI,Mobile phone EMI,2500,EMI,expense,Net Banking,Savings Account,2036-05-08,INR,Lucknow,Yes
+TXN104011,USR40567,Rapido,Ride / fuel expense,814.08,Transportation,expense,UPI,Savings Account,2036-05-08,INR,Lucknow,No
+TXN104012,USR40567,Swiggy,Food order / dining,245.39,Food & Dining,expense,UPI,Savings Account,2036-05-08,INR,Lucknow,No
+TXN104013,USR40567,Coursera Subscription,Online course payment,916.02,Education,expense,Credit Card,Credit Card,2036-05-09,INR,Lucknow,No
+TXN104014,USR40567,Local Dhaba,Food order / dining,297.39,Food & Dining,expense,Cash,Savings Account,2036-05-09,INR,Lucknow,No
+TXN104015,USR40567,Star Health Insurance,Health insurance premium,1400,Insurance,expense,Net Banking,Savings Account,2036-05-10,INR,Lucknow,Yes
+TXN104016,USR40567,Zomato,Food order / dining,176.85,Food & Dining,expense,Credit Card,Credit Card,2036-05-10,INR,Lucknow,No
+TXN104017,USR40567,Upwork Client Payment,Freelance project payment received,5911.71,Freelancing,income,UPI,Savings Account,2036-05-12,INR,Lucknow,No
+TXN104018,USR40567,RD Auto-Debit - SBI Bank,Recurring deposit auto-transfer,2000,Savings,expense,Net Banking,Savings Account,2036-05-12,INR,Lucknow,Yes
+TXN104019,USR40567,Groww - SIP Investment,Monthly SIP investment,2000,Investment,expense,Net Banking,Savings Account,2036-05-15,INR,Lucknow,Yes
+TXN104020,USR40567,HP Petrol Pump,Ride / fuel expense,215.86,Transportation,expense,Cash,Savings Account,2036-05-15,INR,Lucknow,No
+TXN104021,USR40567,Local Shop Side Income,Side business income received,3808.06,Business,income,Net Banking,Savings Account,2036-05-16,INR,Lucknow,No
+TXN104022,USR40567,BookMyShow,Entertainment purchase,296.9,Entertainment,expense,Credit Card,Credit Card,2036-05-18,INR,Lucknow,No
+TXN104023,USR40567,Income Tax Advance Payment,Advance tax payment,828.91,Tax,expense,Net Banking,Savings Account,2036-05-20,INR,Lucknow,Yes
+TXN104024,USR40567,BigBasket,Grocery purchase,1241.31,Groceries,expense,Debit Card,Savings Account,2036-05-21,INR,Lucknow,No
+TXN104025,USR40567,Local Dhaba,Food order / dining,184.99,Food & Dining,expense,UPI,Savings Account,2036-05-21,INR,Lucknow,No
+TXN104026,USR40567,Ola Cabs,Ride / fuel expense,781.49,Transportation,expense,Cash,Savings Account,2036-05-29,INR,Lucknow,No
+TXN104027,USR40567,IRCTC,Travel booking,765.15,Travel,expense,Credit Card,Credit Card,2036-05-31,INR,Lucknow,No
+TXN104028,USR40567,BookMyShow,Entertainment purchase,224.88,Entertainment,expense,UPI,Savings Account,2036-05-31,INR,Lucknow,No
+TXN105001,USR40567,Vishal Retail Solutions Pvt Ltd - Salary,Monthly salary credit,55000,Salary,income,Net Banking,Savings Account,2036-06-01,INR,Lucknow,Yes
+TXN105002,USR40567,Netflix,Monthly subscription,199,Subscriptions,expense,Credit Card,Credit Card,2036-06-02,INR,Lucknow,Yes
+TXN105003,USR40567,Spotify Premium,Monthly subscription,119,Subscriptions,expense,Credit Card,Credit Card,2036-06-02,INR,Lucknow,Yes
+TXN105004,USR40567,Sharma Estate - Landlord,Monthly house rent,12000,Housing & Rent,expense,Net Banking,Savings Account,2036-06-03,INR,Lucknow,Yes
+TXN105005,USR40567,Tata 1mg,Pharmacy / clinic payment,257.13,Healthcare,expense,UPI,Savings Account,2036-06-03,INR,Lucknow,No
+TXN105006,USR40567,UPPCL Electricity,Electricity bill payment,895.42,Utilities,expense,UPI,Savings Account,2036-06-05,INR,Lucknow,Yes
+TXN105007,USR40567,Uber,Ride / fuel expense,807.27,Transportation,expense,Cash,Savings Account,2036-06-05,INR,Lucknow,No
+TXN105008,USR40567,Local Dhaba,Food order / dining,281.79,Food & Dining,expense,Credit Card,Credit Card,2036-06-05,INR,Lucknow,No
+TXN105009,USR40567,Airtel Broadband,Broadband monthly bill,699,Utilities,expense,UPI,Savings Account,2036-06-06,INR,Lucknow,Yes
+TXN105010,USR40567,Jal Nigam Water Bill,Water bill payment,207.47,Utilities,expense,Net Banking,Savings Account,2036-06-07,INR,Lucknow,Yes
+TXN105011,USR40567,Bajaj Finserv Phone EMI,Mobile phone EMI,2500,EMI,expense,Net Banking,Savings Account,2036-06-08,INR,Lucknow,Yes
+TXN105012,USR40567,HP Petrol Pump,Ride / fuel expense,512.67,Transportation,expense,Cash,Savings Account,2036-06-09,INR,Lucknow,No
+TXN105013,USR40567,WazirX Staking Payout,Crypto staking reward credited,633.58,Crypto Staking Yield,income,UPI,Savings Account,2036-06-10,INR,Lucknow,Yes
+TXN105014,USR40567,Star Health Insurance,Health insurance premium,1400,Insurance,expense,Net Banking,Savings Account,2036-06-10,INR,Lucknow,Yes
+TXN105015,USR40567,PVR Cinemas,Entertainment purchase,457.2,Entertainment,expense,Credit Card,Credit Card,2036-06-10,INR,Lucknow,No
+TXN105016,USR40567,RD Auto-Debit - SBI Bank,Recurring deposit auto-transfer,2000,Savings,expense,Net Banking,Savings Account,2036-06-12,INR,Lucknow,Yes
+TXN105017,USR40567,Udemy,Online course payment,1117.57,Education,expense,Credit Card,Credit Card,2036-06-13,INR,Lucknow,No
+TXN105018,USR40567,Groww - SIP Investment,Monthly SIP investment,2000,Investment,expense,Net Banking,Savings Account,2036-06-15,INR,Lucknow,Yes
+TXN105019,USR40567,Local Clinic,Pharmacy / clinic payment,754.22,Healthcare,expense,Debit Card,Savings Account,2036-06-15,INR,Lucknow,No
+TXN105020,USR40567,Income Tax Advance Payment,Advance tax payment,784.96,Tax,expense,Net Banking,Savings Account,2036-06-20,INR,Lucknow,Yes
+TXN105021,USR40567,City Bus Pass,Ride / fuel expense,541.56,Transportation,expense,UPI,Savings Account,2036-06-24,INR,Lucknow,No
+TXN105022,USR40567,Local Shop Side Income,Side business income received,1951.09,Business,income,Net Banking,Savings Account,2036-06-26,INR,Lucknow,No
+TXN105023,USR40567,HP Petrol Pump,Ride / fuel expense,408.8,Transportation,expense,UPI,Savings Account,2036-06-26,INR,Lucknow,No
+TXN105024,USR40567,Redbus,Travel booking,1119.58,Travel,expense,Net Banking,Savings Account,2036-06-26,INR,Lucknow,No
+TXN105025,USR40567,Flipkart,Online/offline shopping purchase,411.22,Shopping,expense,UPI,Savings Account,2036-06-27,INR,Lucknow,No
+TXN105026,USR40567,Swiggy,Food order / dining,310.3,Food & Dining,expense,Cash,Savings Account,2036-06-28,INR,Lucknow,No
+TXN105027,USR40567,Local Kirana Store,Grocery purchase,1511.61,Groceries,expense,Debit Card,Savings Account,2036-06-29,INR,Lucknow,No
+TXN105028,USR40567,Swiggy,Food order / dining,418.09,Food & Dining,expense,Cash,Savings Account,2036-06-30,INR,Lucknow,No
+TXN106001,USR40567,Vishal Retail Solutions Pvt Ltd - Salary,Monthly salary credit,56000,Salary,income,Net Banking,Savings Account,2036-07-01,INR,Lucknow,Yes
+TXN106002,USR40567,Amazon.in,Online/offline shopping purchase,1883.16,Shopping,expense,UPI,Savings Account,2036-07-01,INR,Lucknow,No
+TXN106003,USR40567,Courier - Delhivery,Miscellaneous expense,436.15,Other,expense,Cash,Savings Account,2036-07-01,INR,Lucknow,No
+TXN106004,USR40567,Netflix,Monthly subscription,199,Subscriptions,expense,Credit Card,Credit Card,2036-07-02,INR,Lucknow,Yes
+TXN106005,USR40567,Spotify Premium,Monthly subscription,119,Subscriptions,expense,Credit Card,Credit Card,2036-07-02,INR,Lucknow,Yes
+TXN106006,USR40567,Sharma Estate - Landlord,Monthly house rent,12000,Housing & Rent,expense,Net Banking,Savings Account,2036-07-03,INR,Lucknow,Yes
+TXN106007,USR40567,Local ATM Withdrawal,Miscellaneous expense,590.77,Other,expense,UPI,Savings Account,2036-07-04,INR,Lucknow,No
+TXN106008,USR40567,UPPCL Electricity,Electricity bill payment,576.05,Utilities,expense,UPI,Savings Account,2036-07-05,INR,Lucknow,Yes
+TXN106009,USR40567,Airtel Broadband,Broadband monthly bill,699,Utilities,expense,UPI,Savings Account,2036-07-06,INR,Lucknow,Yes
+TXN106010,USR40567,Coin DCX Staking Reward,Crypto staking reward credited,579.37,Crypto Staking Yield,income,UPI,Savings Account,2036-07-07,INR,Lucknow,Yes
+TXN106011,USR40567,Jal Nigam Water Bill,Water bill payment,291.61,Utilities,expense,Net Banking,Savings Account,2036-07-07,INR,Lucknow,Yes
+TXN106012,USR40567,Bajaj Finserv Phone EMI,Mobile phone EMI,2500,EMI,expense,Net Banking,Savings Account,2036-07-08,INR,Lucknow,Yes
+TXN106013,USR40567,Star Health Insurance,Health insurance premium,1400,Insurance,expense,Net Banking,Savings Account,2036-07-10,INR,Lucknow,Yes
+TXN106014,USR40567,Meena Bazaar,Online/offline shopping purchase,1768.7,Shopping,expense,UPI,Savings Account,2036-07-10,INR,Lucknow,No
+TXN106015,USR40567,RD Auto-Debit - SBI Bank,Recurring deposit auto-transfer,2000,Savings,expense,Net Banking,Savings Account,2036-07-12,INR,Lucknow,Yes
+TXN106016,USR40567,BookMyShow,Entertainment purchase,248.91,Entertainment,expense,UPI,Savings Account,2036-07-12,INR,Lucknow,No
+TXN106017,USR40567,Groww - SIP Investment,Monthly SIP investment,2000,Investment,expense,Net Banking,Savings Account,2036-07-15,INR,Lucknow,Yes
+TXN106018,USR40567,Apollo Pharmacy,Pharmacy / clinic payment,463.91,Healthcare,expense,Debit Card,Savings Account,2036-07-17,INR,Lucknow,No
+TXN106019,USR40567,Upwork Client Payment,Freelance project payment received,2364.86,Freelancing,income,UPI,Savings Account,2036-07-18,INR,Lucknow,No
+TXN106020,USR40567,Local Gaming Cafe,Entertainment purchase,193.86,Entertainment,expense,UPI,Savings Account,2036-07-18,INR,Lucknow,No
+TXN106021,USR40567,Income Tax Advance Payment,Advance tax payment,679.73,Tax,expense,Net Banking,Savings Account,2036-07-20,INR,Lucknow,Yes
+TXN106022,USR40567,Rapido,Ride / fuel expense,720.63,Transportation,expense,Cash,Savings Account,2036-07-20,INR,Lucknow,No
+TXN106023,USR40567,Stationery Shop,Miscellaneous expense,545.77,Other,expense,Cash,Savings Account,2036-07-23,INR,Lucknow,No
+TXN106024,USR40567,Coursera Subscription,Online course payment,1290.52,Education,expense,Credit Card,Credit Card,2036-07-25,INR,Lucknow,No
+TXN106025,USR40567,BookMyShow,Entertainment purchase,186.12,Entertainment,expense,UPI,Savings Account,2036-07-27,INR,Lucknow,No
+TXN106026,USR40567,Zomato,Food order / dining,494.86,Food & Dining,expense,Cash,Savings Account,2036-07-29,INR,Lucknow,No
+TXN106027,USR40567,Flipkart,Online/offline shopping purchase,1807.48,Shopping,expense,Debit Card,Savings Account,2036-07-29,INR,Lucknow,No
+TXN106028,USR40567,IRCTC,Travel booking,1324.63,Travel,expense,Credit Card,Credit Card,2036-07-29,INR,Lucknow,No
+TXN107001,USR40567,Vishal Retail Solutions Pvt Ltd - Salary,Monthly salary credit,58000,Salary,income,Net Banking,Savings Account,2036-08-01,INR,Lucknow,Yes
+TXN107002,USR40567,Netflix,Monthly subscription,199,Subscriptions,expense,Credit Card,Credit Card,2036-08-02,INR,Lucknow,Yes
+TXN107003,USR40567,Spotify Premium,Monthly subscription,119,Subscriptions,expense,Credit Card,Credit Card,2036-08-02,INR,Lucknow,Yes
+TXN107004,USR40567,Sharma Estate - Landlord,Monthly house rent,12000,Housing & Rent,expense,Net Banking,Savings Account,2036-08-03,INR,Lucknow,Yes
+TXN107005,USR40567,UPPCL Electricity,Electricity bill payment,962.91,Utilities,expense,UPI,Savings Account,2036-08-05,INR,Lucknow,Yes
+TXN107006,USR40567,MakeMyTrip,Travel booking,1774.22,Travel,expense,Credit Card,Credit Card,2036-08-05,INR,Lucknow,No
+TXN107007,USR40567,Airtel Broadband,Broadband monthly bill,699,Utilities,expense,UPI,Savings Account,2036-08-06,INR,Lucknow,Yes
+TXN107008,USR40567,Jal Nigam Water Bill,Water bill payment,188.35,Utilities,expense,Net Banking,Savings Account,2036-08-07,INR,Lucknow,Yes
+TXN107009,USR40567,DMart,Grocery purchase,645.23,Groceries,expense,UPI,Savings Account,2036-08-07,INR,Lucknow,No
+TXN107010,USR40567,Local Dhaba,Food order / dining,104.9,Food & Dining,expense,Credit Card,Credit Card,2036-08-07,INR,Lucknow,No
+TXN107011,USR40567,HP Petrol Pump,Ride / fuel expense,203.1,Transportation,expense,UPI,Savings Account,2036-08-07,INR,Lucknow,No
+TXN107012,USR40567,Amazon.in,Online/offline shopping purchase,1318.45,Shopping,expense,UPI,Savings Account,2036-08-07,INR,Lucknow,No
+TXN107013,USR40567,Bajaj Finserv Phone EMI,Mobile phone EMI,2500,EMI,expense,Net Banking,Savings Account,2036-08-08,INR,Lucknow,Yes
+TXN107014,USR40567,Amazon.in,Online/offline shopping purchase,1011.93,Shopping,expense,Debit Card,Savings Account,2036-08-09,INR,Lucknow,No
+TXN107015,USR40567,Apollo Pharmacy,Pharmacy / clinic payment,165.79,Healthcare,expense,Debit Card,Savings Account,2036-08-09,INR,Lucknow,No
+TXN107016,USR40567,Star Health Insurance,Health insurance premium,1400,Insurance,expense,Net Banking,Savings Account,2036-08-10,INR,Lucknow,Yes
+TXN107017,USR40567,RD Auto-Debit - SBI Bank,Recurring deposit auto-transfer,2000,Savings,expense,Net Banking,Savings Account,2036-08-12,INR,Lucknow,Yes
+TXN107018,USR40567,Zomato,Food order / dining,179.63,Food & Dining,expense,Cash,Savings Account,2036-08-12,INR,Lucknow,No
+TXN107019,USR40567,Domino's Pizza,Food order / dining,346.84,Food & Dining,expense,Cash,Savings Account,2036-08-14,INR,Lucknow,No
+TXN107020,USR40567,Groww - SIP Investment,Monthly SIP investment,2000,Investment,expense,Net Banking,Savings Account,2036-08-15,INR,Lucknow,Yes
+TXN107021,USR40567,MakeMyTrip,Travel booking,804.35,Travel,expense,Credit Card,Credit Card,2036-08-18,INR,Lucknow,No
+TXN107022,USR40567,Income Tax Advance Payment,Advance tax payment,1170.58,Tax,expense,Net Banking,Savings Account,2036-08-20,INR,Lucknow,Yes
+TXN107023,USR40567,Courier - Delhivery,Miscellaneous expense,309.74,Other,expense,Cash,Savings Account,2036-08-21,INR,Lucknow,No
+TXN107024,USR40567,Swiggy,Food order / dining,547.77,Food & Dining,expense,Cash,Savings Account,2036-08-23,INR,Lucknow,No
+TXN107025,USR40567,Local Shop Side Income,Side business income received,2225.88,Business,income,UPI,Savings Account,2036-08-24,INR,Lucknow,No
+TXN107026,USR40567,Groww - Dividend Payout,Investment payout received,1083.6,Investments,income,Net Banking,Savings Account,2036-08-24,INR,Lucknow,No
+TXN107027,USR40567,WazirX Staking Payout,Crypto staking reward credited,215.91,Crypto Staking Yield,income,Net Banking,Savings Account,2036-08-28,INR,Lucknow,Yes
+TXN107028,USR40567,Domino's Pizza,Food order / dining,181.82,Food & Dining,expense,UPI,Savings Account,2036-08-30,INR,Lucknow,No
+TXN107029,USR40567,City Bus Pass,Ride / fuel expense,568.48,Transportation,expense,Cash,Savings Account,2036-08-31,INR,Lucknow,No
+TXN108001,USR40567,Vishal Retail Solutions Pvt Ltd - Salary,Monthly salary credit,58000,Salary,income,Net Banking,Savings Account,2036-09-01,INR,Lucknow,Yes
+TXN108002,USR40567,Netflix,Monthly subscription,199,Subscriptions,expense,Credit Card,Credit Card,2036-09-02,INR,Lucknow,Yes
+TXN108003,USR40567,Spotify Premium,Monthly subscription,119,Subscriptions,expense,Credit Card,Credit Card,2036-09-02,INR,Lucknow,Yes
+TXN108004,USR40567,Sharma Estate - Landlord,Monthly house rent,12000,Housing & Rent,expense,Net Banking,Savings Account,2036-09-03,INR,Lucknow,Yes
+TXN108005,USR40567,UPPCL Electricity,Electricity bill payment,581.35,Utilities,expense,UPI,Savings Account,2036-09-05,INR,Lucknow,Yes
+TXN108006,USR40567,Uber,Ride / fuel expense,114.0,Transportation,expense,Cash,Savings Account,2036-09-05,INR,Lucknow,No
+TXN108007,USR40567,BigBasket,Grocery purchase,387.65,Groceries,expense,Debit Card,Savings Account,2036-09-05,INR,Lucknow,No
+TXN108008,USR40567,Airtel Broadband,Broadband monthly bill,699,Utilities,expense,UPI,Savings Account,2036-09-06,INR,Lucknow,Yes
+TXN108009,USR40567,HP Petrol Pump,Ride / fuel expense,62.06,Transportation,expense,UPI,Savings Account,2036-09-06,INR,Lucknow,No
+TXN108010,USR40567,Jal Nigam Water Bill,Water bill payment,194.04,Utilities,expense,Net Banking,Savings Account,2036-09-07,INR,Lucknow,Yes
+TXN108011,USR40567,Bajaj Finserv Phone EMI,Mobile phone EMI,2500,EMI,expense,Net Banking,Savings Account,2036-09-08,INR,Lucknow,Yes
+TXN108012,USR40567,Local Market,Online/offline shopping purchase,527.3,Shopping,expense,Debit Card,Savings Account,2036-09-09,INR,Lucknow,No
+TXN108013,USR40567,Star Health Insurance,Health insurance premium,1400,Insurance,expense,Net Banking,Savings Account,2036-09-10,INR,Lucknow,Yes
+TXN108014,USR40567,Coursera Subscription,Online course payment,803.16,Education,expense,Credit Card,Credit Card,2036-09-10,INR,Lucknow,No
+TXN108015,USR40567,Local Market,Online/offline shopping purchase,696.66,Shopping,expense,Credit Card,Credit Card,2036-09-11,INR,Lucknow,No
+TXN108016,USR40567,Groww - Dividend Payout,Investment payout received,517.67,Investments,income,Net Banking,Savings Account,2036-09-12,INR,Lucknow,No
+TXN108017,USR40567,RD Auto-Debit - SBI Bank,Recurring deposit auto-transfer,2000,Savings,expense,Net Banking,Savings Account,2036-09-12,INR,Lucknow,Yes
+TXN108018,USR40567,Groww - SIP Investment,Monthly SIP investment,2000,Investment,expense,Net Banking,Savings Account,2036-09-15,INR,Lucknow,Yes
+TXN108019,USR40567,Amazon.in,Online/offline shopping purchase,1765.97,Shopping,expense,UPI,Savings Account,2036-09-15,INR,Lucknow,No
+TXN108020,USR40567,Domino's Pizza,Food order / dining,347.71,Food & Dining,expense,Credit Card,Credit Card,2036-09-17,INR,Lucknow,No
+TXN108021,USR40567,Income Tax Advance Payment,Advance tax payment,903.76,Tax,expense,Net Banking,Savings Account,2036-09-20,INR,Lucknow,Yes
+TXN108022,USR40567,Apollo Pharmacy,Pharmacy / clinic payment,162.18,Healthcare,expense,Debit Card,Savings Account,2036-09-20,INR,Lucknow,No
+TXN108023,USR40567,Udemy,Online course payment,1231.45,Education,expense,Credit Card,Credit Card,2036-09-21,INR,Lucknow,No
+TXN108024,USR40567,Local Kirana Store,Grocery purchase,1625.88,Groceries,expense,Debit Card,Savings Account,2036-09-21,INR,Lucknow,No
+TXN108025,USR40567,Udemy,Online course payment,899.83,Education,expense,Credit Card,Credit Card,2036-09-23,INR,Lucknow,No
+TXN108026,USR40567,Sabzi Mandi,Grocery purchase,1147.05,Groceries,expense,UPI,Savings Account,2036-09-23,INR,Lucknow,No
+TXN108027,USR40567,Local Shop Side Income,Side business income received,4265.44,Business,income,Net Banking,Savings Account,2036-09-26,INR,Lucknow,No
+TXN108028,USR40567,Udemy,Online course payment,547.91,Education,expense,Credit Card,Credit Card,2036-09-30,INR,Lucknow,No

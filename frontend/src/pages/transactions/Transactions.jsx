@@ -116,10 +116,29 @@ export const Transactions = () => {
       if (selectedCategory) params.category_id = selectedCategory;
       if (paymentMethod) params.payment_method = paymentMethod;
 
+      if (dateRange && dateRange !== 'ALL') {
+        const now = new Date();
+        if (dateRange === 'THIS_MONTH') {
+          const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+          const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
+          params.start_date = firstDay;
+          params.end_date = lastDay;
+        } else if (dateRange === 'LAST_30') {
+          const past30 = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
+          params.start_date = past30;
+        } else if (dateRange === 'LAST_90') {
+          const past90 = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString();
+          params.start_date = past90;
+        } else if (dateRange === 'THIS_YEAR') {
+          const startYear = new Date(now.getFullYear(), 0, 1).toISOString();
+          params.start_date = startYear;
+        }
+      }
+
       const res = await transactionService.getTransactions(params);
       const items = res?.data?.items || res?.items || (Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []));
       setTransactions(items);
-      if (page === 1 && !searchQuery && !selectedCategory) {
+      if (page === 1 && !searchQuery && !selectedCategory && dateRange === 'ALL') {
         sessionStorage.setItem('tx_cache_items', JSON.stringify(items));
       }
       const paginationMeta = res?.data?.pagination || res?.pagination || {};
@@ -134,13 +153,21 @@ export const Transactions = () => {
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, sortField, sortOrder, searchQuery, selectedCategory, paymentMethod]);
+  }, [page, pageSize, sortField, sortOrder, searchQuery, selectedCategory, paymentMethod, dateRange]);
 
   useEffect(() => {
     loadTransactions();
     loadSummary();
-    const handleLedgerUpdate = () => {
-      loadTransactions();
+    const handleLedgerUpdate = (e) => {
+      try {
+        sessionStorage.removeItem('tx_cache_items');
+        sessionStorage.removeItem('tx_cache_summary');
+      } catch {}
+      const savedTx = e?.detail;
+      if (savedTx && typeof savedTx === 'object' && savedTx.title) {
+        setTransactions((prev) => [savedTx, ...prev.filter((t) => t.id !== savedTx.id)]);
+      }
+      loadTransactions(true);
       loadSummary();
     };
     window.addEventListener('ledger_updated', handleLedgerUpdate);
@@ -202,18 +229,24 @@ export const Transactions = () => {
 
   // Action Handlers
   const handleSaveTransaction = (savedTx) => {
+    try {
+      sessionStorage.removeItem('tx_cache_items');
+      sessionStorage.removeItem('tx_cache_summary');
+    } catch {}
+
     if (savedTx && typeof savedTx === 'object' && savedTx.title) {
       if (editingTransaction) {
         setTransactions((prev) =>
           prev.map((t) => (t.id === savedTx.id ? { ...t, ...savedTx } : t))
         );
       } else {
-        setTransactions((prev) => [savedTx, ...prev]);
+        setTransactions((prev) => [savedTx, ...prev.filter((t) => t.id !== savedTx.id)]);
         setTotalItems((prev) => prev + 1);
+        setPage(1);
       }
     }
     setIsFormOpen(false);
-    loadTransactions();
+    loadTransactions(true);
     loadSummary();
   };
 

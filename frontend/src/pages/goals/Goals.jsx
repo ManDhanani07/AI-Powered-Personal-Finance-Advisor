@@ -217,6 +217,10 @@ export const Goals = () => {
                   setEditingGoal(item);
                   setIsFormOpen(true);
                 }}
+                onDelete={(item) => {
+                  setDeletingGoal(item);
+                  setIsDeleteOpen(true);
+                }}
               />
             ))}
           </div>

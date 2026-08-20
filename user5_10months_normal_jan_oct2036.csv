@@ -1,0 +1,255 @@
+transaction_id,user_id,merchant,description,amount,category,transaction_type,payment_method,account_type,transaction_date,currency,location,recurring
+TXN200001,USR50234,Om Traders Pvt Ltd - Salary,Monthly salary credit,32000,Salary,income,Net Banking,Savings Account,2036-01-01,INR,Bhopal,Yes
+TXN200002,USR50234,Netflix Mobile Plan,Monthly subscription,149,Subscriptions,expense,UPI,Savings Account,2036-01-02,INR,Bhopal,Yes
+TXN200003,USR50234,Local Coaching Class Fee,Course / coaching fee,735.2,Education,expense,UPI,Savings Account,2036-01-02,INR,Bhopal,No
+TXN200004,USR50234,Verma Estate - Landlord,Monthly house rent,8000,Housing & Rent,expense,Net Banking,Savings Account,2036-01-03,INR,Bhopal,Yes
+TXN200005,USR50234,Spotify Premium,Monthly subscription,119,Subscriptions,expense,UPI,Savings Account,2036-01-04,INR,Bhopal,Yes
+TXN200006,USR50234,Udemy,Course / coaching fee,822.07,Education,expense,UPI,Savings Account,2036-01-04,INR,Bhopal,No
+TXN200007,USR50234,MP Electricity Board,Electricity bill payment,352.13,Utilities,expense,UPI,Savings Account,2036-01-05,INR,Bhopal,Yes
+TXN200008,USR50234,Ola Cabs,Local commute expense,454.63,Transportation,expense,UPI,Savings Account,2036-01-05,INR,Bhopal,No
+TXN200009,USR50234,Jio Fiber,Broadband monthly bill,499,Utilities,expense,UPI,Savings Account,2036-01-06,INR,Bhopal,Yes
+TXN200010,USR50234,Municipal Water Bill,Water bill payment,241.91,Utilities,expense,Net Banking,Savings Account,2036-01-07,INR,Bhopal,Yes
+TXN200011,USR50234,Local Dhaba,Food order / dining,64.36,Food & Dining,expense,Cash,Savings Account,2036-01-07,INR,Bhopal,No
+TXN200012,USR50234,Bajaj Finserv Phone EMI,Mobile phone EMI,1600,EMI,expense,Net Banking,Savings Account,2036-01-08,INR,Bhopal,Yes
+TXN200013,USR50234,IRCTC,Travel booking,624.21,Travel,expense,Net Banking,Savings Account,2036-01-08,INR,Bhopal,No
+TXN200014,USR50234,LIC Premium,Life insurance premium,950,Insurance,expense,Net Banking,Savings Account,2036-01-10,INR,Bhopal,Yes
+TXN200015,USR50234,Sabzi Mandi,Grocery purchase,285.53,Groceries,expense,UPI,Savings Account,2036-01-10,INR,Bhopal,No
+TXN200016,USR50234,RD Auto-Debit - SBI Bank,Recurring deposit auto-transfer,1000,Savings,expense,Net Banking,Savings Account,2036-01-12,INR,Bhopal,Yes
+TXN200017,USR50234,Local Gaming Cafe,Entertainment purchase,316.92,Entertainment,expense,UPI,Savings Account,2036-01-12,INR,Bhopal,No
+TXN200018,USR50234,Local Shop Side Income,Side business income received,2411.4,Business,income,UPI,Savings Account,2036-01-13,INR,Bhopal,No
+TXN200019,USR50234,Groww - SIP Investment,Monthly SIP investment,1000,Investment,expense,Net Banking,Savings Account,2036-01-15,INR,Bhopal,Yes
+TXN200020,USR50234,Income Tax Advance Payment,Advance tax payment,635.34,Tax,expense,Net Banking,Savings Account,2036-01-20,INR,Bhopal,Yes
+TXN200021,USR50234,Local Auto Rickshaw,Local commute expense,72.86,Transportation,expense,UPI,Savings Account,2036-01-26,INR,Bhopal,No
+TXN200022,USR50234,Sabzi Mandi,Grocery purchase,1113.88,Groceries,expense,UPI,Savings Account,2036-01-27,INR,Bhopal,No
+TXN200023,USR50234,Amazon.in,Shopping purchase,753.85,Shopping,expense,Debit Card,Savings Account,2036-01-28,INR,Bhopal,No
+TXN200024,USR50234,Local Market,Shopping purchase,1192.59,Shopping,expense,Debit Card,Savings Account,2036-01-29,INR,Bhopal,No
+TXN200025,USR50234,Local Cinema Hall,Entertainment purchase,327.37,Entertainment,expense,Cash,Savings Account,2036-01-31,INR,Bhopal,No
+TXN201001,USR50234,Om Traders Pvt Ltd - Salary,Monthly salary credit,33000,Salary,income,Net Banking,Savings Account,2036-02-01,INR,Bhopal,Yes
+TXN201002,USR50234,Netflix Mobile Plan,Monthly subscription,149,Subscriptions,expense,UPI,Savings Account,2036-02-02,INR,Bhopal,Yes
+TXN201003,USR50234,IRCTC,Travel booking,321.75,Travel,expense,UPI,Savings Account,2036-02-02,INR,Bhopal,No
+TXN201004,USR50234,Verma Estate - Landlord,Monthly house rent,8000,Housing & Rent,expense,Net Banking,Savings Account,2036-02-03,INR,Bhopal,Yes
+TXN201005,USR50234,Spotify Premium,Monthly subscription,119,Subscriptions,expense,UPI,Savings Account,2036-02-04,INR,Bhopal,Yes
+TXN201006,USR50234,MP Electricity Board,Electricity bill payment,512.98,Utilities,expense,UPI,Savings Account,2036-02-05,INR,Bhopal,Yes
+TXN201007,USR50234,Jio Fiber,Broadband monthly bill,499,Utilities,expense,UPI,Savings Account,2036-02-06,INR,Bhopal,Yes
+TXN201008,USR50234,WazirX Staking Payout,Crypto staking reward credited,269.05,Crypto Staking Yield,income,UPI,Savings Account,2036-02-07,INR,Bhopal,Yes
+TXN201009,USR50234,Municipal Water Bill,Water bill payment,150.19,Utilities,expense,Net Banking,Savings Account,2036-02-07,INR,Bhopal,Yes
+TXN201010,USR50234,Bajaj Finserv Phone EMI,Mobile phone EMI,1600,EMI,expense,Net Banking,Savings Account,2036-02-08,INR,Bhopal,Yes
+TXN201011,USR50234,Fiverr Freelance Order,Freelance / tuition income received,1476.92,Freelancing,income,UPI,Savings Account,2036-02-09,INR,Bhopal,No
+TXN201012,USR50234,LIC Premium,Life insurance premium,950,Insurance,expense,Net Banking,Savings Account,2036-02-10,INR,Bhopal,Yes
+TXN201013,USR50234,Swiggy,Food order / dining,202.64,Food & Dining,expense,UPI,Savings Account,2036-02-10,INR,Bhopal,No
+TXN201014,USR50234,Sabzi Mandi,Grocery purchase,1144.96,Groceries,expense,Cash,Savings Account,2036-02-11,INR,Bhopal,No
+TXN201015,USR50234,Local Dhaba,Food order / dining,277.97,Food & Dining,expense,UPI,Savings Account,2036-02-11,INR,Bhopal,No
+TXN201016,USR50234,RD Auto-Debit - SBI Bank,Recurring deposit auto-transfer,1000,Savings,expense,Net Banking,Savings Account,2036-02-12,INR,Bhopal,Yes
+TXN201017,USR50234,Tea Stall,Food order / dining,196.95,Food & Dining,expense,Cash,Savings Account,2036-02-14,INR,Bhopal,No
+TXN201018,USR50234,Udemy,Course / coaching fee,509.69,Education,expense,UPI,Savings Account,2036-02-14,INR,Bhopal,No
+TXN201019,USR50234,Groww - SIP Investment,Monthly SIP investment,1000,Investment,expense,Net Banking,Savings Account,2036-02-15,INR,Bhopal,Yes
+TXN201020,USR50234,Local Market,Shopping purchase,555.0,Shopping,expense,UPI,Savings Account,2036-02-15,INR,Bhopal,No
+TXN201021,USR50234,Income Tax Advance Payment,Advance tax payment,570.47,Tax,expense,Net Banking,Savings Account,2036-02-20,INR,Bhopal,Yes
+TXN201022,USR50234,New Market Bhopal,Shopping purchase,811.76,Shopping,expense,Cash,Savings Account,2036-02-20,INR,Bhopal,No
+TXN201023,USR50234,Local Coaching Class Fee,Course / coaching fee,950.82,Education,expense,UPI,Savings Account,2036-02-20,INR,Bhopal,No
+TXN201024,USR50234,BigBasket,Grocery purchase,284.81,Groceries,expense,UPI,Savings Account,2036-02-20,INR,Bhopal,No
+TXN201025,USR50234,Local ATM Withdrawal,Miscellaneous expense,139.62,Other,expense,Cash,Savings Account,2036-02-22,INR,Bhopal,No
+TXN201026,USR50234,Local Cinema Hall,Entertainment purchase,157.62,Entertainment,expense,Cash,Savings Account,2036-02-26,INR,Bhopal,No
+TXN202001,USR50234,Om Traders Pvt Ltd - Salary,Monthly salary credit,34000,Salary,income,Net Banking,Savings Account,2036-03-01,INR,Bhopal,Yes
+TXN202002,USR50234,Netflix Mobile Plan,Monthly subscription,149,Subscriptions,expense,UPI,Savings Account,2036-03-02,INR,Bhopal,Yes
+TXN202003,USR50234,Verma Estate - Landlord,Monthly house rent,8000,Housing & Rent,expense,Net Banking,Savings Account,2036-03-03,INR,Bhopal,Yes
+TXN202004,USR50234,Spotify Premium,Monthly subscription,119,Subscriptions,expense,UPI,Savings Account,2036-03-04,INR,Bhopal,Yes
+TXN202005,USR50234,Redbus,Travel booking,1259.21,Travel,expense,UPI,Savings Account,2036-03-04,INR,Bhopal,No
+TXN202006,USR50234,MP Electricity Board,Electricity bill payment,573.58,Utilities,expense,UPI,Savings Account,2036-03-05,INR,Bhopal,Yes
+TXN202007,USR50234,Jio Fiber,Broadband monthly bill,499,Utilities,expense,UPI,Savings Account,2036-03-06,INR,Bhopal,Yes
+TXN202008,USR50234,IRCTC,Travel booking,345.23,Travel,expense,Net Banking,Savings Account,2036-03-06,INR,Bhopal,No
+TXN202009,USR50234,Municipal Water Bill,Water bill payment,185.4,Utilities,expense,Net Banking,Savings Account,2036-03-07,INR,Bhopal,Yes
+TXN202010,USR50234,New Market Bhopal,Shopping purchase,1095.57,Shopping,expense,Cash,Savings Account,2036-03-07,INR,Bhopal,No
+TXN202011,USR50234,Bajaj Finserv Phone EMI,Mobile phone EMI,1600,EMI,expense,Net Banking,Savings Account,2036-03-08,INR,Bhopal,Yes
+TXN202012,USR50234,LIC Premium,Life insurance premium,950,Insurance,expense,Net Banking,Savings Account,2036-03-10,INR,Bhopal,Yes
+TXN202013,USR50234,Local Tuition Income,Freelance / tuition income received,3301.69,Freelancing,income,UPI,Savings Account,2036-03-12,INR,Bhopal,No
+TXN202014,USR50234,RD Auto-Debit - SBI Bank,Recurring deposit auto-transfer,1000,Savings,expense,Net Banking,Savings Account,2036-03-12,INR,Bhopal,Yes
+TXN202015,USR50234,Local Pharmacy,Pharmacy / clinic payment,224.03,Healthcare,expense,UPI,Savings Account,2036-03-12,INR,Bhopal,No
+TXN202016,USR50234,Groww - SIP Investment,Monthly SIP investment,1000,Investment,expense,Net Banking,Savings Account,2036-03-15,INR,Bhopal,Yes
+TXN202017,USR50234,Local Coaching Class Fee,Course / coaching fee,803.48,Education,expense,Cash,Savings Account,2036-03-19,INR,Bhopal,No
+TXN202018,USR50234,Income Tax Advance Payment,Advance tax payment,668.27,Tax,expense,Net Banking,Savings Account,2036-03-20,INR,Bhopal,Yes
+TXN202019,USR50234,Local Dhaba,Food order / dining,386.29,Food & Dining,expense,Cash,Savings Account,2036-03-20,INR,Bhopal,No
+TXN202020,USR50234,Groww - Dividend Payout,Investment payout received,228.05,Investments,income,Net Banking,Savings Account,2036-03-22,INR,Bhopal,No
+TXN202021,USR50234,Tea Stall,Food order / dining,373.03,Food & Dining,expense,UPI,Savings Account,2036-03-22,INR,Bhopal,No
+TXN202022,USR50234,Local Coaching Class Fee,Course / coaching fee,947.53,Education,expense,UPI,Savings Account,2036-03-22,INR,Bhopal,No
+TXN202023,USR50234,More Supermarket,Grocery purchase,458.58,Groceries,expense,UPI,Savings Account,2036-03-23,INR,Bhopal,No
+TXN202024,USR50234,Stationery Shop,Miscellaneous expense,156.31,Other,expense,Cash,Savings Account,2036-03-26,INR,Bhopal,No
+TXN202025,USR50234,Local Market,Shopping purchase,695.63,Shopping,expense,UPI,Savings Account,2036-03-29,INR,Bhopal,No
+TXN202026,USR50234,Local Pharmacy,Pharmacy / clinic payment,329.15,Healthcare,expense,Cash,Savings Account,2036-03-31,INR,Bhopal,No
+TXN203001,USR50234,Om Traders Pvt Ltd - Salary,Monthly salary credit,35000,Salary,income,Net Banking,Savings Account,2036-04-01,INR,Bhopal,Yes
+TXN203002,USR50234,Local Clinic,Pharmacy / clinic payment,262.79,Healthcare,expense,Cash,Savings Account,2036-04-01,INR,Bhopal,No
+TXN203003,USR50234,Netflix Mobile Plan,Monthly subscription,149,Subscriptions,expense,UPI,Savings Account,2036-04-02,INR,Bhopal,Yes
+TXN203004,USR50234,Verma Estate - Landlord,Monthly house rent,8000,Housing & Rent,expense,Net Banking,Savings Account,2036-04-03,INR,Bhopal,Yes
+TXN203005,USR50234,Spotify Premium,Monthly subscription,119,Subscriptions,expense,UPI,Savings Account,2036-04-04,INR,Bhopal,Yes
+TXN203006,USR50234,MP Electricity Board,Electricity bill payment,616.33,Utilities,expense,UPI,Savings Account,2036-04-05,INR,Bhopal,Yes
+TXN203007,USR50234,Jio Fiber,Broadband monthly bill,499,Utilities,expense,UPI,Savings Account,2036-04-06,INR,Bhopal,Yes
+TXN203008,USR50234,Municipal Water Bill,Water bill payment,241.52,Utilities,expense,Net Banking,Savings Account,2036-04-07,INR,Bhopal,Yes
+TXN203009,USR50234,Bajaj Finserv Phone EMI,Mobile phone EMI,1600,EMI,expense,Net Banking,Savings Account,2036-04-08,INR,Bhopal,Yes
+TXN203010,USR50234,Swiggy,Food order / dining,181.83,Food & Dining,expense,UPI,Savings Account,2036-04-08,INR,Bhopal,No
+TXN203011,USR50234,LIC Premium,Life insurance premium,950,Insurance,expense,Net Banking,Savings Account,2036-04-10,INR,Bhopal,Yes
+TXN203012,USR50234,Amazon.in,Shopping purchase,627.77,Shopping,expense,Cash,Savings Account,2036-04-11,INR,Bhopal,No
+TXN203013,USR50234,RD Auto-Debit - SBI Bank,Recurring deposit auto-transfer,1000,Savings,expense,Net Banking,Savings Account,2036-04-12,INR,Bhopal,Yes
+TXN203014,USR50234,New Market Bhopal,Shopping purchase,539.15,Shopping,expense,Cash,Savings Account,2036-04-12,INR,Bhopal,No
+TXN203015,USR50234,Fiverr Freelance Order,Freelance / tuition income received,1989.28,Freelancing,income,UPI,Savings Account,2036-04-13,INR,Bhopal,No
+TXN203016,USR50234,Groww - SIP Investment,Monthly SIP investment,1000,Investment,expense,Net Banking,Savings Account,2036-04-15,INR,Bhopal,Yes
+TXN203017,USR50234,Income Tax Advance Payment,Advance tax payment,411.62,Tax,expense,Net Banking,Savings Account,2036-04-20,INR,Bhopal,Yes
+TXN203018,USR50234,Local Pharmacy,Pharmacy / clinic payment,290.71,Healthcare,expense,UPI,Savings Account,2036-04-20,INR,Bhopal,No
+TXN203019,USR50234,Local ATM Withdrawal,Miscellaneous expense,217.17,Other,expense,UPI,Savings Account,2036-04-20,INR,Bhopal,No
+TXN203020,USR50234,Zomato,Food order / dining,223.7,Food & Dining,expense,Cash,Savings Account,2036-04-23,INR,Bhopal,No
+TXN203021,USR50234,Local Gaming Cafe,Entertainment purchase,256.96,Entertainment,expense,Cash,Savings Account,2036-04-24,INR,Bhopal,No
+TXN203022,USR50234,Government Hospital OPD,Pharmacy / clinic payment,398.84,Healthcare,expense,Cash,Savings Account,2036-04-28,INR,Bhopal,No
+TXN203023,USR50234,BigBasket,Grocery purchase,525.05,Groceries,expense,UPI,Savings Account,2036-04-28,INR,Bhopal,No
+TXN203024,USR50234,Swiggy,Food order / dining,291.48,Food & Dining,expense,UPI,Savings Account,2036-04-30,INR,Bhopal,No
+TXN203025,USR50234,Local ATM Withdrawal,Miscellaneous expense,365.84,Other,expense,UPI,Savings Account,2036-04-30,INR,Bhopal,No
+TXN204001,USR50234,Om Traders Pvt Ltd - Salary,Monthly salary credit,37000,Salary,income,Net Banking,Savings Account,2036-05-01,INR,Bhopal,Yes
+TXN204002,USR50234,Netflix Mobile Plan,Monthly subscription,149,Subscriptions,expense,UPI,Savings Account,2036-05-02,INR,Bhopal,Yes
+TXN204003,USR50234,Local Cinema Hall,Entertainment purchase,333.76,Entertainment,expense,Cash,Savings Account,2036-05-02,INR,Bhopal,No
+TXN204004,USR50234,Verma Estate - Landlord,Monthly house rent,8000,Housing & Rent,expense,Net Banking,Savings Account,2036-05-03,INR,Bhopal,Yes
+TXN204005,USR50234,Spotify Premium,Monthly subscription,119,Subscriptions,expense,UPI,Savings Account,2036-05-04,INR,Bhopal,Yes
+TXN204006,USR50234,MP Electricity Board,Electricity bill payment,647.69,Utilities,expense,UPI,Savings Account,2036-05-05,INR,Bhopal,Yes
+TXN204007,USR50234,Jio Fiber,Broadband monthly bill,499,Utilities,expense,UPI,Savings Account,2036-05-06,INR,Bhopal,Yes
+TXN204008,USR50234,Local Coaching Class Fee,Course / coaching fee,589.41,Education,expense,Cash,Savings Account,2036-05-06,INR,Bhopal,No
+TXN204009,USR50234,Municipal Water Bill,Water bill payment,234.91,Utilities,expense,Net Banking,Savings Account,2036-05-07,INR,Bhopal,Yes
+TXN204010,USR50234,Bajaj Finserv Phone EMI,Mobile phone EMI,1600,EMI,expense,Net Banking,Savings Account,2036-05-08,INR,Bhopal,Yes
+TXN204011,USR50234,LIC Premium,Life insurance premium,950,Insurance,expense,Net Banking,Savings Account,2036-05-10,INR,Bhopal,Yes
+TXN204012,USR50234,WazirX Staking Payout,Crypto staking reward credited,203.94,Crypto Staking Yield,income,UPI,Savings Account,2036-05-11,INR,Bhopal,Yes
+TXN204013,USR50234,RD Auto-Debit - SBI Bank,Recurring deposit auto-transfer,1000,Savings,expense,Net Banking,Savings Account,2036-05-12,INR,Bhopal,Yes
+TXN204014,USR50234,Local Coaching Class Fee,Course / coaching fee,478.17,Education,expense,Cash,Savings Account,2036-05-13,INR,Bhopal,No
+TXN204015,USR50234,Groww - SIP Investment,Monthly SIP investment,1000,Investment,expense,Net Banking,Savings Account,2036-05-15,INR,Bhopal,Yes
+TXN204016,USR50234,Local Coaching Class Fee,Course / coaching fee,928.99,Education,expense,UPI,Savings Account,2036-05-15,INR,Bhopal,No
+TXN204017,USR50234,City Bus Pass,Local commute expense,490.84,Transportation,expense,Cash,Savings Account,2036-05-17,INR,Bhopal,No
+TXN204018,USR50234,Income Tax Advance Payment,Advance tax payment,670.63,Tax,expense,Net Banking,Savings Account,2036-05-20,INR,Bhopal,Yes
+TXN204019,USR50234,Amazon.in,Shopping purchase,756.11,Shopping,expense,UPI,Savings Account,2036-05-21,INR,Bhopal,No
+TXN204020,USR50234,Sabzi Mandi,Grocery purchase,1047.28,Groceries,expense,UPI,Savings Account,2036-05-22,INR,Bhopal,No
+TXN204021,USR50234,Tea Stall,Food order / dining,216.02,Food & Dining,expense,Cash,Savings Account,2036-05-23,INR,Bhopal,No
+TXN204022,USR50234,Local Pharmacy,Pharmacy / clinic payment,400.0,Healthcare,expense,Cash,Savings Account,2036-05-24,INR,Bhopal,No
+TXN204023,USR50234,Sabzi Mandi,Grocery purchase,649.03,Groceries,expense,Debit Card,Savings Account,2036-05-29,INR,Bhopal,No
+TXN204024,USR50234,Local ATM Withdrawal,Miscellaneous expense,181.05,Other,expense,UPI,Savings Account,2036-05-29,INR,Bhopal,No
+TXN204025,USR50234,More Supermarket,Grocery purchase,777.8,Groceries,expense,Cash,Savings Account,2036-05-29,INR,Bhopal,No
+TXN205001,USR50234,Om Traders Pvt Ltd - Salary,Monthly salary credit,39000,Salary,income,Net Banking,Savings Account,2036-06-01,INR,Bhopal,Yes
+TXN205002,USR50234,Netflix Mobile Plan,Monthly subscription,149,Subscriptions,expense,UPI,Savings Account,2036-06-02,INR,Bhopal,Yes
+TXN205003,USR50234,Verma Estate - Landlord,Monthly house rent,8000,Housing & Rent,expense,Net Banking,Savings Account,2036-06-03,INR,Bhopal,Yes
+TXN205004,USR50234,Spotify Premium,Monthly subscription,119,Subscriptions,expense,UPI,Savings Account,2036-06-04,INR,Bhopal,Yes
+TXN205005,USR50234,Courier - Delhivery,Miscellaneous expense,111.82,Other,expense,UPI,Savings Account,2036-06-04,INR,Bhopal,No
+TXN205006,USR50234,MP Electricity Board,Electricity bill payment,449.49,Utilities,expense,UPI,Savings Account,2036-06-05,INR,Bhopal,Yes
+TXN205007,USR50234,Local Kirana Store,Grocery purchase,1194.68,Groceries,expense,UPI,Savings Account,2036-06-05,INR,Bhopal,No
+TXN205008,USR50234,Jio Fiber,Broadband monthly bill,499,Utilities,expense,UPI,Savings Account,2036-06-06,INR,Bhopal,Yes
+TXN205009,USR50234,Government Hospital OPD,Pharmacy / clinic payment,161.49,Healthcare,expense,Cash,Savings Account,2036-06-06,INR,Bhopal,No
+TXN205010,USR50234,Municipal Water Bill,Water bill payment,141.18,Utilities,expense,Net Banking,Savings Account,2036-06-07,INR,Bhopal,Yes
+TXN205011,USR50234,BigBasket,Grocery purchase,232.9,Groceries,expense,UPI,Savings Account,2036-06-07,INR,Bhopal,No
+TXN205012,USR50234,Ola Cabs,Local commute expense,370.28,Transportation,expense,UPI,Savings Account,2036-06-07,INR,Bhopal,No
+TXN205013,USR50234,Bajaj Finserv Phone EMI,Mobile phone EMI,1600,EMI,expense,Net Banking,Savings Account,2036-06-08,INR,Bhopal,Yes
+TXN205014,USR50234,Redbus,Travel booking,1169.16,Travel,expense,UPI,Savings Account,2036-06-08,INR,Bhopal,No
+TXN205015,USR50234,LIC Premium,Life insurance premium,950,Insurance,expense,Net Banking,Savings Account,2036-06-10,INR,Bhopal,Yes
+TXN205016,USR50234,Groww - Dividend Payout,Investment payout received,333.06,Investments,income,Net Banking,Savings Account,2036-06-11,INR,Bhopal,No
+TXN205017,USR50234,Local Clinic,Pharmacy / clinic payment,208.29,Healthcare,expense,UPI,Savings Account,2036-06-11,INR,Bhopal,No
+TXN205018,USR50234,RD Auto-Debit - SBI Bank,Recurring deposit auto-transfer,1000,Savings,expense,Net Banking,Savings Account,2036-06-12,INR,Bhopal,Yes
+TXN205019,USR50234,City Bus Pass,Local commute expense,149.1,Transportation,expense,UPI,Savings Account,2036-06-12,INR,Bhopal,No
+TXN205020,USR50234,WazirX Staking Payout,Crypto staking reward credited,397.1,Crypto Staking Yield,income,UPI,Savings Account,2036-06-13,INR,Bhopal,Yes
+TXN205021,USR50234,Amazon.in,Shopping purchase,476.98,Shopping,expense,Cash,Savings Account,2036-06-14,INR,Bhopal,No
+TXN205022,USR50234,Groww - SIP Investment,Monthly SIP investment,1000,Investment,expense,Net Banking,Savings Account,2036-06-15,INR,Bhopal,Yes
+TXN205023,USR50234,Income Tax Advance Payment,Advance tax payment,631.5,Tax,expense,Net Banking,Savings Account,2036-06-20,INR,Bhopal,Yes
+TXN205024,USR50234,Petrol Pump,Local commute expense,101.9,Transportation,expense,UPI,Savings Account,2036-06-21,INR,Bhopal,No
+TXN205025,USR50234,Swiggy,Food order / dining,362.04,Food & Dining,expense,Cash,Savings Account,2036-06-25,INR,Bhopal,No
+TXN205026,USR50234,New Market Bhopal,Shopping purchase,780.51,Shopping,expense,UPI,Savings Account,2036-06-29,INR,Bhopal,No
+TXN206001,USR50234,Om Traders Pvt Ltd - Salary,Monthly salary credit,41000,Salary,income,Net Banking,Savings Account,2036-07-01,INR,Bhopal,Yes
+TXN206002,USR50234,Netflix Mobile Plan,Monthly subscription,149,Subscriptions,expense,UPI,Savings Account,2036-07-02,INR,Bhopal,Yes
+TXN206003,USR50234,Verma Estate - Landlord,Monthly house rent,8000,Housing & Rent,expense,Net Banking,Savings Account,2036-07-03,INR,Bhopal,Yes
+TXN206004,USR50234,Local Coaching Class Fee,Course / coaching fee,630.22,Education,expense,Cash,Savings Account,2036-07-03,INR,Bhopal,No
+TXN206005,USR50234,Spotify Premium,Monthly subscription,119,Subscriptions,expense,UPI,Savings Account,2036-07-04,INR,Bhopal,Yes
+TXN206006,USR50234,MP Electricity Board,Electricity bill payment,703.31,Utilities,expense,UPI,Savings Account,2036-07-05,INR,Bhopal,Yes
+TXN206007,USR50234,Jio Fiber,Broadband monthly bill,499,Utilities,expense,UPI,Savings Account,2036-07-06,INR,Bhopal,Yes
+TXN206008,USR50234,Municipal Water Bill,Water bill payment,124.74,Utilities,expense,Net Banking,Savings Account,2036-07-07,INR,Bhopal,Yes
+TXN206009,USR50234,New Market Bhopal,Shopping purchase,895.48,Shopping,expense,Cash,Savings Account,2036-07-07,INR,Bhopal,No
+TXN206010,USR50234,Bajaj Finserv Phone EMI,Mobile phone EMI,1600,EMI,expense,Net Banking,Savings Account,2036-07-08,INR,Bhopal,Yes
+TXN206011,USR50234,LIC Premium,Life insurance premium,950,Insurance,expense,Net Banking,Savings Account,2036-07-10,INR,Bhopal,Yes
+TXN206012,USR50234,Local Shop Side Income,Side business income received,1642.65,Business,income,UPI,Savings Account,2036-07-11,INR,Bhopal,No
+TXN206013,USR50234,RD Auto-Debit - SBI Bank,Recurring deposit auto-transfer,1000,Savings,expense,Net Banking,Savings Account,2036-07-12,INR,Bhopal,Yes
+TXN206014,USR50234,Swiggy,Food order / dining,267.53,Food & Dining,expense,Cash,Savings Account,2036-07-12,INR,Bhopal,No
+TXN206015,USR50234,Local Cinema Hall,Entertainment purchase,142.97,Entertainment,expense,UPI,Savings Account,2036-07-12,INR,Bhopal,No
+TXN206016,USR50234,Petrol Pump,Local commute expense,409.73,Transportation,expense,UPI,Savings Account,2036-07-14,INR,Bhopal,No
+TXN206017,USR50234,Groww - SIP Investment,Monthly SIP investment,1000,Investment,expense,Net Banking,Savings Account,2036-07-15,INR,Bhopal,Yes
+TXN206018,USR50234,Udemy,Course / coaching fee,921.92,Education,expense,Cash,Savings Account,2036-07-15,INR,Bhopal,No
+TXN206019,USR50234,Fiverr Freelance Order,Freelance / tuition income received,2808.43,Freelancing,income,Net Banking,Savings Account,2036-07-17,INR,Bhopal,No
+TXN206020,USR50234,Courier - Delhivery,Miscellaneous expense,359.66,Other,expense,Cash,Savings Account,2036-07-17,INR,Bhopal,No
+TXN206021,USR50234,Local Pharmacy,Pharmacy / clinic payment,326.29,Healthcare,expense,UPI,Savings Account,2036-07-17,INR,Bhopal,No
+TXN206022,USR50234,Government Hospital OPD,Pharmacy / clinic payment,439.55,Healthcare,expense,UPI,Savings Account,2036-07-19,INR,Bhopal,No
+TXN206023,USR50234,Income Tax Advance Payment,Advance tax payment,648.23,Tax,expense,Net Banking,Savings Account,2036-07-20,INR,Bhopal,Yes
+TXN206024,USR50234,Tea Stall,Food order / dining,231.33,Food & Dining,expense,UPI,Savings Account,2036-07-21,INR,Bhopal,No
+TXN206025,USR50234,Local Coaching Class Fee,Course / coaching fee,685.53,Education,expense,Cash,Savings Account,2036-07-24,INR,Bhopal,No
+TXN206026,USR50234,IRCTC,Travel booking,1305.78,Travel,expense,Net Banking,Savings Account,2036-07-28,INR,Bhopal,No
+TXN207001,USR50234,Om Traders Pvt Ltd - Salary,Monthly salary credit,43000,Salary,income,Net Banking,Savings Account,2036-08-01,INR,Bhopal,Yes
+TXN207002,USR50234,Netflix Mobile Plan,Monthly subscription,149,Subscriptions,expense,UPI,Savings Account,2036-08-02,INR,Bhopal,Yes
+TXN207003,USR50234,Verma Estate - Landlord,Monthly house rent,8000,Housing & Rent,expense,Net Banking,Savings Account,2036-08-03,INR,Bhopal,Yes
+TXN207004,USR50234,Spotify Premium,Monthly subscription,119,Subscriptions,expense,UPI,Savings Account,2036-08-04,INR,Bhopal,Yes
+TXN207005,USR50234,MP Electricity Board,Electricity bill payment,656.95,Utilities,expense,UPI,Savings Account,2036-08-05,INR,Bhopal,Yes
+TXN207006,USR50234,Jio Fiber,Broadband monthly bill,499,Utilities,expense,UPI,Savings Account,2036-08-06,INR,Bhopal,Yes
+TXN207007,USR50234,Municipal Water Bill,Water bill payment,217.96,Utilities,expense,Net Banking,Savings Account,2036-08-07,INR,Bhopal,Yes
+TXN207008,USR50234,Bajaj Finserv Phone EMI,Mobile phone EMI,1600,EMI,expense,Net Banking,Savings Account,2036-08-08,INR,Bhopal,Yes
+TXN207009,USR50234,Petrol Pump,Local commute expense,131.09,Transportation,expense,Cash,Savings Account,2036-08-08,INR,Bhopal,No
+TXN207010,USR50234,Redbus,Travel booking,1224.26,Travel,expense,Net Banking,Savings Account,2036-08-08,INR,Bhopal,No
+TXN207011,USR50234,LIC Premium,Life insurance premium,950,Insurance,expense,Net Banking,Savings Account,2036-08-10,INR,Bhopal,Yes
+TXN207012,USR50234,RD Auto-Debit - SBI Bank,Recurring deposit auto-transfer,1000,Savings,expense,Net Banking,Savings Account,2036-08-12,INR,Bhopal,Yes
+TXN207013,USR50234,More Supermarket,Grocery purchase,1016.6,Groceries,expense,Cash,Savings Account,2036-08-12,INR,Bhopal,No
+TXN207014,USR50234,Local Auto Rickshaw,Local commute expense,433.22,Transportation,expense,UPI,Savings Account,2036-08-14,INR,Bhopal,No
+TXN207015,USR50234,City Bus Pass,Local commute expense,343.36,Transportation,expense,Cash,Savings Account,2036-08-14,INR,Bhopal,No
+TXN207016,USR50234,Groww - SIP Investment,Monthly SIP investment,1000,Investment,expense,Net Banking,Savings Account,2036-08-15,INR,Bhopal,Yes
+TXN207017,USR50234,Income Tax Advance Payment,Advance tax payment,660.59,Tax,expense,Net Banking,Savings Account,2036-08-20,INR,Bhopal,Yes
+TXN207018,USR50234,Local Clinic,Pharmacy / clinic payment,297.91,Healthcare,expense,Cash,Savings Account,2036-08-24,INR,Bhopal,No
+TXN207019,USR50234,Local Coaching Class Fee,Course / coaching fee,771.5,Education,expense,Cash,Savings Account,2036-08-25,INR,Bhopal,No
+TXN207020,USR50234,Local Cinema Hall,Entertainment purchase,271.51,Entertainment,expense,Cash,Savings Account,2036-08-25,INR,Bhopal,No
+TXN207021,USR50234,Udemy,Course / coaching fee,581.13,Education,expense,UPI,Savings Account,2036-08-27,INR,Bhopal,No
+TXN207022,USR50234,Sabzi Mandi,Grocery purchase,527.26,Groceries,expense,UPI,Savings Account,2036-08-29,INR,Bhopal,No
+TXN207023,USR50234,Local Pharmacy,Pharmacy / clinic payment,453.25,Healthcare,expense,Cash,Savings Account,2036-08-29,INR,Bhopal,No
+TXN207024,USR50234,Local Dhaba,Food order / dining,259.61,Food & Dining,expense,Cash,Savings Account,2036-08-29,INR,Bhopal,No
+TXN208001,USR50234,Om Traders Pvt Ltd - Salary,Monthly salary credit,45000,Salary,income,Net Banking,Savings Account,2036-09-01,INR,Bhopal,Yes
+TXN208002,USR50234,City Bus Pass,Local commute expense,116.17,Transportation,expense,UPI,Savings Account,2036-09-01,INR,Bhopal,No
+TXN208003,USR50234,Netflix Mobile Plan,Monthly subscription,149,Subscriptions,expense,UPI,Savings Account,2036-09-02,INR,Bhopal,Yes
+TXN208004,USR50234,Courier - Delhivery,Miscellaneous expense,361.91,Other,expense,Cash,Savings Account,2036-09-02,INR,Bhopal,No
+TXN208005,USR50234,Verma Estate - Landlord,Monthly house rent,8000,Housing & Rent,expense,Net Banking,Savings Account,2036-09-03,INR,Bhopal,Yes
+TXN208006,USR50234,Spotify Premium,Monthly subscription,119,Subscriptions,expense,UPI,Savings Account,2036-09-04,INR,Bhopal,Yes
+TXN208007,USR50234,IRCTC,Travel booking,580.64,Travel,expense,Net Banking,Savings Account,2036-09-04,INR,Bhopal,No
+TXN208008,USR50234,Local Coaching Class Fee,Course / coaching fee,707.93,Education,expense,Cash,Savings Account,2036-09-04,INR,Bhopal,No
+TXN208009,USR50234,MP Electricity Board,Electricity bill payment,584.03,Utilities,expense,UPI,Savings Account,2036-09-05,INR,Bhopal,Yes
+TXN208010,USR50234,IRCTC,Travel booking,683.48,Travel,expense,Net Banking,Savings Account,2036-09-05,INR,Bhopal,No
+TXN208011,USR50234,Jio Fiber,Broadband monthly bill,499,Utilities,expense,UPI,Savings Account,2036-09-06,INR,Bhopal,Yes
+TXN208012,USR50234,Local Pharmacy,Pharmacy / clinic payment,453.49,Healthcare,expense,Cash,Savings Account,2036-09-06,INR,Bhopal,No
+TXN208013,USR50234,Municipal Water Bill,Water bill payment,181.01,Utilities,expense,Net Banking,Savings Account,2036-09-07,INR,Bhopal,Yes
+TXN208014,USR50234,Swiggy,Food order / dining,150.8,Food & Dining,expense,UPI,Savings Account,2036-09-07,INR,Bhopal,No
+TXN208015,USR50234,Bajaj Finserv Phone EMI,Mobile phone EMI,1600,EMI,expense,Net Banking,Savings Account,2036-09-08,INR,Bhopal,Yes
+TXN208016,USR50234,LIC Premium,Life insurance premium,950,Insurance,expense,Net Banking,Savings Account,2036-09-10,INR,Bhopal,Yes
+TXN208017,USR50234,RD Auto-Debit - SBI Bank,Recurring deposit auto-transfer,1000,Savings,expense,Net Banking,Savings Account,2036-09-12,INR,Bhopal,Yes
+TXN208018,USR50234,Local Coaching Class Fee,Course / coaching fee,509.46,Education,expense,Cash,Savings Account,2036-09-12,INR,Bhopal,No
+TXN208019,USR50234,City Bus Pass,Local commute expense,60.13,Transportation,expense,Cash,Savings Account,2036-09-12,INR,Bhopal,No
+TXN208020,USR50234,Local Tuition Income,Freelance / tuition income received,2544.7,Freelancing,income,Net Banking,Savings Account,2036-09-15,INR,Bhopal,No
+TXN208021,USR50234,Groww - SIP Investment,Monthly SIP investment,1000,Investment,expense,Net Banking,Savings Account,2036-09-15,INR,Bhopal,Yes
+TXN208022,USR50234,Income Tax Advance Payment,Advance tax payment,481.89,Tax,expense,Net Banking,Savings Account,2036-09-20,INR,Bhopal,Yes
+TXN208023,USR50234,New Market Bhopal,Shopping purchase,308.65,Shopping,expense,UPI,Savings Account,2036-09-22,INR,Bhopal,No
+TXN208024,USR50234,Groww - Dividend Payout,Investment payout received,578.51,Investments,income,Net Banking,Savings Account,2036-09-25,INR,Bhopal,No
+TXN208025,USR50234,Local ATM Withdrawal,Miscellaneous expense,202.87,Other,expense,Cash,Savings Account,2036-09-25,INR,Bhopal,No
+TXN208026,USR50234,Udemy,Course / coaching fee,703.59,Education,expense,UPI,Savings Account,2036-09-25,INR,Bhopal,No
+TXN209001,USR50234,Om Traders Pvt Ltd - Salary,Monthly salary credit,47000,Salary,income,Net Banking,Savings Account,2036-10-01,INR,Bhopal,Yes
+TXN209002,USR50234,Netflix Mobile Plan,Monthly subscription,149,Subscriptions,expense,UPI,Savings Account,2036-10-02,INR,Bhopal,Yes
+TXN209003,USR50234,Verma Estate - Landlord,Monthly house rent,8000,Housing & Rent,expense,Net Banking,Savings Account,2036-10-03,INR,Bhopal,Yes
+TXN209004,USR50234,Udemy,Course / coaching fee,753.48,Education,expense,Cash,Savings Account,2036-10-03,INR,Bhopal,No
+TXN209005,USR50234,IRCTC,Travel booking,793.47,Travel,expense,Net Banking,Savings Account,2036-10-03,INR,Bhopal,No
+TXN209006,USR50234,Spotify Premium,Monthly subscription,119,Subscriptions,expense,UPI,Savings Account,2036-10-04,INR,Bhopal,Yes
+TXN209007,USR50234,MP Electricity Board,Electricity bill payment,744.31,Utilities,expense,UPI,Savings Account,2036-10-05,INR,Bhopal,Yes
+TXN209008,USR50234,Ola Cabs,Local commute expense,252.82,Transportation,expense,UPI,Savings Account,2036-10-05,INR,Bhopal,No
+TXN209009,USR50234,Jio Fiber,Broadband monthly bill,499,Utilities,expense,UPI,Savings Account,2036-10-06,INR,Bhopal,Yes
+TXN209010,USR50234,IRCTC,Travel booking,491.47,Travel,expense,Net Banking,Savings Account,2036-10-06,INR,Bhopal,No
+TXN209011,USR50234,Municipal Water Bill,Water bill payment,126.14,Utilities,expense,Net Banking,Savings Account,2036-10-07,INR,Bhopal,Yes
+TXN209012,USR50234,Bajaj Finserv Phone EMI,Mobile phone EMI,1600,EMI,expense,Net Banking,Savings Account,2036-10-08,INR,Bhopal,Yes
+TXN209013,USR50234,LIC Premium,Life insurance premium,950,Insurance,expense,Net Banking,Savings Account,2036-10-10,INR,Bhopal,Yes
+TXN209014,USR50234,Local Pharmacy,Pharmacy / clinic payment,121.0,Healthcare,expense,Cash,Savings Account,2036-10-10,INR,Bhopal,No
+TXN209015,USR50234,Local Market,Shopping purchase,995.83,Shopping,expense,Cash,Savings Account,2036-10-11,INR,Bhopal,No
+TXN209016,USR50234,RD Auto-Debit - SBI Bank,Recurring deposit auto-transfer,1000,Savings,expense,Net Banking,Savings Account,2036-10-12,INR,Bhopal,Yes
+TXN209017,USR50234,Local Gaming Cafe,Entertainment purchase,106.81,Entertainment,expense,Cash,Savings Account,2036-10-13,INR,Bhopal,No
+TXN209018,USR50234,Groww - SIP Investment,Monthly SIP investment,1000,Investment,expense,Net Banking,Savings Account,2036-10-15,INR,Bhopal,Yes
+TXN209019,USR50234,Government Hospital OPD,Pharmacy / clinic payment,301.84,Healthcare,expense,Cash,Savings Account,2036-10-15,INR,Bhopal,No
+TXN209020,USR50234,Local Coaching Class Fee,Course / coaching fee,946.65,Education,expense,UPI,Savings Account,2036-10-17,INR,Bhopal,No
+TXN209021,USR50234,Local Market,Shopping purchase,883.09,Shopping,expense,UPI,Savings Account,2036-10-19,INR,Bhopal,No
+TXN209022,USR50234,Local Tuition Income,Freelance / tuition income received,2283.92,Freelancing,income,UPI,Savings Account,2036-10-20,INR,Bhopal,No
+TXN209023,USR50234,Income Tax Advance Payment,Advance tax payment,328.74,Tax,expense,Net Banking,Savings Account,2036-10-20,INR,Bhopal,Yes
+TXN209024,USR50234,IRCTC,Travel booking,973.57,Travel,expense,UPI,Savings Account,2036-10-25,INR,Bhopal,No
+TXN209025,USR50234,Redbus,Travel booking,770.17,Travel,expense,Net Banking,Savings Account,2036-10-29,INR,Bhopal,No

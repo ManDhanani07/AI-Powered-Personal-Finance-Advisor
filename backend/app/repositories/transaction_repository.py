@@ -230,9 +230,9 @@ class TransactionRepository(BaseRepository[Transaction]):
         # Sorting
         sort_attr = getattr(Transaction, sort_by, Transaction.transaction_date)
         if sort_order.lower() == "desc":
-            query = query.order_by(sort_attr.desc())
+            query = query.order_by(sort_attr.desc(), Transaction.created_at.desc(), Transaction.id.desc())
         else:
-            query = query.order_by(sort_attr.asc())
+            query = query.order_by(sort_attr.asc(), Transaction.created_at.asc(), Transaction.id.asc())
 
         # Pagination
         offset = (page - 1) * page_size

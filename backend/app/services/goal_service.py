@@ -78,7 +78,18 @@ class GoalService(BaseService[GoalRepository]):
 
         target_date = goal_data.get("target_date")
         if isinstance(target_date, str):
-            target_date = datetime.strptime(target_date, "%Y-%m-%d").date()
+            parsed_date = None
+            for fmt in ("%Y-%m-%d", "%d-%m-%Y", "%d/%m/%Y", "%Y/%m/%d"):
+                try:
+                    parsed_date = datetime.strptime(target_date, fmt).date()
+                    break
+                except ValueError:
+                    continue
+            if not parsed_date:
+                raise BadRequestException("Invalid target date format. Expected YYYY-MM-DD or DD-MM-YYYY.")
+            target_date = parsed_date
+        elif isinstance(target_date, datetime):
+            target_date = target_date.date()
 
         if target_date <= date.today():
             raise BadRequestException("Target date must be in the future")
@@ -93,7 +104,7 @@ class GoalService(BaseService[GoalRepository]):
         goal_payload = {
             "user_id": user_id,
             "goal_name": goal_name,
-            "goal_type": (goal_data.get("goal_type") or "SAVINGS").upper(),
+            "goal_type": (goal_data.get("goal_type") or "SAVINGS").upper().replace(" ", "_"),
             "target_amount": target_amount,
             "current_amount": curr_amt,
             "target_date": target_date,
@@ -112,6 +123,7 @@ class GoalService(BaseService[GoalRepository]):
                     if savings_cat:
                         cat_id = savings_cat.id
                 await self.transaction_repository.create({
+                    "transaction_number": f"TXN-{uuid.uuid4().hex[:8].upper()}",
                     "user_id": user_id,
                     "category_id": cat_id,
                     "title": f"Goal Vault Deposit - {goal_name}",
@@ -157,7 +169,18 @@ class GoalService(BaseService[GoalRepository]):
         if "target_date" in update_data and update_data["target_date"]:
             t_date = update_data["target_date"]
             if isinstance(t_date, str):
-                t_date = datetime.strptime(t_date, "%Y-%m-%d").date()
+                parsed_date = None
+                for fmt in ("%Y-%m-%d", "%d-%m-%Y", "%d/%m/%Y", "%Y/%m/%d"):
+                    try:
+                        parsed_date = datetime.strptime(t_date, fmt).date()
+                        break
+                    except ValueError:
+                        continue
+                if not parsed_date:
+                    raise BadRequestException("Invalid target date format. Expected YYYY-MM-DD or DD-MM-YYYY.")
+                t_date = parsed_date
+            elif isinstance(t_date, datetime):
+                t_date = t_date.date()
             if t_date <= date.today():
                 raise BadRequestException("Target date must be in the future")
             update_data["target_date"] = t_date
