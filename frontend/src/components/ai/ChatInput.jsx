@@ -52,10 +52,7 @@ export const ChatInput = ({ onSendMessage, disabled = false }) => {
         />
 
         <div className="absolute right-14 flex items-center space-x-2 text-[10px] font-mono text-slate-500 pointer-events-none hidden sm:flex">
-          <span className="px-2 py-0.5 rounded-md bg-zinc-800 border border-zinc-700 text-slate-400 font-bold flex items-center space-x-1">
-            <span>Enter</span>
-          </span>
-          <span>{text.length}/2000</span>
+          {text.length > 0 && <span>{text.length}/2000</span>}
         </div>
 
         <button

@@ -27,9 +27,12 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3000,
+    port: 5173,
     open: false,
     cors: true,
+    warmup: {
+      clientFiles: ['./src/main.jsx', './src/App.jsx', './src/routes/AppRoutes.jsx'],
+    },
   },
   build: {
     outDir: 'dist',

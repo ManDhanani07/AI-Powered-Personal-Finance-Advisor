@@ -89,6 +89,13 @@ export const authService = {
   },
 
   /**
+   * Disconnect Google OAuth account
+   */
+  async disconnectGoogle() {
+    return await apiClient.post('/auth/google/disconnect');
+  },
+
+  /**
    * Get current authenticated user profile
    */
   async getCurrentUser() {

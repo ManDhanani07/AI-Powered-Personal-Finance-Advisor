@@ -22,7 +22,8 @@ class ChatHistory(Base, UUIDMixin):
     )
     question: Mapped[str] = mapped_column(Text, nullable=False)
     answer: Mapped[str] = mapped_column(Text, nullable=False)
-    model_name: Mapped[str] = mapped_column(String(100), default="gemini-1.5-pro", nullable=False)
+    model_name: Mapped[str] = mapped_column(String(100), default="gemini-3.6-flash", nullable=False)
+    conversation_id: Mapped[str | None] = mapped_column(String(100), nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

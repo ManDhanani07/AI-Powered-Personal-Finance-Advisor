@@ -5,9 +5,10 @@ Google OAuth, logout, token refresh, password resets, and user profile.
 """
 
 from fastapi import APIRouter, Depends, status
-from app.dependencies.service import get_auth_service
+from app.dependencies.service import get_auth_service, get_user_repository
 from app.dependencies.auth import get_current_user
 from app.services.auth_service import AuthService
+from app.repositories.user_repository import UserRepository
 from app.models.user import User
 from app.schemas.base import APIResponse
 from app.schemas.auth import (
@@ -88,6 +89,24 @@ async def google_oauth_callback_post(
         success=True,
         message="Google OAuth callback authenticated successfully",
         data=login_res,
+    )
+
+
+@router.post(
+    "/google/disconnect",
+    response_model=APIResponse[dict],
+    status_code=status.HTTP_200_OK,
+    summary="Disconnect linked Google account",
+)
+async def disconnect_google_oauth(
+    current_user: User = Depends(get_current_user),
+    user_repo: UserRepository = Depends(get_user_repository),
+):
+    await user_repo.update(current_user.id, {"google_id": None})
+    return APIResponse(
+        success=True,
+        message="Google account disconnected successfully.",
+        data={"google_id": None},
     )
 
 

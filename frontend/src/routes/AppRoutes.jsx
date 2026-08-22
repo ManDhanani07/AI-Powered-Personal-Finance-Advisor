@@ -5,6 +5,7 @@ import ProtectedRoute from '../components/routes/ProtectedRoute.jsx';
 import AdminProtectedRoute from '../components/routes/AdminProtectedRoute.jsx';
 import GuestRoute from '../components/routes/GuestRoute.jsx';
 import { ProtectedLayout } from '../layouts/ProtectedLayout.jsx';
+import { AccountLayout } from '../layouts/AccountLayout.jsx';
 import { NotFoundScreen } from '../components/common/NotFoundScreen.jsx';
 import { ROUTES } from '../constants/index.js';
 
@@ -170,7 +171,7 @@ export const AppRoutes = () => {
           <Route path="settings" element={<AdminSettings />} />
         </Route>
 
-        {/* Protected Main Routes */}
+        {/* Protected Dashboard Routes (With Responsive Sidebar) */}
         <Route
           element={
             <ProtectedRoute>
@@ -187,14 +188,23 @@ export const AppRoutes = () => {
           <Route path={ROUTES.EXPENSE_PREDICTION} element={<ExpensePredictionPage />} />
           <Route path={ROUTES.REPORTS} element={<ReportsPage />} />
           <Route path={ROUTES.AI_ADVISOR} element={<AiAdvisorPage />} />
+        </Route>
 
-          {/* Profile & Account Routes */}
+        {/* Dedicated Focused Account & Settings Routes (NO SIDEBAR) */}
+        <Route
+          element={
+            <ProtectedRoute>
+              <AccountLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route path={ROUTES.PROFILE} element={<Profile />} />
           <Route path={`${ROUTES.PROFILE}/edit`} element={<EditProfile />} />
-          <Route path={`${ROUTES.PROFILE}/account`} element={<AccountSettings />} />
-          <Route path={`${ROUTES.PROFILE}/security`} element={<SecuritySettings />} />
+          <Route path={`${ROUTES.PROFILE}/account`} element={<Preferences />} />
           <Route path={`${ROUTES.PROFILE}/preferences`} element={<Preferences />} />
           <Route path={ROUTES.SETTINGS} element={<Preferences />} />
+          <Route path={`${ROUTES.PROFILE}/security`} element={<SecuritySettings />} />
+          <Route path={ROUTES.SECURITY} element={<SecuritySettings />} />
         </Route>
 
         {/* 404 Route */}

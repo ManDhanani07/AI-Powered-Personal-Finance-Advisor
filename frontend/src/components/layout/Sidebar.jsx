@@ -11,7 +11,6 @@ import {
   LineChart,
   BrainCircuit,
   Bot,
-  Settings,
   ShieldCheck,
 } from 'lucide-react';
 import { ROUTES } from '../../constants/index.js';
@@ -28,7 +27,6 @@ const NAV_ITEMS = [
   { label: 'Expense Prediction', path: ROUTES.EXPENSE_PREDICTION, icon: BrainCircuit },
   { label: 'Reports', path: ROUTES.REPORTS, icon: FileBarChart },
   { label: 'AI Advisor', path: ROUTES.AI_ADVISOR, icon: Bot },
-  { label: 'Settings', path: ROUTES.SETTINGS, icon: Settings },
 ];
 
 const MOBILE_NAV_ITEMS = [

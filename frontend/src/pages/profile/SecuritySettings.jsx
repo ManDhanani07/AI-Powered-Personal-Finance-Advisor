@@ -5,8 +5,8 @@ import SecuritySuite from '../../components/profile/SecuritySuite.jsx';
 export const SecuritySettings = () => {
   return (
     <PageContainer
-      title="Security & 2FA Suite"
-      description="Setup two-factor authenticator codes, manage device sessions, and update credentials."
+      title="Security & Login"
+      description="Protect your account and manage how you sign in."
     >
       <div className="max-w-5xl mx-auto space-y-6">
         <SecuritySuite />

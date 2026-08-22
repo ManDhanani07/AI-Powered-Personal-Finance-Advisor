@@ -17,7 +17,8 @@ class AIChatResponse(BaseModel):
     id: str
     question: str
     answer: str
-    model_name: str = Field(default="gemini-1.5-flash", description="Gemini model name used")
+    model_name: str = Field(default="gemini-3.6-flash", description="Gemini model name used")
+    conversation_id: Optional[str] = Field(None, description="Conversation session ID")
     created_at: datetime
     context_used: bool = Field(default=True, description="Whether live PostgreSQL context was included")
 
@@ -27,6 +28,7 @@ class ChatHistoryItemResponse(BaseModel):
     question: str
     answer: str
     model_name: str
+    conversation_id: Optional[str] = None
     created_at: datetime
 
     class Config:

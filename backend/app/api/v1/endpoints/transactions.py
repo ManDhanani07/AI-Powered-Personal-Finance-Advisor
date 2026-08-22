@@ -14,6 +14,7 @@ from app.schemas.base import APIResponse, PaginatedResponse
 from app.schemas.transaction import (
     TransactionCreateRequest,
     TransactionUpdateRequest,
+    TransactionBulkDeleteRequest,
     TransactionResponse,
     TransactionSummaryResponse,
 )
@@ -237,6 +238,43 @@ async def restore_transaction(
         success=True,
         message="Transaction restored successfully",
         data=TransactionResponse.model_validate(restored),
+    )
+
+
+@router.delete(
+    "/all",
+    response_model=APIResponse[dict],
+    status_code=status.HTTP_200_OK,
+    summary="Permanently delete all transactions and reset ledger for current user",
+)
+async def delete_all_transactions(
+    current_user: User = Depends(get_current_user),
+    service: TransactionService = Depends(get_transaction_service),
+):
+    deleted_count = await service.delete_all_transactions(current_user.id)
+    return APIResponse(
+        success=True,
+        message=f"Successfully deleted all {deleted_count} transactions and reset ledger",
+        data={"deleted_count": deleted_count, "all_cleared": True},
+    )
+
+
+@router.delete(
+    "/bulk",
+    response_model=APIResponse[dict],
+    status_code=status.HTTP_200_OK,
+    summary="Permanently delete batch of transactions by IDs",
+)
+async def delete_bulk_transactions(
+    payload: TransactionBulkDeleteRequest,
+    current_user: User = Depends(get_current_user),
+    service: TransactionService = Depends(get_transaction_service),
+):
+    deleted_count = await service.delete_bulk_transactions(current_user.id, payload.transaction_ids)
+    return APIResponse(
+        success=True,
+        message=f"Successfully deleted {deleted_count} selected transactions",
+        data={"deleted_count": deleted_count},
     )
 
 

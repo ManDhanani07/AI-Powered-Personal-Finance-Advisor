@@ -100,6 +100,20 @@ export const transactionService = {
   },
 
   /**
+   * Permanently delete all transactions and reset ledger
+   */
+  async deleteAllTransactions() {
+    return await apiClient.delete('/transactions/all');
+  },
+
+  /**
+   * Permanently delete a batch of transactions by IDs
+   */
+  async bulkDeleteTransactions(transactionIds) {
+    return await apiClient.delete('/transactions/bulk', { data: { transaction_ids: transactionIds } });
+  },
+
+  /**
    * Alias for deleteTransaction
    */
   async delete(id, hard = false) {

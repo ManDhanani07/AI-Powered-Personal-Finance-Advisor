@@ -18,6 +18,7 @@ export const ROUTES = {
   AI_ADVISOR: '/ai',
   PROFILE: '/profile',
   SETTINGS: '/settings',
+  SECURITY: '/security',
   NOT_FOUND: '/404',
 };
 

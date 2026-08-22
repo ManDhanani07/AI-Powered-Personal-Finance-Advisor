@@ -25,6 +25,26 @@ class ChatHistoryRepository(BaseRepository[ChatHistory]):
         result = await self.db.execute(query)
         return list(result.scalars().all())
 
+    async def get_by_conversation(self, user_id: UUID, conversation_id: str, limit: int = 100) -> List[ChatHistory]:
+        """Fetch all messages within a specific conversation session."""
+        query = (
+            select(ChatHistory)
+            .where(ChatHistory.user_id == user_id, ChatHistory.conversation_id == conversation_id)
+            .order_by(desc(ChatHistory.created_at))
+            .limit(limit)
+        )
+        result = await self.db.execute(query)
+        return list(result.scalars().all())
+
+    async def delete_by_conversation(self, user_id: UUID, conversation_id: str) -> int:
+        """Delete all messages in a specific conversation session."""
+        query = delete(ChatHistory).where(
+            ChatHistory.user_id == user_id, ChatHistory.conversation_id == conversation_id
+        )
+        result = await self.db.execute(query)
+        await self.db.commit()
+        return result.rowcount
+
     async def get_latest_by_user(self, user_id: UUID) -> Optional[ChatHistory]:
         """Fetch the single most recent AI chat history record for a user."""
         query = (

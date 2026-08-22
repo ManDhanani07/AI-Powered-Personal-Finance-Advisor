@@ -711,3 +711,29 @@ class AuthService:
             tokens=tokens,
             user=UserResponse.model_validate(refreshed_user),
         )
+
+    async def change_password(self, user_id: UUID, old_password: str, new_password: str) -> bool:
+        """
+        Verify old password and update to new password with password_changed_at tracking.
+        """
+        user = await self.user_repository.get_by_id(user_id)
+        if not user:
+            raise NotFoundException("User not found.")
+
+        if not verify_password(old_password, user.password_hash):
+            raise UnauthorizedException("Incorrect current password. Please verify and try again.")
+
+        if old_password == new_password:
+            raise BadRequestException("New password cannot be the same as your current password.")
+
+        if len(new_password) < 8:
+            raise BadRequestException("New password must be at least 8 characters long.")
+
+        now = datetime.now(timezone.utc)
+        new_hash = get_password_hash(new_password)
+        await self.user_repository.update(user_id, {
+            "password_hash": new_hash,
+            "password_changed_at": now,
+        })
+        logger.info(f"[AuthService] Password successfully changed for user: {user.email}")
+        return True

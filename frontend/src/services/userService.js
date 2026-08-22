@@ -30,6 +30,62 @@ export const userService = {
   },
 
   /**
+   * Remove Profile Avatar Picture
+   */
+  async removeProfilePicture() {
+    return await apiClient.delete('/user/remove-profile-picture');
+  },
+
+  /**
+   * Get User Preferences
+   */
+  async getPreferences() {
+    return await apiClient.get('/user/preferences');
+  },
+
+  /**
+   * Save User Preferences
+   */
+  async updatePreferences(preferences) {
+    return await apiClient.put('/user/preferences', { preferences });
+  },
+
+  /**
+   * Toggle Two-Factor Authentication
+   */
+  async toggle2FA(enabled) {
+    return await apiClient.put('/user/2fa', { enabled });
+  },
+
+  /**
+   * Toggle Security Login Alerts
+   */
+  async toggleSecurityAlerts(enabled) {
+    return await apiClient.put('/user/security-alerts', { enabled });
+  },
+
+  /**
+   * Get Active Sessions & Logged-in Devices
+   */
+  async getSessions() {
+    return await apiClient.get('/user/sessions');
+  },
+
+  /**
+   * Revoke All Other Device Sessions
+   */
+  async revokeOtherSessions() {
+    return await apiClient.post('/user/sessions/revoke-all-others');
+  },
+
+  /**
+   * Get Recent Login Activity Audit History
+   */
+  async getLoginHistory() {
+    return await apiClient.get('/user/login-history');
+  },
+
+  /**
    * Permanently Delete User Account
    */
   async deleteAccount(password, confirmationText = 'DELETE') {

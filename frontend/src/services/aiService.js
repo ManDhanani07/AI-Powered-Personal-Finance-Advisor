@@ -35,6 +35,14 @@ export const aiService = {
   },
 
   /**
+   * Delete single conversation session
+   */
+  async deleteConversationSession(conversationId) {
+    const response = await apiClient.delete(`/ai/history/session/${conversationId}`);
+    return response?.data ?? response;
+  },
+
+  /**
    * Send prompt to Gemini AI assistant for reports insight
    */
   async queryAdvisor(message) {

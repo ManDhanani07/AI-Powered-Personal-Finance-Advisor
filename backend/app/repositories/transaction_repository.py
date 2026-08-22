@@ -338,3 +338,24 @@ class TransactionRepository(BaseRepository[Transaction]):
             "total_expense": exp_val,
             "net_balance": inc_val - exp_val,
         }
+
+    async def delete_all_for_user(self, user_id: UUID) -> int:
+        """Permanently delete all transactions for a user from PostgreSQL."""
+        from sqlalchemy import delete as sa_delete
+        result = await self.db.execute(sa_delete(Transaction).where(Transaction.user_id == user_id))
+        await self.db.commit()
+        return result.rowcount
+
+    async def delete_bulk_for_user(self, user_id: UUID, transaction_ids: List[UUID]) -> int:
+        """Permanently delete a list of transactions for a user."""
+        from sqlalchemy import delete as sa_delete
+        result = await self.db.execute(
+            sa_delete(Transaction).where(
+                and_(
+                    Transaction.user_id == user_id,
+                    Transaction.id.in_(transaction_ids),
+                )
+            )
+        )
+        await self.db.commit()
+        return result.rowcount

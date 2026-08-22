@@ -669,6 +669,29 @@ class TransactionService(BaseService[TransactionRepository]):
             await self.transaction_repository.soft_delete(transaction_id)
         return True
 
+    async def delete_all_transactions(self, user_id: UUID) -> int:
+        """Permanently delete all transactions and reset budget spent totals for a user."""
+        count = await self.transaction_repository.delete_all_for_user(user_id)
+        
+        # Reset spent amounts on budgets for this user
+        try:
+            from sqlalchemy import update as sa_update
+            from app.models.budget import Budget
+            await self.transaction_repository.db.execute(
+                sa_update(Budget).where(Budget.user_id == user_id).values(spent_amount=Decimal("0.00"))
+            )
+            await self.transaction_repository.db.commit()
+        except Exception:
+            pass
+
+        return count
+
+    async def delete_bulk_transactions(self, user_id: UUID, transaction_ids: List[UUID]) -> int:
+        """Permanently delete a specific batch of transactions for a user."""
+        if not transaction_ids:
+            return 0
+        return await self.transaction_repository.delete_bulk_for_user(user_id, transaction_ids)
+
     async def restore_transaction(self, transaction_id: UUID, user_id: UUID):
         """Restore soft-deleted transaction for user."""
         existing = await self.transaction_repository.get_by_id(transaction_id)

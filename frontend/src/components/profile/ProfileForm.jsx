@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Loader2, Save, X, Upload, DollarSign, User, Image } from 'lucide-react';
+import { Loader2, Save, X, User, Phone, Briefcase, IndianRupee, MapPin } from 'lucide-react';
 import { toast } from 'react-toastify';
 import userService from '../../services/userService.js';
 
 export const ProfileForm = ({ user, onCancel, onSuccess }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [currency, setCurrency] = useState(user?.currency || 'INR');
-  const [avatarPreview, setAvatarPreview] = useState(user?.avatar_url || null);
 
   const {
     register,
@@ -26,37 +24,22 @@ export const ProfileForm = ({ user, onCancel, onSuccess }) => {
     },
   });
 
-  const handleAvatarDrop = (e) => {
-    e.preventDefault();
-    const files = e.dataTransfer ? e.dataTransfer.files : e.target.files;
-    if (files && files[0]) {
-      const file = files[0];
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setAvatarPreview(reader.result);
-        toast.success('Avatar image uploaded preview!', { icon: '🖼️' });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     try {
       const payload = {
-        first_name: data.first_name,
-        last_name: data.last_name,
-        phone: data.phone || null,
-        occupation: data.occupation || null,
+        first_name: data.first_name.trim(),
+        last_name: data.last_name.trim(),
+        phone: data.phone?.trim() || null,
+        occupation: data.occupation?.trim() || null,
         monthly_income: parseFloat(data.monthly_income) || 0.0,
-        city: data.city || null,
-        state: data.state || null,
-        country: data.country || 'India',
-        currency: currency,
+        city: data.city?.trim() || null,
+        state: data.state?.trim() || null,
+        country: data.country?.trim() || 'India',
       };
 
       const res = await userService.updateProfile(payload);
-      toast.success('Profile details updated successfully!', { icon: '✨' });
+      toast.success('Profile details updated successfully! ✨');
       if (onSuccess) {
         onSuccess(res.data);
       }
@@ -69,146 +52,137 @@ export const ProfileForm = ({ user, onCancel, onSuccess }) => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <div className="rounded-3xl border border-border-subtle bg-bg-surface p-6 shadow-glass space-y-5">
-        <div className="flex items-center justify-between border-b border-border-subtle pb-4">
+      <div className="rounded-3xl border border-zinc-800 bg-[#09090B] p-6 sm:p-7 shadow-[0_10px_30px_rgba(0,0,0,0.85)] space-y-6">
+        <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
           <div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white font-outfit">Edit Profile & Preferences</h3>
-            <p className="text-xs text-slate-400">Update personal specifications, avatar, currency, and location</p>
-          </div>
-        </div>
-
-        {/* Drag-and-Drop Avatar Uploader */}
-        <div className="space-y-2">
-          <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
-            Profile Avatar Image
-          </label>
-          <div
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={handleAvatarDrop}
-            className="border-2 border-dashed border-border-strong rounded-3xl p-6 text-center bg-bg-elevated/40 hover:bg-bg-elevated/70 transition-colors cursor-pointer flex flex-col sm:flex-row items-center justify-center gap-4"
-          >
-            {avatarPreview ? (
-              <img
-                src={avatarPreview}
-                alt="Avatar Preview"
-                className="w-16 h-16 rounded-full object-cover border-2 border-primary-500 shadow-md"
-              />
-            ) : (
-              <div className="w-16 h-16 rounded-full bg-primary-500/10 text-primary-500 border border-primary-500/20 flex items-center justify-center font-bold text-xl">
-                {user?.first_name?.charAt(0) || 'U'}
-              </div>
-            )}
-            <div className="text-left space-y-1">
-              <p className="text-xs font-bold text-slate-900 dark:text-white">
-                Drag & drop image here or click to browse
-              </p>
-              <p className="text-[11px] text-slate-400">Supports PNG, JPG, WEBP up to 5MB</p>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleAvatarDrop}
-                className="hidden"
-                id="avatar-input"
-              />
-              <label htmlFor="avatar-input" className="text-xs font-bold text-primary-500 hover:underline cursor-pointer">
-                Upload New Image
-              </label>
-            </div>
+            <h3 className="text-lg font-bold text-white font-outfit">Edit Personal Information</h3>
+            <p className="text-xs text-slate-400">Update your name, contact details, occupation, and location</p>
           </div>
         </div>
 
         {/* First & Last Name */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-              First Name
+          <div className="space-y-1.5">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-300">
+              First Name <span className="text-rose-400">*</span>
             </label>
-            <input
-              type="text"
-              {...register('first_name', { required: 'First name is required' })}
-              className="w-full rounded-xl border border-border-strong bg-bg-surface py-2.5 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 text-slate-900 dark:text-white"
-            />
-            {errors.first_name && <p className="text-xs text-rose-500">{errors.first_name.message}</p>}
+            <div className="relative">
+              <input
+                type="text"
+                {...register('first_name', { required: 'First name is required' })}
+                placeholder="Man"
+                className="w-full rounded-xl border border-zinc-800 bg-black/60 py-2.5 px-3.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50"
+              />
+            </div>
+            {errors.first_name && <p className="text-[11px] text-rose-400">{errors.first_name.message}</p>}
           </div>
 
-          <div className="space-y-1">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-              Last Name
+          <div className="space-y-1.5">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-300">
+              Last Name <span className="text-rose-400">*</span>
             </label>
-            <input
-              type="text"
-              {...register('last_name', { required: 'Last name is required' })}
-              className="w-full rounded-xl border border-border-strong bg-bg-surface py-2.5 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 text-slate-900 dark:text-white"
-            />
-            {errors.last_name && <p className="text-xs text-rose-500">{errors.last_name.message}</p>}
-          </div>
-        </div>
-
-        {/* Primary Currency Switcher & Monthly Income */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-              Primary Currency Switcher
-            </label>
-            <select
-              value={currency}
-              onChange={(e) => setCurrency(e.target.value)}
-              className="w-full rounded-xl border border-border-strong bg-bg-surface py-2.5 px-3.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary-500/20 text-slate-900 dark:text-white"
-            >
-              <option value="INR">INR (₹) — Indian Rupee</option>
-              <option value="USD">USD ($) — US Dollar</option>
-              <option value="EUR">EUR (€) — Euro</option>
-              <option value="GBP">GBP (£) — British Pound</option>
-            </select>
-          </div>
-
-          <div className="space-y-1">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-              Monthly Income
-            </label>
-            <input
-              type="number"
-              placeholder="150000"
-              {...register('monthly_income', { min: { value: 0, message: 'Income cannot be negative' } })}
-              className="w-full rounded-xl border border-border-strong bg-bg-surface py-2.5 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 text-primary-500 font-bold"
-            />
+            <div className="relative">
+              <input
+                type="text"
+                {...register('last_name', { required: 'Last name is required' })}
+                placeholder="Dhanani"
+                className="w-full rounded-xl border border-zinc-800 bg-black/60 py-2.5 px-3.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50"
+              />
+            </div>
+            {errors.last_name && <p className="text-[11px] text-rose-400">{errors.last_name.message}</p>}
           </div>
         </div>
 
         {/* Phone & Occupation */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+          <div className="space-y-1.5">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-300">
               Phone Number
             </label>
             <input
               type="text"
               placeholder="+91 98765 43210"
               {...register('phone')}
-              className="w-full rounded-xl border border-border-strong bg-bg-surface py-2.5 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 text-slate-900 dark:text-white"
+              className="w-full rounded-xl border border-zinc-800 bg-black/60 py-2.5 px-3.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50"
             />
           </div>
 
-          <div className="space-y-1">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+          <div className="space-y-1.5">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-300">
               Occupation
             </label>
             <input
               type="text"
-              placeholder="Software Engineer"
+              placeholder="Software Engineer / Financial Analyst"
               {...register('occupation')}
-              className="w-full rounded-xl border border-border-strong bg-bg-surface py-2.5 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 text-slate-900 dark:text-white"
+              className="w-full rounded-xl border border-zinc-800 bg-black/60 py-2.5 px-3.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50"
+            />
+          </div>
+        </div>
+
+        {/* Monthly Income */}
+        <div className="space-y-1.5">
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-300">
+            Monthly Income
+          </label>
+          <div className="relative">
+            <input
+              type="number"
+              step="any"
+              placeholder="150000"
+              {...register('monthly_income', { min: { value: 0, message: 'Income cannot be negative' } })}
+              className="w-full rounded-xl border border-zinc-800 bg-black/60 py-2.5 px-3.5 text-sm text-emerald-400 font-mono font-bold placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50"
+            />
+          </div>
+          {errors.monthly_income && <p className="text-[11px] text-rose-400">{errors.monthly_income.message}</p>}
+        </div>
+
+        {/* City, State, Country */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="space-y-1.5">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-300">
+              City
+            </label>
+            <input
+              type="text"
+              placeholder="Ahmedabad"
+              {...register('city')}
+              className="w-full rounded-xl border border-zinc-800 bg-black/60 py-2.5 px-3.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-300">
+              State
+            </label>
+            <input
+              type="text"
+              placeholder="Gujarat"
+              {...register('state')}
+              className="w-full rounded-xl border border-zinc-800 bg-black/60 py-2.5 px-3.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-300">
+              Country
+            </label>
+            <input
+              type="text"
+              placeholder="India"
+              {...register('country')}
+              className="w-full rounded-xl border border-zinc-800 bg-black/60 py-2.5 px-3.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50"
             />
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-border-subtle">
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-zinc-800">
           {onCancel && (
             <button
               type="button"
               onClick={onCancel}
-              className="flex items-center gap-1.5 rounded-xl border border-border-strong px-4 py-2.5 text-xs font-semibold text-slate-300 hover:bg-bg-elevated"
+              className="flex items-center gap-1.5 rounded-xl border border-zinc-800 px-4 py-2.5 text-xs font-semibold text-slate-300 hover:bg-zinc-900 cursor-pointer transition-colors"
             >
               <X className="h-4 w-4" />
               Cancel
@@ -218,17 +192,17 @@ export const ProfileForm = ({ user, onCancel, onSuccess }) => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary-500 to-indigo-600 px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-primary-500/25 transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-70"
+            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white px-6 py-2.5 text-xs font-black uppercase tracking-wider shadow-lg shadow-indigo-500/25 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
           >
             {isSubmitting ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Saving Changes...
+                Saving...
               </>
             ) : (
               <>
                 <Save className="h-4 w-4" />
-                Save Profile
+                Save Changes
               </>
             )}
           </button>

@@ -55,6 +55,12 @@ class UserResponse(BaseModel):
     is_active: bool
     email_verified: bool
     last_login: Optional[datetime] = None
+    two_factor_enabled: bool = False
+    password_changed_at: Optional[datetime] = None
+    security_alerts_enabled: bool = True
+    google_id: Optional[str] = None
+    auth_provider: str = "email"
+    preferences: Optional[dict] = None
     created_at: datetime
     updated_at: datetime
 

@@ -48,3 +48,9 @@ class ChatHistoryService(BaseService[ChatHistoryRepository]):
         if not await self.user_repository.exists(id=user_id):
             raise NotFoundException(f"User with ID {user_id} does not exist")
         return await self.chat_repository.clear_user_history(user_id)
+
+    async def delete_conversation_session(self, user_id: UUID, conversation_id: str) -> int:
+        """Delete all messages belonging to a single conversation session."""
+        if not await self.user_repository.exists(id=user_id):
+            raise NotFoundException(f"User with ID {user_id} does not exist")
+        return await self.chat_repository.delete_by_conversation(user_id, conversation_id)

@@ -68,3 +68,20 @@ async def clear_chat_history(
         data={"deleted_count": deleted_count},
         message=f"Cleared {deleted_count} conversation history records",
     )
+
+
+@router.delete("/history/session/{conversation_id}", response_model=APIResponse[Dict[str, int]], status_code=status.HTTP_200_OK)
+async def delete_conversation_session(
+    conversation_id: str,
+    current_user: User = Depends(get_current_user),
+    chat_service: ChatHistoryService = Depends(get_chat_history_service),
+):
+    """Delete all messages for a specific conversation session."""
+    deleted_count = await chat_service.delete_conversation_session(
+        user_id=current_user.id, conversation_id=conversation_id
+    )
+    return APIResponse(
+        success=True,
+        data={"deleted_count": deleted_count},
+        message=f"Deleted conversation session {conversation_id}",
+    )

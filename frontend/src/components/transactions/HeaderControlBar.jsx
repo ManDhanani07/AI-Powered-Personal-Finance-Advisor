@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Search, Download, Upload, X, Plus, ChevronDown } from 'lucide-react';
+import { Search, Download, Upload, X, Plus, ChevronDown, Trash2 } from 'lucide-react';
 
 const SelectFilter = ({ value, onChange, children, minWidth = '140px' }) => (
   <div className="relative" style={{ minWidth }}>
@@ -29,6 +29,7 @@ export const HeaderControlBar = ({
   onExportCSV,
   onImportCSV,
   onAddTransaction,
+  onDeleteAll,
 }) => {
   const searchInputRef = useRef(null);
 
@@ -133,6 +134,18 @@ export const HeaderControlBar = ({
           >
             <Upload className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Import CSV</span>
+          </button>
+        )}
+
+        {/* Delete All / Reset Ledger */}
+        {onDeleteAll && (
+          <button
+            onClick={onDeleteAll}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-rose-900/40 bg-rose-950/30 hover:bg-rose-900/40 text-rose-400 hover:text-rose-300 text-xs font-medium transition-colors cursor-pointer"
+            title="Permanently wipe all transactions from database"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Clear Ledger</span>
           </button>
         )}
 

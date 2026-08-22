@@ -49,6 +49,10 @@ class TransactionUpdateRequest(BaseModel):
     is_recurring: Optional[bool] = None
 
 
+class TransactionBulkDeleteRequest(BaseModel):
+    transaction_ids: List[UUID] = Field(..., min_length=1, description="List of transaction UUIDs to permanently delete")
+
+
 class TransactionResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

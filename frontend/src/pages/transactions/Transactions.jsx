@@ -12,6 +12,7 @@ import TransactionDetailDrawer from '../../components/transactions/TransactionDe
 import PaginationToolbar from '../../components/transactions/PaginationToolbar.jsx';
 import TransactionForm from '../../components/transactions/TransactionForm.jsx';
 import DeleteTransactionModal from '../../components/transactions/DeleteTransactionModal.jsx';
+import DeleteAllTransactionsModal from '../../components/transactions/DeleteAllTransactionsModal.jsx';
 import CsvImportModal from '../../components/transactions/CsvImportModal.jsx';
 
 export const Transactions = () => {
@@ -65,6 +66,7 @@ export const Transactions = () => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deletingTransaction, setDeletingTransaction] = useState(null);
 
+  const [isDeleteAllOpen, setIsDeleteAllOpen] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
 
   // Fetch Categories on mount
@@ -328,6 +330,7 @@ export const Transactions = () => {
         onExportCSV={handleExportCSV}
         onImportCSV={() => setIsImportOpen(true)}
         onAddTransaction={handleCreateNew}
+        onDeleteAll={totalItems > 0 ? () => setIsDeleteAllOpen(true) : null}
       />
 
       {/* ── Summary Strip ── */}
@@ -429,6 +432,18 @@ export const Transactions = () => {
         onSuccess={handleDeleteSuccess}
         onConfirm={handleDeleteSuccess}
         transaction={deletingTransaction}
+      />
+
+      <DeleteAllTransactionsModal
+        isOpen={isDeleteAllOpen}
+        onClose={() => setIsDeleteAllOpen(false)}
+        onSuccess={() => {
+          setTransactions([]);
+          setTotalItems(0);
+          loadTransactions(true);
+          loadSummary();
+        }}
+        totalCount={totalItems}
       />
 
       <CsvImportModal

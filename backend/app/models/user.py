@@ -5,7 +5,8 @@ User Model Definition with Enterprise Security, RBAC, and Authentication Fields.
 from typing import Optional, List, TYPE_CHECKING
 from datetime import date, datetime
 from decimal import Decimal
-from sqlalchemy import String, Date, Numeric, Boolean, DateTime, Integer
+from sqlalchemy import String, Date, Numeric, Boolean, DateTime, Integer, JSON
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.base import Base, UUIDMixin, TimestampMixin
 
@@ -48,12 +49,18 @@ class User(Base, UUIDMixin, TimestampMixin):
     email_verification_token: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     password_reset_token: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     password_reset_expiry: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    password_changed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     last_login: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     failed_login_attempts: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     account_locked: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     lock_until: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     refresh_token: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     refresh_token_expiry: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    # Preferences & Extended Security
+    two_factor_enabled: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    security_alerts_enabled: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    preferences: Mapped[Optional[dict]] = mapped_column(JSONB, default=dict, nullable=True)
 
     # Relationships
     transactions: Mapped[List["Transaction"]] = relationship(

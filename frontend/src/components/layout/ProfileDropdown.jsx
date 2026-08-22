@@ -87,7 +87,7 @@ export const ProfileDropdown = () => {
                 <span>Preferences & Settings</span>
               </Link>
               <Link
-                to={`${ROUTES.PROFILE}/security`}
+                to={ROUTES.SECURITY}
                 onClick={() => setIsOpen(false)}
                 className="flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-300 hover:bg-zinc-900 hover:text-white transition-colors"
               >

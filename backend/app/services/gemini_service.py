@@ -86,15 +86,19 @@ class GeminiService:
         exp = ov["total_expenses"]
         surplus = ov["net_surplus"]
 
-        # 1. DELETE ALL / BULK TRANSACTIONS INTENT
-        delete_all_keywords = [
-            "delete all transaction", "delete all transactions", "remove all transaction", "remove all transactions",
-            "clear all transaction", "clear all transactions", "delete all entries", "delete all entry", "clear ledger",
-            "delete everything", "wipe transactions", "reset transactions", "remove all entries", "delete all transactions entry"
-        ]
-        is_delete_all = any(k in q_lower for k in delete_all_keywords) or (
-            ("delete all" in q_lower or "clear all" in q_lower or "remove all" in q_lower) and ("transaction" in q_lower or "entry" in q_lower or "entries" in q_lower)
-        )
+        # 1. DELETE ALL / BULK TRANSACTIONS INTENT (Robust to typos like 'delet', 'dlt', punctuation)
+        clean_q = re.sub(r'[^\w\s]', '', q_lower).strip()
+        words = clean_q.split()
+
+        del_stems = {"delete", "delet", "deleting", "deleted", "del", "dlt", "remove", "removing", "removed", "clear", "clearing", "cleared", "wipe", "wiping", "wiped", "purge", "purging", "purged", "erase", "erasing", "erased", "reset", "resetting", "destroy", "drop"}
+        all_stems = {"all", "everything", "entire", "every", "whole", "full", "complete"}
+        tx_stems = {"transaction", "transactions", "entry", "entries", "tx", "txs", "record", "records", "ledger", "history", "expenses", "incomes", "data"}
+
+        has_del = bool(del_stems.intersection(words)) or any(d in clean_q for d in ["delete", "delet", "wipe", "clear all", "reset ledger", "reset transaction", "purge"])
+        has_all = bool(all_stems.intersection(words)) or "all" in clean_q or "everything" in clean_q or "ledger" in clean_q
+        has_tx = bool(tx_stems.intersection(words)) or any(t in clean_q for t in ["transaction", "entry", "entries", "ledger", "record", "data", "history"])
+
+        is_delete_all = (has_del and has_all) or (has_del and has_tx and ("all" in clean_q or len(words) <= 4)) or any(clean_q.startswith(p) for p in ["clear ledger", "wipe ledger", "reset ledger", "purge ledger", "clear all", "delete all", "delet all", "del all"])
 
         if is_delete_all:
             db_txs = await self.tx_repo.get_all_by_user(user_id)
@@ -102,8 +106,13 @@ class GeminiService:
                 return f"Hello {user_name}! There are currently **0 transactions** recorded in your database ledger to delete."
 
             del_count = len(db_txs)
-            from sqlalchemy import delete as sa_delete
+            from sqlalchemy import delete as sa_delete, update as sa_update
+            from app.models.budget import Budget
             await self.tx_repo.db.execute(sa_delete(Transaction).where(Transaction.user_id == user_id))
+            try:
+                await self.tx_repo.db.execute(sa_update(Budget).where(Budget.user_id == user_id).values(spent_amount=Decimal("0.00")))
+            except Exception:
+                pass
             await self.tx_repo.db.commit()
 
             return (
@@ -1099,8 +1108,11 @@ class GeminiService:
                 answer_text = crud_goal_res
                 model_name = "gemini-goal-engine"
             else:
-                # Fetch recent chat context for follow-up resolution
-                recent_chats = await self.chat_repo.get_by_user(user_id, limit=3)
+                # Fetch recent chat context for follow-up resolution (within same conversation session if available)
+                if conversation_id:
+                    recent_chats = await self.chat_repo.get_by_conversation(user_id, conversation_id, limit=12)
+                else:
+                    recent_chats = await self.chat_repo.get_by_user(user_id, limit=6)
                 last_question = recent_chats[0].question if recent_chats else ""
                 last_answer = recent_chats[0].answer if recent_chats else ""
 
@@ -1118,20 +1130,28 @@ class GeminiService:
                         "   - If the current user question is written in HINDI (Devanagari script, e.g. 'मेरी बचत कितनी है?'): Respond in fluent, clear HINDI.\n"
                         "   - If the current user question is written in REGIONAL LANGUAGE (e.g. Gujarati, Marathi): Respond in that language.\n"
                         "   - RULE: ALWAYS strictly mirror the language of the current user question, regardless of past conversation history!\n\n"
-                        "2. TYPOS, SPELLING & GRAMMAR TOLERANCE:\n"
-                        "   - Users may have spelling mistakes (e.g., 'expanse', 'shoping', 'incom', 'moni', 'transction', 'bachat', 'kharcha', 'buget', 'emargancy', 'salry', 'diference', 'scoter').\n"
-                        "   - Users may write broken English, bad grammar, incomplete phrases, or informal slang (e.g., 'me save fast how', 'food much high why', 'how much left money', 'can i buy bike decembr').\n"
-                        "   - ALWAYS deduce what the user REALLY wants beneath their typos or imperfect grammar.\n"
-                        "   - NEVER correct or point out their grammar/spelling errors. Always respond respectfully, warmly, clearly, and directly to their intended question in their language.\n\n"
-                        "3. STRICT DATA ACCURACY & ZERO-DATA HANDLING (NEVER INVENT DATA):\n"
+                        "2. CHATGPT-GRADE MULTI-TURN CONVERSATION & FOLLOW-UP RESOLUTION (CRITICAL):\n"
+                        "   - Maintain deep context across multiple turns of conversation.\n"
+                        "   - When the user asks follow-up questions or ellipses:\n"
+                        "     * Examples: 'and on food?', 'what about last month?', 'which one is higher?', 'why?', 'how can I reduce it?', 'show me a donut chart for that', 'how much difference between them?', 'can I afford it?'.\n"
+                        "     * Seamlessly resolve pronouns ('it', 'they', 'this', 'that', 'which', 'them', 'both', 'the first one') from the preceding messages in this conversation thread.\n"
+                        "     * When comparing categories discussed earlier (e.g. Shopping vs Food), compute exact differences, percentage variations, and highlight key merchant drivers.\n"
+                        "     * Never ask the user to re-phrase or repeat what they said earlier.\n\n"
+                        "3. EXTREME TYPO, SPELLING, GRAMMAR & BROKEN ENGLISH TOLERANCE:\n"
+                        "   - Real humans type quickly on mobile with typos, missing letters, phonetic spelling, text slang, or broken grammar:\n"
+                        "     * Examples: 'spnd', 'shpng', 'incom', 'fud', 'hiher', 'difrnce', 'whch is mr', 'wy is it so hi', 'how to sav bachat', 'bta bhai', 'sho me chart', 'trnx', 'expanse', 'buget'.\n"
+                        "   - NEVER say you don't understand due to typos or grammar flaws.\n"
+                        "   - Instantly deduce the exact financial intent beneath their words.\n"
+                        "   - NEVER correct or point out their grammar/spelling errors. Always answer directly, warmly, and accurately with real numbers from their financial database.\n\n"
+                        "4. STRICT DATA ACCURACY & ZERO-DATA HANDLING (NEVER INVENT DATA):\n"
                         "   - Never invent, extrapolate, or fabricate transactions, budgets, goals, or alter totals. Use the EXACT numbers from the LIVE CONTEXT.\n"
                         "   - If the user has 0 budgets in the context (`budgets: []` or `total_budget_limit: 0`), accurately tell the user they have not created any budget envelopes yet. DO NOT claim the system has 'default baseline budgets' or make up numbers.\n"
                         "   - If the user has 0 goals in the context (`goals: []`), tell the user they have not created any goals yet.\n"
                         "   - If the user has 0 transactions or 0 income/expenses (`total_income: 0.0, total_expenses: 0.0`), accurately report that their ledger currently has 0 transactions.\n\n"
-                        "4. CURRENCY & FORMATTING:\n"
+                        "5. CURRENCY & FORMATTING:\n"
                         "   - Format all amounts cleanly in Indian Rupees (**₹3,25,000.00**).\n"
                         "   - Use bold numbers, bullet points, clean markdown tables, and emojis to make answers easy to read.\n\n"
-                        "5. INTERACTIVE CHARTS:\n"
+                        "6. INTERACTIVE CHARTS:\n"
                         "   - Our UI has a built-in interactive charting engine. When the user asks for any chart, pie chart, donut chart, bar chart, graph, trend, visualization, category breakdown, or goal progress, you MUST include an interactive chart code block at the end formatted exactly as:\n"
                         "   ```chart\n"
                         "   {\n"
@@ -1153,21 +1173,29 @@ class GeminiService:
                     # Build multi-turn context
                     if recent_chats:
                         history_lines = []
-                        for h in reversed(recent_chats[:3]):
-                            history_lines.append(f"User: {h.question}\nAdvisor: {h.answer}")
-                        full_user_prompt = f"RECENT CONVERSATION HISTORY:\n" + "\n---\n".join(history_lines) + f"\n\nCURRENT USER QUESTION:\n{message}"
+                        for h in reversed(recent_chats[:8]):
+                            history_lines.append(f"User: {h.question}\nFinancial Copilot: {h.answer}")
+                        full_user_prompt = (
+                            "=== ACTIVE CONVERSATION THREAD (PREVIOUS MESSAGES) ===\n"
+                            + "\n\n---\n\n".join(history_lines)
+                            + "\n\n====================================================\n\n"
+                            + f"CURRENT USER MESSAGE:\n{message}\n\n"
+                            + "INSTRUCTIONS FOR RESOLVING THE CURRENT USER MESSAGE:\n"
+                            + "1. If the user's message is a follow-up (e.g. 'and on food?', 'which is higher?', 'why?', 'show me chart', 'how to reduce it?'), resolve context, pronouns, and intent from the previous messages above.\n"
+                            + "2. If there are typos or grammatical mistakes (e.g. 'spnd', 'shpng', 'incom', 'hiher', 'sav', 'kharcha'), deduce the intent accurately and answer without correcting their English.\n"
+                            + "3. Ground all answers strictly in the user's live financial context."
+                        )
                     else:
                         full_user_prompt = message
 
                     try:
                         def _call_gemini_model():
                             candidate_models = [
-                                "gemini-3.6-flash",
                                 "gemini-3.7-flash",
+                                "gemini-3.5-flash",
+                                "gemini-3.1-flash-lite",
+                                "gemini-3.6-flash",
                                 "gemini-flash-latest",
-                                "gemini-pro-latest",
-                                "gemini-2.5-flash",
-                                "gemini-1.5-flash",
                             ]
                             last_err = None
                             for c_model in candidate_models:
@@ -1178,8 +1206,10 @@ class GeminiService:
                                     )
                                     res = m.generate_content(full_user_prompt)
                                     if res and res.text:
+                                        logger.info(f"[GeminiService] Response successfully generated using {c_model}")
                                         return res.text.strip()
                                 except Exception as me:
+                                    logger.debug(f"[GeminiService] Model {c_model} attempt failed ({type(me).__name__}: {me}), trying next candidate...")
                                     last_err = me
                                     continue
                             if last_err:
@@ -1189,24 +1219,26 @@ class GeminiService:
                         loop = asyncio.get_running_loop()
                         llm_text = await asyncio.wait_for(
                             loop.run_in_executor(None, _call_gemini_model),
-                            timeout=10.0
+                            timeout=25.0
                         )
                         if llm_text:
                             answer_text = llm_text
                         else:
                             answer_text = self._fallback_rule_based_answer(message, ctx, last_question, last_answer)
                     except Exception as e:
-                        logger.warning(f"[GeminiService] LLM API call failed: {e}")
+                        logger.warning(f"[GeminiService] LLM API call fallback engaged: {e}")
                         answer_text = self._fallback_rule_based_answer(message, ctx, last_question, last_answer)
                 else:
                     answer_text = self._fallback_rule_based_answer(message, ctx, last_question, last_answer)
 
         # 4. Store Chat in Database
+        eff_conv_id = str(conversation_id).strip() if conversation_id else str(uuid.uuid4())
         chat_record = ChatHistory(
             user_id=user_id,
             question=message.strip(),
             answer=answer_text,
             model_name="gemini-financial-advisor",
+            conversation_id=eff_conv_id,
             created_at=datetime.now(timezone.utc),
         )
         saved_obj = await self.chat_repo.create(chat_record)
@@ -1216,6 +1248,7 @@ class GeminiService:
             "question": saved_obj.question,
             "answer": saved_obj.answer,
             "model_name": "gemini-financial-advisor",
+            "conversation_id": eff_conv_id,
             "created_at": saved_obj.created_at,
             "context_used": True,
         }
@@ -1320,12 +1353,90 @@ class GeminiService:
         has_prev_month = comp_a.get("last_income") is not None or inc_a.get("last_month_income") is not None
 
         # =====================================================================
-        # 0. 🔄 CONTEXT-AWARE FOLLOW-UP RESOLUTION (e.g. "Provide graph for above")
+        # 0. 🔄 CONTEXT-AWARE FOLLOW-UP RESOLUTION (ChatGPT-Style Multi-Turn Memory)
         # =====================================================================
+        # 0.1 ⚖️ COMPARATIVE FOLLOW-UP ("Which is higher?", "Which one is more?", "Difference between them?")
+        is_comparative_followup = any(k in q_lower for k in [
+            "which is higher", "which one is higher", "which is more", "which one is more",
+            "which is bigger", "which one is bigger", "difference between them", "how much difference",
+            "compare them", "dono me se konsa zyada", "konsa zyada hai", "diffrence", "higer", "who is higher",
+            "which was more", "which is largest", "difference"
+        ])
+        if is_comparative_followup:
+            c1 = shopping_cat if ("shop" in last_q_lower or "amazon" in last_q_lower) else top_cat
+            c2 = food_cat if ("food" in last_q_lower or "dining" in last_q_lower or "swiggy" in last_q_lower) else (second_cat or top_cat)
+            if c1 and c2:
+                higher = c1 if c1.get("amount", 0) >= c2.get("amount", 0) else c2
+                lower = c2 if higher == c1 else c1
+                diff = round(higher.get("amount", 0) - lower.get("amount", 0), 2)
+                pct_diff = round((diff / max(1.0, lower.get("amount", 0))) * 100, 1)
+
+                chart_json = json.dumps({
+                    "type": "horizontal_bars",
+                    "title": f"{higher['category']} vs {lower['category']} Comparison",
+                    "data": [
+                        {"name": higher["category"], "amount": higher.get("amount", 0), "percentage": higher.get("percentage", 0), "color": "#F43F5E"},
+                        {"name": lower["category"], "amount": lower.get("amount", 0), "percentage": lower.get("percentage", 0), "color": "#06B6D4"}
+                    ]
+                }, indent=2)
+
+                return (
+                    f"⚖️ **Comparison: {higher['category']} vs {lower['category']}**\n\n"
+                    f"• **Higher Category**: **{higher['category']}** at **₹{higher.get('amount', 0):,.2f}** ({higher.get('percentage', 0)}% of total expenses)\n"
+                    f"• **Lower Category**: **{lower['category']}** at **₹{lower.get('amount', 0):,.2f}** ({lower.get('percentage', 0)}% of total expenses)\n"
+                    f"• **Difference**: **{higher['category']}** is **₹{diff:,.2f} higher** (+{pct_diff}% more) than **{lower['category']}**.\n\n"
+                    f"```chart\n{chart_json}\n```"
+                )
+
+        # 0.2 🍲 CATEGORY FOLLOW-UP TRANSITION ("and on food?", "what about food?", "food?")
+        is_food_followup = q_lower in ["and food", "and on food", "what about food", "food", "food?", "and food?", "aur food", "aur food pe", "and dining", "food and dining"] or (
+            ("and " in q_lower or "what about" in q_lower or "aur " in q_lower) and ("food" in q_lower or "dining" in q_lower or "khana" in q_lower or "fud" in q_lower)
+        )
+        if is_food_followup:
+            f_amt = food_cat.get("amount", 0.0)
+            f_pct = food_cat.get("percentage", 0.0)
+            chart_json = json.dumps({
+                "type": "category_donut",
+                "title": "Food & Dining Spend Breakdown",
+                "data": [
+                    {"name": "Food & Dining", "amount": f_amt, "percentage": f_pct, "color": "#10B981"},
+                    {"name": "Other Outflows", "amount": max(0.0, exp - f_amt), "percentage": round(100.0 - f_pct, 1), "color": "#3B82F6"}
+                ]
+            }, indent=2)
+            return (
+                f"🍲 **Food & Dining Spending Breakdown**\n\n"
+                f"• **Total Food Spend**: **₹{f_amt:,.2f}**\n"
+                f"• **Share of Total Expenses**: **{f_pct}%**\n\n"
+                f"```chart\n{chart_json}\n```"
+            )
+
+        # 0.3 📉 REDUCTION / COACHING FOLLOW-UP ("why?", "how can I reduce it?", "how to cut down?")
+        is_reduction_followup = any(k in q_lower for k in [
+            "how to reduce", "how can i reduce", "how to cut", "how can i cut", "why is it so high",
+            "why is it high", "reduce it", "cut it down", "how to save on this", "tips to reduce",
+            "kam kaise kare", "bachat kaise kare", "reduce kharcha", "cut down", "tips"
+        ])
+        if is_reduction_followup:
+            target_cat = shopping_cat if "shop" in last_q_lower else (food_cat if "food" in last_q_lower else (top_cat or shopping_cat))
+            target_name = target_cat.get("category", "Top Spending")
+            target_amt = target_cat.get("amount", 0.0)
+            target_pct = target_cat.get("percentage", 0.0)
+            
+            return (
+                f"💡 **Action Plan to Reduce {target_name} Expenses**\n\n"
+                f"• **Current Monthly Spend**: **₹{target_amt:,.2f}** ({target_pct}% of total outflows)\n\n"
+                f"🎯 **Actionable Recommendations**:\n"
+                f"1. **Set a Weekly Envelope**: Cap discretionary {target_name} at ₹{round(target_amt * 0.7 / 4, 0):,.0f} per week to save **₹{round(target_amt * 0.3, 0):,.0f} monthly**.\n"
+                f"2. **Implement the 48-Hour Rule**: For non-essential purchases over ₹1,000, wait 48 hours before purchasing to eliminate impulse buying.\n"
+                f"3. **Redirect Savings into Vaults**: Redirect the saved amount automatically into your emergency fund or high-yield savings goal.\n"
+            )
+
+        # 0.4 📈 GRAPH / CHART FOLLOW-UP ("Provide graph for above")
         is_follow_up_graph = any(k in q_lower for k in [
             "provide graph for above", "provide graph", "show graph for above", "graph for above",
             "show chart for above", "chart for above", "provide chart", "show graph", "give graph",
-            "visualize above", "visualize this", "plot above", "chart it", "graph it"
+            "visualize above", "visualize this", "plot above", "chart it", "graph it", "show donut chart",
+            "pie chart", "donut chart"
         ])
 
         if is_follow_up_graph:
@@ -1805,47 +1916,52 @@ class GeminiService:
                 f"💡 **Insight**: Your spending is highly concentrated in {top_cat['category']} and {second_cat['category']}. Together, these two categories account for approximately **{round(top_cat['percentage'] + second_cat['percentage'], 2)}% of total expenses**."
             )
 
-        # "How much do I spend on Shopping?"
-        if any(k in q_lower for k in ["how much do i spend on shopping", "spend on shopping", "shopping spending", "shopping expense"]) and not any(w in q_lower for w in ["reduce", "cut", "decrease", "what if", "what happens"]):
-            return (
-                f"🛍️ **You spent ₹{shopping_cat['amount']:,.2f} on Shopping this month.**\n\n"
-                f"• **Share of total expenses**: **{shopping_cat['percentage']}%**\n"
-                f"• **Transactions**: **{shopping_cat.get('transaction_count', 14)}**\n"
-                f"• **Average transaction**: **₹{shopping_cat.get('avg_transaction', 15214.28):,.2f}**\n\n"
-                f"Shopping is your largest expense category and accounts for the majority of your discretionary spending."
-            )
+        # Dynamic Typo-Tolerant Category Spending Matcher
+        # Handles queries like "how much i spnd on shoping", "mera food pe kitna kharcha hua", "how much on rent", etc.
+        for cat_obj in categories:
+            cat_name = cat_obj.get("category", "")
+            cat_key = cat_name.lower().split()[0]  # e.g. "shopping", "food", "housing", "transportation"
+            
+            is_cat_match = False
+            if cat_key in q_lower:
+                is_cat_match = True
+            elif cat_key == "shopping" and any(k in q_lower for k in ["shop", "shoping", "shpng", "amazon", "flipkart", "myntra"]):
+                is_cat_match = True
+            elif (cat_key == "food" or "dining" in cat_name.lower()) and any(k in q_lower for k in ["food", "fud", "dining", "dinning", "swiggy", "zomato", "restaurant", "khana"]):
+                is_cat_match = True
+            elif (cat_key == "housing" or "rent" in cat_name.lower()) and any(k in q_lower for k in ["house", "rent", "housing", "flat", "pg", "makan"]):
+                is_cat_match = True
+            elif cat_key == "utilities" and any(k in q_lower for k in ["utility", "utilities", "bills", "electricity", "wifi", "bijli"]):
+                is_cat_match = True
+            elif cat_key == "transportation" and any(k in q_lower for k in ["transport", "transportation", "uber", "ola", "petrol", "fuel", "cab"]):
+                is_cat_match = True
+            elif cat_key == "groceries" and any(k in q_lower for k in ["grocer", "grocery", "groceries", "blinkit", "zepto", "ration"]):
+                is_cat_match = True
+            elif cat_key == "education" and any(k in q_lower for k in ["educat", "education", "course", "fees", "books", "tuition"]):
+                is_cat_match = True
 
-        # "How much do I spend on Food?" / "Food & Dining"
-        if any(k in q_lower for k in ["how much do i spend on food", "spend on food", "food spending", "dining spending"]) and not any(w in q_lower for w in ["reduce", "cut", "decrease", "what if", "what happens"]):
-            return (
-                f"🍽️ **You spent ₹{food_cat['amount']:,.2f} on Food & Dining this month.**\n\n"
-                f"• **Share of total expenses**: **{food_cat['percentage']}%**\n"
-                f"• **Transactions**: **{food_cat.get('transaction_count', 8)}**\n"
-                f"• **Average transaction**: **₹{food_cat.get('avg_transaction', 723.75):,.2f}**\n\n"
-                f"Your Food & Dining expenses remain well within your allocated budget limit."
-            )
+            if is_cat_match and not any(w in q_lower for w in ["reduce", "cut", "decrease", "what if", "why"]):
+                c_amt = cat_obj.get("amount", 0.0)
+                c_pct = cat_obj.get("percentage", 0.0)
+                c_tx_count = cat_obj.get("transaction_count", 0)
+                c_color = cat_obj.get("color", "#F43F5E")
+                
+                chart_json = json.dumps({
+                    "type": "category_donut",
+                    "title": f"{cat_name} Outflow Breakdown",
+                    "data": [
+                        {"name": cat_name, "amount": c_amt, "percentage": c_pct, "color": c_color},
+                        {"name": "Other Expenses", "amount": max(0.0, exp - c_amt), "percentage": round(max(0.0, 100.0 - c_pct), 1), "color": "#3B82F6"}
+                    ]
+                }, indent=2)
 
-        # "How much do I spend on Utilities?"
-        if any(k in q_lower for k in ["spend on utilities", "utilities spending"]):
-            return (
-                f"⚡ **You spent ₹{util_cat['amount']:,.2f} on Utilities this month.**\n\n"
-                f"• **Share of total expenses**: **{util_cat['percentage']}%**\n"
-                f"• **Transactions**: **{util_cat.get('transaction_count', 3)}**"
-            )
-
-        # "How much do I spend on Transportation?"
-        if any(k in q_lower for k in ["spend on transportation", "transportation spending", "transport spending"]):
-            return (
-                f"🚗 **You spent ₹{transport_cat['amount']:,.2f} on Transportation this month.**\n\n"
-                f"• **Share of total expenses**: **{transport_cat['percentage']}%**\n"
-                f"• **Transactions**: **{transport_cat.get('transaction_count', 2)}**"
-            )
-
-        # "How much do I spend on Education?"
-        if any(k in q_lower for k in ["spend on education", "education spending"]):
-            return (
-                f"🎓 **You spent ₹{edu_cat['amount']:,.2f} on Education this month ({edu_cat['percentage']}%).**"
-            )
+                return (
+                    f"🛍️ **{cat_name} Spending Breakdown**\n\n"
+                    f"You have spent **₹{c_amt:,.2f} on {cat_name}** this month.\n\n"
+                    f"• **Share of Total Expenses**: **{c_pct}%** of all recorded outflows (₹{exp:,.2f})\n"
+                    f"• **Transaction Count**: **{c_tx_count} transaction(s)**\n\n"
+                    f"```chart\n{chart_json}\n```"
+                )
 
         # =====================================================================
         # 4. 💵 SAVINGS QUESTIONS (1 to 10)
@@ -2885,22 +3001,58 @@ class GeminiService:
             )
 
         # =====================================================================
-        # DYNAMIC TOPIC FALLBACK (Contextual & Specific, Never Static)
+        # DYNAMIC TOPIC & SPECIFIC CATEGORY SPENDING FALLBACK
         # =====================================================================
-        if any(k in q_lower for k in ["income", "earn", "salary", "deposit"]):
-            return f"💰 **Income Overview**: Your current recorded income is **₹{inc:,.2f}** with an average transaction value of **₹{inc_a.get('avg_tx', inc):,.2f}**."
+        # Check for specific category matching (e.g. "shopping or food", "travel", "housing", "groceries")
+        matched_cats = []
+        if categories:
+            for cat in categories:
+                c_name = cat.get("category", "")
+                c_lower = c_name.lower()
+                tokens = [t.strip() for t in re.split(r"[\s&/,]+", c_lower) if len(t.strip()) > 2]
+                if c_lower in q_lower or any(tok in q_lower for tok in tokens):
+                    matched_cats.append(cat)
 
-        if any(k in q_lower for k in ["expense", "spend", "cost", "paid", "shopping", "food"]):
-            return f"💸 **Expense Overview**: Your current spending is **₹{exp:,.2f}**, with **{top_cat['category']}** making up **{top_cat['percentage']}%** of total expenses."
+        if matched_cats:
+            lines = [f"📊 **Category Spending Breakdown for {user_name}**:\n"]
+            total_matched = sum(float(c.get("amount", 0.0)) for c in matched_cats)
+            for c in matched_cats:
+                c_amt = float(c.get("amount", 0.0))
+                c_pct = float(c.get("percentage", 0.0))
+                c_title = c.get("category", "Category")
+                lines.append(f"• **{c_title}**: **₹{c_amt:,.2f}** ({c_pct:.1f}% of total spending)")
+            
+            if len(matched_cats) > 1:
+                lines.append(f"\n👉 **Combined Total**: **₹{total_matched:,.2f}** ({round(total_matched / (exp or 1) * 100, 1):.1f}% of total expenses)")
+            return "\n".join(lines)
+
+        if any(k in q_lower for k in ["last transaction", "recent transaction", "latest transaction"]):
+            recent_list = ctx.get("recent_transactions", [])
+            if recent_list:
+                latest = recent_list[0]
+                return (
+                    f"💳 **Your Most Recent Transaction**:\n\n"
+                    f"• **Title/Merchant**: **{latest.get('merchant') or latest.get('title', 'Unknown')}**\n"
+                    f"• **Amount**: **₹{float(latest.get('amount', 0.0)):,.2f}**\n"
+                    f"• **Type**: **{latest.get('transaction_type', 'EXPENSE')}**\n"
+                    f"• **Category**: **{latest.get('category_name', 'General')}**\n"
+                    f"• **Date**: **{str(latest.get('transaction_date', ''))[:10]}**"
+                )
+
+        if any(k in q_lower for k in ["income", "earn", "salary", "deposit"]):
+            return f"💰 **Income Overview**: Your current recorded income is **₹{inc:,.2f}** across **{inc_tx_count}** credit entries."
+
+        if any(k in q_lower for k in ["expense", "spend", "cost", "paid", "kharcha"]):
+            return f"💸 **Expense Overview**: Your current spending is **₹{exp:,.2f}**, with **{top_cat['category']}** being your highest expenditure at **₹{float(top_cat.get('amount', 0.0)):,.2f}** ({top_cat['percentage']}%)."
 
         if any(k in q_lower for k in ["goal", "vault"]):
             return f"🎯 **Goal Overview**: Your {p_name} is **{p_pct}% complete** (₹{p_saved:,.2f} / ₹{p_target:,.2f} saved)."
 
-        if any(k in q_lower for k in ["save", "saving"]):
+        if any(k in q_lower for k in ["save", "saving", "bachat"]):
             return f"💵 **Savings Overview**: You have **₹{surplus:,.2f}** in net savings with a **{sav_rate}% savings rate**."
 
         if any(k in q_lower for k in ["health", "score"]):
-            return f"❤️ **Financial Health**: Your score is **{fh_a.get('score', 62)}/100 ({fh_a.get('grade', 'D')})** — Needs Improvement."
+            return f"❤️ **Financial Health**: Your score is **{fh_a.get('score', 62)}/100 ({fh_a.get('grade', 'D')})**."
 
         return (
             f"Hello {user_name}! 👋 Here is your financial snapshot based on your live ledger:\n\n"
