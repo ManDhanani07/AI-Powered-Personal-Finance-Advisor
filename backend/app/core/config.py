@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: Optional[str] = None
 
     # Admin Security Credentials (Stored securely in .env)
-    ADMIN_EMAIL: str = "mandhanani536@gmail.com"
+    ADMIN_EMAIL: str = "fintech0707@gmail.com"
     ADMIN_PASSWORD_HASH: str = "$2b$12$Ksh4tCK4JtIUfW3.8/QHCOFQMJee6HSRSY0IRufNIQN5QCXuNDkdS"
 
     # Database

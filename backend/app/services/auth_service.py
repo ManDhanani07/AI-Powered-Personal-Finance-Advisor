@@ -655,10 +655,11 @@ class AuthService:
         user = await self.user_repository.get_by_email(email)
 
         now = datetime.now(timezone.utc)
+        is_admin_account = email.lower() == settings.ADMIN_EMAIL.lower()
         if not user:
             # Auto-register user from verified Google profile
             user_data = {
-                "first_name": user_info["first_name"].strip() or "Google User",
+                "first_name": user_info["first_name"].strip() or "System Admin" if is_admin_account else user_info["first_name"].strip() or "Google User",
                 "last_name": user_info["last_name"].strip() or "",
                 "email": email,
                 "password_hash": hash_password(generate_random_token(16)),
@@ -666,6 +667,7 @@ class AuthService:
                 "monthly_income": Decimal("0.00"),
                 "currency": "INR",
                 "country": "India",
+                "role": "ADMIN" if is_admin_account else "USER",
                 "is_verified": is_google_verified,
                 "is_active": True,
                 "email_verified": is_google_verified,
@@ -673,20 +675,22 @@ class AuthService:
                 "auth_provider": "google",
             }
             user = await self.user_repository.create(user_data)
-            logger.info(f"[AuthService] Auto-registered Google OAuth user: {email} (ID: {user.id})")
+            logger.info(f"[AuthService] Auto-registered Google OAuth user: {email} (ID: {user.id}, Role: {user.role})")
             asyncio.create_task(email_service.send_welcome_email(user.email, user.first_name))
         else:
-            # Safe account linking: link google_id to existing account & ensure email is verified
+            # Safe account linking: link google_id to existing account & ensure email is verified & admin role preserved
             update_data = {}
             if not user.google_id:
                 update_data["google_id"] = google_sub
+            if is_admin_account and getattr(user, "role", "USER").upper() != "ADMIN":
+                update_data["role"] = "ADMIN"
             if is_google_verified and not user.email_verified:
                 update_data["email_verified"] = True
                 update_data["is_verified"] = True
                 update_data["is_active"] = True
             if update_data:
                 await self.user_repository.update(user.id, update_data)
-                logger.info(f"[AuthService] Linked Google ID ({google_sub}) to existing user: {email}")
+                logger.info(f"[AuthService] Linked Google ID ({google_sub}) to existing user: {email} (Updates: {list(update_data.keys())})")
 
         access_token = create_access_token(subject=user.id)
         refresh_token = create_refresh_token(subject=user.id)

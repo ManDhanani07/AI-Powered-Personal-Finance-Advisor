@@ -1,6 +1,6 @@
 """
 Ensure Admin User Credentials in Database.
-Creates or updates the primary admin user account idempotently using backend .env settings.
+Creates or updates the primary admin user account idempotently with password 'Fintech1234'.
 """
 
 import sys
@@ -13,15 +13,19 @@ if str(backend_dir) not in sys.path:
 
 from sqlalchemy import select
 from app.core.config import settings
+from app.core.security import hash_password
 from app.core.logging import logger
 from app.database.session import AsyncSessionLocal
 from app.models.user import User
 
-async def ensure_admin():
-    admin_email = settings.ADMIN_EMAIL
-    admin_hash = settings.ADMIN_PASSWORD_HASH
+ADMIN_EMAIL = "fintech0707@gmail.com"
+ADMIN_RAW_PASS = "Fintech1234"
 
-    logger.info(f"=== Ensuring Admin Account: {admin_email} ===")
+async def ensure_admin():
+    admin_email = ADMIN_EMAIL
+    admin_hash = hash_password(ADMIN_RAW_PASS)
+
+    logger.info(f"=== Ensuring Admin Account: {admin_email} with password '{ADMIN_RAW_PASS}' ===")
     async with AsyncSessionLocal() as session:
         try:
             res = await session.execute(select(User).where(User.email == admin_email))
@@ -37,6 +41,8 @@ async def ensure_admin():
                     is_active=True,
                     is_verified=True,
                     email_verified=True,
+                    failed_login_attempts=0,
+                    account_locked=False,
                     currency="INR",
                     country="India",
                 )
@@ -48,13 +54,17 @@ async def ensure_admin():
                 user.is_active = True
                 user.is_verified = True
                 user.email_verified = True
-                logger.info(f"Admin account updated for {admin_email}.")
+                user.failed_login_attempts = 0
+                user.account_locked = False
+                logger.info(f"Admin account updated for {admin_email} (Role: ADMIN, Verified: True, Active: True).")
 
             await session.commit()
+            print(f"SUCCESS: Admin account {admin_email} ensured with role ADMIN and password '{ADMIN_RAW_PASS}'")
             return True
         except Exception as ex:
             await session.rollback()
             logger.error(f"Failed to ensure admin account: {ex}")
+            print(f"ERROR: {ex}")
             return False
 
 if __name__ == "__main__":

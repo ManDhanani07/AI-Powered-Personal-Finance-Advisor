@@ -32,12 +32,27 @@ from app.repositories.financial_health_repository import FinancialHealthReposito
 from app.services.financial_health_service import FinancialHealthService
 from app.exceptions.custom_exceptions import NotFoundException, BadRequestException
 
-try:
-    import google.generativeai as genai
-    HAS_GEMINI_SDK = True
-except ImportError:
-    genai = None
-    HAS_GEMINI_SDK = False
+genai = None
+HAS_GEMINI_SDK = False
+
+
+def _get_genai_sdk():
+    """Lazy load Google Generative AI SDK on-demand without startup warning."""
+    global genai, HAS_GEMINI_SDK
+    if genai is not None:
+        return genai
+    try:
+        import warnings
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=FutureWarning)
+            warnings.filterwarnings("ignore")
+            import google.generativeai as _genai
+            genai = _genai
+            HAS_GEMINI_SDK = True
+            return genai
+    except Exception:
+        HAS_GEMINI_SDK = False
+        return None
 
 
 def _render_progress_bar(pct: float, length: int = 15) -> str:
@@ -70,11 +85,13 @@ class GeminiService:
         self.health_service = health_service
 
         self.api_key = getattr(settings, "GEMINI_API_KEY", None) or os.getenv("GEMINI_API_KEY")
-        if self.api_key and HAS_GEMINI_SDK:
-            try:
-                genai.configure(api_key=self.api_key)
-            except Exception as e:
-                logger.warning(f"[GeminiService] Failed to configure Gemini SDK: {e}")
+        if self.api_key:
+            sdk = _get_genai_sdk()
+            if sdk:
+                try:
+                    sdk.configure(api_key=self.api_key)
+                except Exception as e:
+                    logger.warning(f"[GeminiService] Failed to configure Gemini SDK: {e}")
 
     async def _handle_transaction_crud_intent(self, user_id: UUID, message: str, ctx: Dict[str, Any]) -> Optional[str]:
         """Multi-turn Add, Edit, and Delete transactions directly via AI Assistant."""

@@ -19,6 +19,8 @@ export default defineConfig({
       'tailwind-merge',
       'react-hook-form',
       'react-toastify',
+      'canvas-confetti',
+      'date-fns',
     ],
   },
   resolve: {
@@ -31,7 +33,14 @@ export default defineConfig({
     open: false,
     cors: true,
     warmup: {
-      clientFiles: ['./src/main.jsx', './src/App.jsx', './src/routes/AppRoutes.jsx'],
+      clientFiles: [
+        './src/main.jsx',
+        './src/App.jsx',
+        './src/routes/AppRoutes.jsx',
+        './src/layouts/AppLayout.jsx',
+        './src/pages/dashboard/Dashboard.jsx',
+        './src/pages/landing/LandingPage.jsx',
+      ],
     },
   },
   build: {

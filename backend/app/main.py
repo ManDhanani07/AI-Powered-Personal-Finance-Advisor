@@ -2,6 +2,9 @@
 Main FastAPI Application Entry Point (SMTP Active).
 """
 
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
+
 from pathlib import Path
 from contextlib import asynccontextmanager
 from fastapi import FastAPI

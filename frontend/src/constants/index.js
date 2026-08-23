@@ -19,6 +19,19 @@ export const ROUTES = {
   PROFILE: '/profile',
   SETTINGS: '/settings',
   SECURITY: '/security',
+  ADMIN: {
+    OVERVIEW: '/admin/overview',
+    USERS: '/admin/users',
+    TRANSACTIONS: '/admin/transactions',
+    AI_ML: '/admin/ai-ml',
+    RISK_SECURITY: '/admin/risk-security',
+    ANALYTICS: '/admin/analytics',
+    DATA_MANAGEMENT: '/admin/data-management',
+    NOTIFICATIONS: '/admin/notifications',
+    SUPPORT: '/admin/support',
+    SYSTEM: '/admin/system',
+    AUDIT_LOGS: '/admin/audit-logs',
+  },
   NOT_FOUND: '/404',
 };
 

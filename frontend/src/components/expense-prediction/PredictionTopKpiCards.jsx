@@ -43,7 +43,7 @@ export const PredictionTopKpiCards = ({ forecast, summary, trendMetrics, overspe
       ? 'bg-rose-500/20 text-rose-300 border-rose-500/30'
       : riskLevel.toLowerCase() === 'medium'
       ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
-      : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
+      : 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30';
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -166,7 +166,7 @@ export const PredictionTopKpiCards = ({ forecast, summary, trendMetrics, overspe
                 ? 'bg-rose-500'
                 : riskLevel.toLowerCase() === 'medium'
                 ? 'bg-amber-500'
-                : 'bg-emerald-500'
+                : 'bg-gradient-to-r from-cyan-400 to-sky-400'
             }`}
           />
         </div>

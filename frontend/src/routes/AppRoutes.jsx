@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useEffect } from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
 import ProtectedRoute from '../components/routes/ProtectedRoute.jsx';
@@ -13,7 +13,7 @@ import { ROUTES } from '../constants/index.js';
 const RouteLoadingFallback = () => (
   <div className="flex-1 w-full h-full min-h-[300px] flex items-center justify-center bg-transparent">
     <div className="flex flex-col items-center gap-3">
-      <div className="w-8 h-8 rounded-full border-2 border-emerald-500/20 border-t-emerald-400 animate-spin" />
+      <div className="w-8 h-8 rounded-full border-2 border-indigo-500/20 border-t-indigo-400 animate-spin" />
       <span className="text-[11px] font-bold uppercase tracking-widest text-slate-500 font-mono">Loading</span>
     </div>
   </div>
@@ -29,12 +29,14 @@ const ResetPassword = lazy(() => import('../pages/auth/ResetPassword.jsx'));
 // Dynamic Lazy-Loaded Profile & Settings Pages
 const Profile = lazy(() => import('../pages/profile/Profile.jsx'));
 const EditProfile = lazy(() => import('../pages/profile/EditProfile.jsx'));
-const AccountSettings = lazy(() => import('../pages/profile/AccountSettings.jsx'));
 const SecuritySettings = lazy(() => import('../pages/profile/SecuritySettings.jsx'));
 const Preferences = lazy(() => import('../pages/profile/Preferences.jsx'));
 
+// Statically loaded core entry pages (Zero waterfall / instant cold render)
+import LandingPage from '../pages/landing/LandingPage.jsx';
+import Dashboard from '../pages/dashboard/Dashboard.jsx';
+
 // Dynamic Lazy-Loaded Core Feature Modules
-const Dashboard = lazy(() => import('../pages/dashboard/Dashboard.jsx'));
 const Transactions = lazy(() => import('../pages/transactions/Transactions.jsx'));
 const Categories = lazy(() => import('../pages/categories/Categories.jsx'));
 const Budgets = lazy(() => import('../pages/budgets/Budgets.jsx'));
@@ -44,30 +46,28 @@ const ExpensePredictionPage = lazy(() => import('../pages/expense-prediction/Exp
 const ReportsPage = lazy(() => import('../pages/reports/ReportsPage.jsx'));
 const AiAdvisorPage = lazy(() => import('../pages/ai/AiAdvisorPage.jsx'));
 
-// Dynamic Lazy-Loaded Admin Portal Pages
+// Dynamic Lazy-Loaded Admin Portal Pages (Fintech + AI Operations Console)
 const AdminLayout = lazy(() => import('../pages/admin/AdminLayout.jsx'));
 const AdminOverview = lazy(() => import('../pages/admin/AdminOverview.jsx'));
 const AdminUsers = lazy(() => import('../pages/admin/AdminUsers.jsx'));
 const AdminTransactions = lazy(() => import('../pages/admin/AdminTransactions.jsx'));
-const AdminFinancialActivity = lazy(() => import('../pages/admin/AdminFinancialActivity.jsx'));
-const AdminAiUsage = lazy(() => import('../pages/admin/AdminAiUsage.jsx'));
-const AdminBudgetsGoals = lazy(() => import('../pages/admin/AdminBudgetsGoals.jsx'));
-const AdminSystemHealth = lazy(() => import('../pages/admin/AdminSystemHealth.jsx'));
+const AdminAiMlOps = lazy(() => import('../pages/admin/AdminAiMlOps.jsx'));
+const AdminRiskSecurity = lazy(() => import('../pages/admin/AdminRiskSecurity.jsx'));
+const AdminPlatformAnalytics = lazy(() => import('../pages/admin/AdminPlatformAnalytics.jsx'));
+const AdminDataManagement = lazy(() => import('../pages/admin/AdminDataManagement.jsx'));
+const AdminNotifications = lazy(() => import('../pages/admin/AdminNotifications.jsx'));
+const AdminSupport = lazy(() => import('../pages/admin/AdminSupport.jsx'));
+const AdminSystemConsole = lazy(() => import('../pages/admin/AdminSystemConsole.jsx'));
 const AdminAuditLogs = lazy(() => import('../pages/admin/AdminAuditLogs.jsx'));
-const AdminReports = lazy(() => import('../pages/admin/AdminReports.jsx'));
-const AdminSettings = lazy(() => import('../pages/admin/AdminSettings.jsx'));
-
-// Dynamic Lazy-Loaded Public Landing Page
-const LandingPage = lazy(() => import('../pages/landing/LandingPage.jsx'));
 
 export const AppRoutes = () => {
   return (
     <Suspense fallback={<RouteLoadingFallback />}>
       <Routes>
-        {/* Public Marketing Landing Page */}
+        {/* Landing Page */}
         <Route path={ROUTES.HOME} element={<LandingPage />} />
 
-        {/* Guest Authentication Routes (Supports both /login and /auth/login) */}
+        {/* Guest Authentication Routes */}
         <Route
           path={ROUTES.AUTH.LOGIN}
           element={
@@ -149,7 +149,7 @@ export const AppRoutes = () => {
           }
         />
 
-        {/* Admin Portal Protected Routes (Restricted strictly to fintech0707@gmail.com) */}
+        {/* Admin Portal Protected Routes (Fintech + AI Operations Console) */}
         <Route
           path="/admin"
           element={
@@ -162,16 +162,25 @@ export const AppRoutes = () => {
           <Route path="overview" element={<AdminOverview />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="transactions" element={<AdminTransactions />} />
-          <Route path="financial-activity" element={<AdminFinancialActivity />} />
-          <Route path="ai-usage" element={<AdminAiUsage />} />
-          <Route path="budgets-goals" element={<AdminBudgetsGoals />} />
-          <Route path="system-health" element={<AdminSystemHealth />} />
+          <Route path="ai-ml" element={<AdminAiMlOps />} />
+          <Route path="risk-security" element={<AdminRiskSecurity />} />
+          <Route path="analytics" element={<AdminPlatformAnalytics />} />
+          <Route path="data-management" element={<AdminDataManagement />} />
+          <Route path="notifications" element={<AdminNotifications />} />
+          <Route path="support" element={<AdminSupport />} />
+          <Route path="system" element={<AdminSystemConsole />} />
           <Route path="audit-logs" element={<AdminAuditLogs />} />
-          <Route path="reports" element={<AdminReports />} />
-          <Route path="settings" element={<AdminSettings />} />
+
+          {/* Backward Compatibility Alias Redirects */}
+          <Route path="ai-usage" element={<Navigate to="/admin/ai-ml" replace />} />
+          <Route path="financial-activity" element={<Navigate to="/admin/analytics" replace />} />
+          <Route path="budgets-goals" element={<Navigate to="/admin/analytics" replace />} />
+          <Route path="system-health" element={<Navigate to="/admin/system" replace />} />
+          <Route path="settings" element={<Navigate to="/admin/system" replace />} />
+          <Route path="reports" element={<Navigate to="/admin/analytics" replace />} />
         </Route>
 
-        {/* Protected Dashboard Routes (With Responsive Sidebar) */}
+        {/* Protected User Dashboard Routes */}
         <Route
           element={
             <ProtectedRoute>
@@ -190,7 +199,7 @@ export const AppRoutes = () => {
           <Route path={ROUTES.AI_ADVISOR} element={<AiAdvisorPage />} />
         </Route>
 
-        {/* Dedicated Focused Account & Settings Routes (NO SIDEBAR) */}
+        {/* Dedicated Account & Profile Routes */}
         <Route
           element={
             <ProtectedRoute>
