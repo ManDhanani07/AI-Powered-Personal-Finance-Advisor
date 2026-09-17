@@ -46,14 +46,29 @@ const processQueue = (error, token = null) => {
 };
 
 apiClient.interceptors.response.use(
-  (response) => response.data,
+  (response) => {
+    if (response.config?.responseType === 'blob') {
+      return response;
+    }
+    return response.data;
+  },
   async (error) => {
     const originalRequest = error.config;
 
+    let errorData = error.response?.data;
+    if (typeof Blob !== 'undefined' && errorData instanceof Blob) {
+      try {
+        const text = await errorData.text();
+        errorData = JSON.parse(text);
+      } catch (parseErr) {
+        // non-JSON blob error text
+      }
+    }
+
     const customError = {
-      message: error.response?.data?.message || error.message || 'An unexpected error occurred',
+      message: errorData?.message || errorData?.detail || error.message || 'An unexpected error occurred',
       status: error.response?.status || 500,
-      data: error.response?.data || null,
+      data: errorData || null,
     };
 
     // Handle 401 Unauthorized & Automatic Token Refresh

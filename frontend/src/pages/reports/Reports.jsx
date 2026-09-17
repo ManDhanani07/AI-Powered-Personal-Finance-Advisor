@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   FileText,
   PieChart,
-  Scale,
+  ShieldCheck,
   Sparkles,
   Loader2,
 } from 'lucide-react';
@@ -14,7 +14,7 @@ import ReportFilters from '../../components/reports/ReportFilters.jsx';
 
 import ExecutiveSummarySection from '../../components/reports/ExecutiveSummarySection.jsx';
 import SpendingAnalysisSection from '../../components/reports/SpendingAnalysisSection.jsx';
-import FinancialPerformanceSection from '../../components/reports/FinancialPerformanceSection.jsx';
+import TaxAndAuditSection from '../../components/reports/TaxAndAuditSection.jsx';
 import InsightsExportSection from '../../components/reports/InsightsExportSection.jsx';
 
 import reportService from '../../services/reportService.js';
@@ -23,7 +23,7 @@ import transactionService from '../../services/transactionService.js';
 const TABS = [
   { id: 'executive_summary', label: 'Executive Summary', icon: FileText },
   { id: 'spending_analysis', label: 'Spending Analysis', icon: PieChart },
-  { id: 'financial_performance', label: 'Financial Performance', icon: Scale },
+  { id: 'tax_audit', label: 'Tax & Fiscal Audit', icon: ShieldCheck },
   { id: 'insights_export', label: 'Insights & Export', icon: Sparkles },
 ];
 
@@ -59,88 +59,89 @@ export const Reports = () => {
   const [goalData, setGoalData] = useState(null);
   const [healthData, setHealthData] = useState(null);
   const [forecastData, setForecastData] = useState(null);
+  const [advancedData, setAdvancedData] = useState(null);
   const [rawTransactions, setRawTransactions] = useState([]);
 
-  useEffect(() => {
-    let isMounted = true;
+  const loadReportsData = async () => {
+    setLoading(true);
+    try {
+      const [
+        summaryRes,
+        monthlyRes,
+        categoryRes,
+        incExpRes,
+        savingsRes,
+        budgetRes,
+        goalRes,
+        healthRes,
+        forecastRes,
+        txsRes,
+        advancedRes,
+      ] = await Promise.allSettled([
+        reportService.getDashboardSummary(activeFilter, customStart, customEnd, comparePrevious),
+        reportService.getMonthlyBreakdown(),
+        reportService.getCategoryAnalysis(activeFilter, customStart, customEnd),
+        reportService.getIncomeVsExpense(activeFilter, customStart, customEnd),
+        reportService.getSavingsAnalysis(),
+        reportService.getBudgetPerformance(),
+        reportService.getGoalAnalysis(),
+        reportService.getHealthScoreTrend(),
+        reportService.getForecastData(),
+        transactionService.getTransactions({ page: 1, limit: 100 }),
+        reportService.getAdvancedAnalytics(activeFilter, customStart, customEnd),
+      ]);
 
-    const loadReportsData = async () => {
-      setLoading(true);
-      try {
-        const [
-          summaryRes,
-          monthlyRes,
-          categoryRes,
-          incExpRes,
-          savingsRes,
-          budgetRes,
-          goalRes,
-          healthRes,
-          forecastRes,
-          txsRes,
-        ] = await Promise.allSettled([
-          reportService.getDashboardSummary(activeFilter, customStart, customEnd, comparePrevious),
-          reportService.getMonthlyBreakdown(),
-          reportService.getCategoryAnalysis(activeFilter, customStart, customEnd),
-          reportService.getIncomeVsExpense(activeFilter, customStart, customEnd),
-          reportService.getSavingsAnalysis(),
-          reportService.getBudgetPerformance(),
-          reportService.getGoalAnalysis(),
-          reportService.getHealthScoreTrend(),
-          reportService.getForecastData(),
-          transactionService.getTransactions({ page: 1, limit: 100 }),
-        ]);
-
-        if (!isMounted) return;
-
-        const unwrap = (res) => {
-          if (res?.status !== 'fulfilled' || res.value === undefined || res.value === null) return null;
-          // Handles both wrapped { data: { ... } } and unwrapped payload shapes safely
-          if (res.value && typeof res.value === 'object' && res.value.data !== undefined && res.value.data !== null && typeof res.value.data === 'object') {
-            return res.value.data;
-          }
-          return res.value;
-        };
-
-        const sumVal = unwrap(summaryRes);
-        const monthVal = unwrap(monthlyRes);
-        const catVal = unwrap(categoryRes);
-        const incExpVal = unwrap(incExpRes);
-        const savVal = unwrap(savingsRes);
-        const budVal = unwrap(budgetRes);
-        const goalVal = unwrap(goalRes);
-        const healthVal = unwrap(healthRes);
-        const fcVal = unwrap(forecastRes);
-        const txVal = unwrap(txsRes);
-
-        if (sumVal) {
-          setSummaryData(sumVal);
-          if (activeFilter === 'all') {
-            sessionStorage.setItem('reports_cache_summary', JSON.stringify(sumVal));
-          }
+      const unwrap = (res) => {
+        if (res?.status !== 'fulfilled' || res.value === undefined || res.value === null) return null;
+        if (res.value && typeof res.value === 'object' && res.value.data !== undefined && res.value.data !== null && typeof res.value.data === 'object') {
+          return res.value.data;
         }
-        if (monthVal) setMonthlyReport(monthVal);
-        if (catVal) setCategoryData(catVal);
-        if (incExpVal) setIncomeExpenseData(incExpVal);
-        if (savVal) setSavingsData(savVal);
-        if (budVal) setBudgetData(budVal);
-        if (goalVal) setGoalData(goalVal);
-        if (healthVal) setHealthData(healthVal);
-        if (fcVal) setForecastData(fcVal);
-        if (txVal) setRawTransactions(txVal.items || (Array.isArray(txVal) ? txVal : []));
-      } catch (err) {
-        console.error('Failed to load reports data:', err);
-      } finally {
-        if (isMounted) setLoading(false);
+        return res.value;
+      };
+
+      const sumVal = unwrap(summaryRes);
+      const monthVal = unwrap(monthlyRes);
+      const catVal = unwrap(categoryRes);
+      const incExpVal = unwrap(incExpRes);
+      const savVal = unwrap(savingsRes);
+      const budVal = unwrap(budgetRes);
+      const goalVal = unwrap(goalRes);
+      const healthVal = unwrap(healthRes);
+      const fcVal = unwrap(forecastRes);
+      const txVal = unwrap(txsRes);
+      const advVal = unwrap(advancedRes);
+
+      if (sumVal) {
+        setSummaryData(sumVal);
+        if (activeFilter === 'all') {
+          sessionStorage.setItem('reports_cache_summary', JSON.stringify(sumVal));
+        }
       }
-    };
+      if (monthVal) setMonthlyReport(monthVal);
+      if (catVal) setCategoryData(catVal);
+      if (incExpVal) setIncomeExpenseData(incExpVal);
+      if (savVal) setSavingsData(savVal);
+      if (budVal) setBudgetData(budVal);
+      if (goalVal) setGoalData(goalVal);
+      if (healthVal) setHealthData(healthVal);
+      if (fcVal) setForecastData(fcVal);
+      if (advVal) setAdvancedData(advVal);
+      if (txVal) setRawTransactions(txVal.items || (Array.isArray(txVal) ? txVal : []));
+    } catch (err) {
+      console.error('Failed to load reports data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     loadReportsData();
-
-    return () => {
-      isMounted = false;
-    };
   }, [activeFilter, customStart, customEnd, comparePrevious]);
+
+  const handleExport = async (format = 'pdf', tabOverride = null) => {
+    const targetType = tabOverride || activeTab || 'executive_summary';
+    return await reportService.downloadReportFile('pdf', targetType, activeFilter, customStart, customEnd);
+  };
 
   const handleFilterChange = (filterId) => {
     setActiveFilter(filterId);
@@ -158,6 +159,7 @@ export const Reports = () => {
 
   const derivedCategories = useMemo(() => {
     if (categoryData?.categories?.length) return categoryData.categories;
+    if (Array.isArray(categoryData) && categoryData.length) return categoryData;
     if (summaryData?.categories?.length) return summaryData.categories;
     return [];
   }, [categoryData, summaryData]);
@@ -194,9 +196,15 @@ export const Reports = () => {
         {/* Header */}
         <ReportsHeader
           activeFilter={activeFilter}
+          customStart={customStart}
+          customEnd={customEnd}
+          onRefresh={loadReportsData}
+          isRefreshing={loading}
+          onExport={handleExport}
           onFilterChange={handleFilterChange}
           summaryData={summaryData}
           categories={derivedCategories}
+          activeTab={activeTab}
         />
 
         {/* Global Period Filter & Controls */}
@@ -269,13 +277,10 @@ export const Reports = () => {
                 />
               )}
 
-              {activeTab === 'financial_performance' && (
-                <FinancialPerformanceSection
-                  budgetData={derivedBudgetData}
-                  goalData={derivedGoalData}
-                  healthData={derivedHealthData}
-                  forecastData={derivedForecastData}
-                  monthlyReport={monthlyReport}
+              {activeTab === 'tax_audit' && (
+                <TaxAndAuditSection
+                  advancedData={advancedData}
+                  summaryData={summaryData}
                 />
               )}
 

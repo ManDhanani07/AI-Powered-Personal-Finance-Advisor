@@ -1,17 +1,14 @@
 import reportService from './reportService.js';
 
 export const exportService = {
-  async exportCsv(filter = 'this_month') {
-    return await reportService.downloadReportFile('csv', 'executive', filter);
+  async exportExcel(filter = 'this_month', reportType = 'executive') {
+    return await reportService.downloadReportFile('xlsx', reportType, filter);
   },
 
-  async exportExcel(filter = 'this_month') {
-    return await reportService.downloadReportFile('excel', 'executive', filter);
-  },
-
-  async exportPdf(filter = 'this_month') {
-    return await reportService.downloadReportFile('pdf', 'executive', filter);
+  async exportPdf(filter = 'this_month', reportType = 'executive') {
+    return await reportService.downloadReportFile('pdf', reportType, filter);
   },
 };
 
 export default exportService;
+

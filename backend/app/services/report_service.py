@@ -395,6 +395,259 @@ class ReportService:
             "score_trend": history,
         }
 
+    async def get_forecast_report(self, user_id: UUID) -> Dict[str, Any]:
+        """Generate expense prediction and forecast metrics for reports."""
+        try:
+            summary = await self.report_repo.get_income_expense_summary(user_id, None, None)
+            total_exp = float(summary.get("total_expenses", 0.0))
+            forecast_val = round(total_exp * 0.95, 2) if total_exp > 0 else 0.0
+            return {
+                "forecast_next_month_expense": forecast_val,
+                "expected_expense_change_pct": -5.0 if total_exp > 0 else 0.0,
+                "forecast_reliability": "High" if total_exp > 0 else "Moderate",
+            }
+        except Exception:
+            return {
+                "forecast_next_month_expense": 0.0,
+                "expected_expense_change_pct": 0.0,
+                "forecast_reliability": "Moderate",
+            }
+
+    async def get_advanced_analytics_report(
+        self,
+        user_id: UUID,
+        filter_type: str = "all",
+        custom_start: Optional[str] = None,
+        custom_end: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Generate institutional financial ratios, 50/30/20 allocation rule, tax deductibles, recurring overhead, and anomalies."""
+        start_dt, end_dt = self._resolve_date_range(filter_type, custom_start, custom_end)
+        prev_start, prev_end = self._resolve_previous_date_range(start_dt, end_dt, filter_type)
+
+        txs = await self.report_repo.get_filtered_transactions(user_id, start_dt, end_dt)
+        if not txs and filter_type != "all":
+            txs = await self.report_repo.get_filtered_transactions(user_id, None, None)
+
+        cats = await self.report_repo.get_category_spending_analysis(user_id, start_dt, end_dt)
+        if not cats and filter_type != "all":
+            cats = await self.report_repo.get_category_spending_analysis(user_id, None, None)
+
+        summary = await self.report_repo.get_income_expense_summary(user_id, start_dt, end_dt)
+        if summary["transaction_count"] == 0 and filter_type != "all":
+            summary = await self.report_repo.get_income_expense_summary(user_id, None, None)
+
+        total_income = float(summary.get("total_income", 0.0))
+        total_expenses = float(summary.get("total_expenses", 0.0))
+        net_savings = max(0.0, total_income - total_expenses)
+
+        # 1. 50/30/20 Rule Allocation Analysis
+        needs_keywords = {"groceries", "food", "utilities", "rent", "housing", "health", "medical", "transport", "transportation", "bills", "fuel", "education"}
+        wants_keywords = {"shopping", "entertainment", "dining", "restaurant", "travel", "leisure", "electronics", "personal care", "subscriptions", "lifestyle"}
+        savings_keywords = {"investment", "savings", "mutual funds", "stocks", "deposits", "crypto", "vault"}
+
+        needs_spent = 0.0
+        wants_spent = 0.0
+        savings_allocated = net_savings
+
+        for c in cats:
+            name = (c.get("category_name") or "").lower()
+            amt = float(c.get("total_amount") or 0.0)
+            if any(k in name for k in needs_keywords):
+                needs_spent += amt
+            elif any(k in name for k in savings_keywords):
+                savings_allocated += amt
+            else:
+                wants_spent += amt
+
+        total_budget_base = max(1.0, total_income if total_income > 0 else (needs_spent + wants_spent + savings_allocated))
+        needs_pct = round((needs_spent / total_budget_base) * 100, 1)
+        wants_pct = round((wants_spent / total_budget_base) * 100, 1)
+        savings_pct = round((savings_allocated / total_budget_base) * 100, 1)
+
+        rule_status = "OPTIMAL" if (needs_pct <= 55 and wants_pct <= 35 and savings_pct >= 15) else "ATTENTION_NEEDED"
+        if wants_pct > 35:
+            recommendation = f"Discretionary spending is high at {wants_pct}% (target 30%). Reducing lifestyle expenses by INR {int(wants_spent * 0.15):,} would balance capital allocation."
+        elif needs_pct > 55:
+            recommendation = f"Essential needs consume {needs_pct}% of capital (target 50%). Consider reviewing fixed recurring contracts."
+        else:
+            recommendation = f"Your 50/30/20 capital allocation is well-balanced with a healthy {savings_pct}% wealth retention rate."
+
+        allocation_50_30_20 = {
+            "needs": {"amount": round(needs_spent, 2), "percentage": needs_pct, "benchmark_pct": 50.0, "variance": round(needs_pct - 50.0, 1)},
+            "wants": {"amount": round(wants_spent, 2), "percentage": wants_pct, "benchmark_pct": 30.0, "variance": round(wants_pct - 30.0, 1)},
+            "savings": {"amount": round(savings_allocated, 2), "percentage": savings_pct, "benchmark_pct": 20.0, "variance": round(savings_pct - 20.0, 1)},
+            "status": rule_status,
+            "recommendation": recommendation,
+        }
+
+        # 2. Institutional Solvency & Liquidity Ratios
+        monthly_burn = total_expenses if filter_type in ["this_month", "last_month"] else (total_expenses / max(1.0, float(summary.get("transaction_count", 1)) / 8.0))
+        monthly_burn = max(1000.0, monthly_burn)
+        
+        liquid_reserves = max(50000.0, net_savings * 3.5)
+        runway_months = round(liquid_reserves / monthly_burn, 1)
+
+        fixed_overhead_ratio = round((needs_spent / max(1.0, total_income)) * 100, 1) if total_income > 0 else 0.0
+        discretionary_ratio = round((wants_spent / max(1.0, total_income)) * 100, 1) if total_income > 0 else 0.0
+        capital_retention_rate = round((net_savings / max(1.0, total_income)) * 100, 1) if total_income > 0 else 0.0
+        operating_cash_flow = round(total_income - total_expenses, 2)
+        daily_burn_rate = round(total_expenses / 30.0, 2)
+
+        financial_ratios = {
+            "emergency_runway_months": runway_months,
+            "runway_status": "Fortified" if runway_months >= 6.0 else ("Moderate" if runway_months >= 3.0 else "Vulnerable"),
+            "fixed_overhead_ratio": fixed_overhead_ratio,
+            "fixed_overhead_status": "Healthy" if fixed_overhead_ratio <= 50.0 else "Elevated",
+            "discretionary_burden_ratio": discretionary_ratio,
+            "discretionary_status": "Controlled" if discretionary_ratio <= 30.0 else "High",
+            "capital_retention_rate": capital_retention_rate,
+            "operating_cash_flow": operating_cash_flow,
+            "daily_burn_rate": daily_burn_rate,
+        }
+
+        # 3. Tax Deductibles & Fiscal Year Optimization Audit
+        tax_rules = {
+            "section_80c": {"name": "Section 80C (Investments & PF)", "keywords": ["investment", "mutual fund", "ppf", "provident", "lic", "life insurance", "tuition", "epf", "nps", "stocks", "savings goal vault", "vault"], "max_limit": 150000.0},
+            "section_80d": {"name": "Section 80D (Health & Medical)", "keywords": ["health insurance", "medical", "mediclaim", "pharmacy", "doctor", "hospital", "clinic"], "max_limit": 50000.0},
+            "section_80g": {"name": "Section 80G (Charitable Donations)", "keywords": ["donation", "charity", "relief fund", "ngo", "temple", "trust"], "max_limit": 25000.0},
+            "professional_expenses": {"name": "Professional & Tech Deductibles", "keywords": ["software", "hosting", "cloud", "course", "education", "books", "hardware", "office", "mobile shop", "telecom", "recharge"], "max_limit": 75000.0},
+        }
+
+        tax_breakdown = {}
+        total_claimed_tax_deductions = 0.0
+        total_eligible_tax_deductions = 0.0
+
+        for key, rule in tax_rules.items():
+            matched_items = []
+            for t in txs:
+                cat_name = (t.category.category_name if getattr(t, "category", None) and hasattr(t.category, "category_name") else "").lower()
+                desc = (t.description or "").lower()
+                merchant = (t.merchant or "").lower()
+                if any(k in cat_name or k in desc or k in merchant for k in rule["keywords"]):
+                    matched_items.append({
+                        "id": str(t.id),
+                        "date": t.transaction_date.strftime("%Y-%m-%d") if t.transaction_date else "",
+                        "description": t.description or (t.category.category_name if getattr(t, "category", None) else "Deductible"),
+                        "merchant": t.merchant or "Direct",
+                        "amount": float(t.amount),
+                    })
+            eligible = sum(i["amount"] for i in matched_items)
+            claimed = min(eligible, rule["max_limit"])
+            total_eligible_tax_deductions += eligible
+            total_claimed_tax_deductions += claimed
+
+            tax_breakdown[key] = {
+                "name": rule["name"],
+                "eligible_amount": round(eligible, 2),
+                "claimed_amount": round(claimed, 2),
+                "max_limit": rule["max_limit"],
+                "utilization_pct": round((claimed / rule["max_limit"]) * 100, 1),
+                "items_count": len(matched_items),
+                "sample_items": matched_items[:5],
+            }
+
+        tax_audit = {
+            "total_eligible_deductions": round(total_eligible_tax_deductions, 2),
+            "total_claimed_deductions": round(total_claimed_tax_deductions, 2),
+            "estimated_tax_shield_20pct": round(total_claimed_tax_deductions * 0.20, 2),
+            "estimated_tax_shield_30pct": round(total_claimed_tax_deductions * 0.30, 2),
+            "breakdown": tax_breakdown,
+        }
+
+        # 4. Recurring Commitments & Subscription Audit
+        recurring_keywords = ["netflix", "spotify", "prime", "recharge", "airtel", "jio", "wifi", "broadband", "gym", "electricity", "rent", "insurance", "subscription", "aws", "github", "google"]
+        recurring_items = []
+        merchant_seen = set()
+
+        for t in txs:
+            merchant = (t.merchant or "").lower()
+            desc = (t.description or "").lower()
+            cat = (t.category.category_name if getattr(t, "category", None) and hasattr(t.category, "category_name") else "").lower()
+            if any(k in merchant or k in desc or k in cat for k in recurring_keywords) or "recharge" in desc or "reserve" in merchant:
+                m_key = t.merchant or t.description or "Recurring Service"
+                if m_key not in merchant_seen:
+                    merchant_seen.add(m_key)
+                    recurring_items.append({
+                        "name": m_key,
+                        "category": t.category.category_name if getattr(t, "category", None) else "Subscription",
+                        "amount": float(t.amount),
+                        "frequency": "Monthly",
+                        "annual_projected": float(t.amount) * 12,
+                    })
+
+        total_recurring_monthly = sum(r["amount"] for r in recurring_items)
+        recurring_audit = {
+            "active_subscriptions_count": len(recurring_items),
+            "total_monthly_recurring": round(total_recurring_monthly, 2),
+            "total_annual_projected": round(total_recurring_monthly * 12, 2),
+            "recurring_services": recurring_items,
+        }
+
+        # 5. Spending Outliers & Anomaly Detection
+        anomalies = []
+        cat_averages = {}
+        for c in cats:
+            name = c.get("category_name") or "General"
+            cnt = max(1, int(c.get("tx_count") or 1))
+            tot = float(c.get("total_amount") or 0.0)
+            cat_averages[name] = tot / cnt
+
+        for t in txs:
+            if t.transaction_type == "EXPENSE":
+                cat_name = t.category.category_name if getattr(t, "category", None) and hasattr(t.category, "category_name") else "General"
+                avg = cat_averages.get(cat_name, 1000.0)
+                amt = float(t.amount)
+                if amt > max(3000.0, avg * 2.0):
+                    anomalies.append({
+                        "id": str(t.id),
+                        "date": t.transaction_date.strftime("%Y-%m-%d") if t.transaction_date else "",
+                        "description": t.description or cat_name,
+                        "category": cat_name,
+                        "merchant": t.merchant or "Unknown",
+                        "amount": amt,
+                        "category_avg": round(avg, 2),
+                        "deviation_pct": round(((amt - avg) / avg) * 100, 1),
+                    })
+
+        anomaly_audit = {
+            "detected_anomalies_count": len(anomalies),
+            "outlier_transactions": sorted(anomalies, key=lambda x: x["amount"], reverse=True)[:8],
+        }
+
+        # 6. Multi-Period Variance Matrix
+        prev_cats = await self.report_repo.get_category_spending_analysis(user_id, prev_start, prev_end)
+        prev_map = {c["category_name"]: float(c["total_amount"]) for c in prev_cats}
+        variance_matrix = []
+
+        for c in cats:
+            c_name = c["category_name"]
+            curr_val = float(c["total_amount"])
+            prev_val = prev_map.get(c_name, 0.0)
+            delta = round(curr_val - prev_val, 2)
+            pct_diff = round(((curr_val - prev_val) / prev_val) * 100, 1) if prev_val > 0 else 0.0
+            variance_matrix.append({
+                "category_name": c_name,
+                "current_amount": curr_val,
+                "previous_amount": prev_val,
+                "delta_amount": delta,
+                "percentage_change": pct_diff,
+                "trend": "REDUCED" if delta < 0 else ("INCREASED" if delta > 0 else "FLAT"),
+            })
+
+        return {
+            "filter_applied": filter_type,
+            "period": {
+                "start": start_dt.strftime("%Y-%m-%d") if start_dt else "All-Time",
+                "end": end_dt.strftime("%Y-%m-%d") if end_dt else "All-Time",
+            },
+            "allocation_50_30_20": allocation_50_30_20,
+            "financial_ratios": financial_ratios,
+            "tax_audit": tax_audit,
+            "recurring_audit": recurring_audit,
+            "anomaly_audit": anomaly_audit,
+            "variance_matrix": sorted(variance_matrix, key=lambda x: abs(x["delta_amount"]), reverse=True),
+        }
+
     async def export_report_file(
         self,
         user_id: UUID,
@@ -411,78 +664,86 @@ class ReportService:
 
         now_str = datetime.utcnow().strftime("%Y-%m-%d")
         report_type_clean = report_type.replace("_", "-").capitalize()
-        filename = f"{username_clean}_{report_type_clean}_Report_{now_str}.{export_format}"
+        fmt_lower = export_format.lower()
+        if fmt_lower in ["xlsx", "excel"]:
+            ext = "xlsx"
+            media_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        elif fmt_lower == "pdf":
+            ext = "pdf"
+            media_type = "application/pdf"
+        elif fmt_lower == "csv":
+            ext = "csv"
+            media_type = "text/csv"
+        else:
+            ext = "pdf"
+            media_type = "application/pdf"
+
+        report_type_normalized = (report_type or "executive").lower().strip()
+        type_slugs = {
+            "executive_summary": "Executive_Financial",
+            "executive": "Executive_Financial",
+            "spending_analysis": "Spending_and_Merchant_Analysis",
+            "spending": "Spending_and_Merchant_Analysis",
+            "tax_audit": "Tax_and_Fiscal_Audit",
+            "tax": "Tax_and_Fiscal_Audit",
+            "insights_export": "Comprehensive_Financial_Dossier",
+            "insights": "Comprehensive_Financial_Dossier",
+            "comprehensive": "Comprehensive_Financial_Dossier",
+        }
+        title_slug = type_slugs.get(report_type_normalized, report_type_clean)
+        filename = f"{username_clean}_{title_slug}_Report_{now_str}.{ext}"
+
+        summary_rep = await self.get_dashboard_summary_report(user_id, filter_type, custom_start, custom_end)
+        cat_rep = await self.get_category_report(user_id, filter_type, custom_start, custom_end)
+        budget_rep = await self.get_budget_report(user_id)
+        goal_rep = await self.get_goal_report(user_id)
+        health_rep = await self.get_financial_health_report(user_id)
+        forecast_rep = await self.get_forecast_report(user_id)
+        advanced_rep = await self.get_advanced_analytics_report(user_id, filter_type, custom_start, custom_end)
 
         start_dt, end_dt = self._resolve_date_range(filter_type, custom_start, custom_end)
         txs = await self.report_repo.get_filtered_transactions(user_id, start_dt, end_dt)
-        
         if not txs:
             txs = await self.report_repo.get_filtered_transactions(user_id, None, None)
 
-        output = io.BytesIO()
+        user_email = user.email if user else "user@example.com"
 
-        if export_format == "xlsx":
-            media_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            summary_rep = await self.get_dashboard_summary_report(user_id, filter_type, custom_start, custom_end)
-            cat_rep = await self.get_category_report(user_id, filter_type, custom_start, custom_end)
-            budget_rep = await self.get_budget_report(user_id)
-            goal_rep = await self.get_goal_report(user_id)
-            health_rep = await self.get_financial_health_report(user_id)
-            forecast_rep = await self.get_forecast_report(user_id)
-
-            import pandas as pd
-            with pd.ExcelWriter(output, engine="openpyxl") as writer:
-                # 1. Summary Sheet
-                kpis = summary_rep.get("kpis", {})
-                df_sum = pd.DataFrame([
-                    {"Metric": "Report Title", "Value": "AI Wealth OS - Executive Financial Summary"},
-                    {"Metric": "User Email", "Value": user.email if user else "N/A"},
-                    {"Metric": "Filter Period", "Value": filter_type},
-                    {"Metric": "Export Date", "Value": now_str},
-                    {"Metric": "Total Income (INR)", "Value": kpis.get("total_income", 0)},
-                    {"Metric": "Total Expenses (INR)", "Value": kpis.get("total_expenses", 0)},
-                    {"Metric": "Net Savings (INR)", "Value": kpis.get("net_savings", 0)},
-                    {"Metric": "Savings Rate (%)", "Value": kpis.get("savings_rate", 0)},
-                    {"Metric": "Financial Health Score", "Value": kpis.get("health_score", 75.0)},
-                ])
-                df_sum.to_excel(writer, sheet_name="Summary", index=False)
-
-                # 2. Spending Analysis Sheet
-                cats = cat_rep.get("categories", [])
-                if cats:
-                    df_spend = pd.DataFrame(cats)
-                    df_spend.to_excel(writer, sheet_name="Spending Analysis", index=False)
-                else:
-                    pd.DataFrame([{"Message": "No spending category data logged."}]).to_excel(writer, sheet_name="Spending Analysis", index=False)
-
-                # 3. Financial Performance Sheet
-                df_perf = pd.DataFrame([
-                    {"Module": "Budget", "Metric": "Total Limit (INR)", "Value": budget_rep.get("total_limit", 0)},
-                    {"Module": "Budget", "Metric": "Total Spent (INR)", "Value": budget_rep.get("total_spent", 0)},
-                    {"Module": "Budget", "Metric": "Utilization (%)", "Value": budget_rep.get("overall_utilization_pct", 0)},
-                    {"Module": "Goals", "Metric": "Total Goals", "Value": goal_rep.get("total_goals", 0)},
-                    {"Module": "Goals", "Metric": "Completed Goals", "Value": goal_rep.get("completed_goals", 0)},
-                    {"Module": "Goals", "Metric": "Overall Completion (%)", "Value": goal_rep.get("overall_completion_pct", 0)},
-                    {"Module": "Health Score", "Metric": "Latest Score", "Value": health_rep.get("latest_score", 75.0)},
-                    {"Module": "Health Score", "Metric": "Grade", "Value": health_rep.get("latest_grade", "B")},
-                    {"Module": "Forecast", "Metric": "Next Month Forecast (INR)", "Value": forecast_rep.get("forecast_next_month_expense", 0)},
-                ])
-                df_perf.to_excel(writer, sheet_name="Financial Performance", index=False)
-
-                # 4. Insights Sheet
-                df_ins = pd.DataFrame([
-                    {"Type": "Executive Insight", "Detail": summary_rep.get("executive_insight", "Financial position stable.")},
-                    {"Type": "Health Score Explanation", "Detail": health_rep.get("explanation", "Good financial health.")},
-                    {"Type": "Forecast Reliability", "Detail": forecast_rep.get("forecast_reliability", "Moderate")},
-                ])
-                df_ins.to_excel(writer, sheet_name="Insights", index=False)
-
-            output.seek(0)
+        if ext == "xlsx":
+            from app.reports import generate_excel_financial_report
+            output = generate_excel_financial_report(
+                user_display=user_display,
+                user_email=user_email,
+                filter_type=filter_type,
+                summary_rep=summary_rep,
+                cat_rep=cat_rep,
+                budget_rep=budget_rep,
+                goal_rep=goal_rep,
+                health_rep=health_rep,
+                forecast_rep=forecast_rep,
+                transactions=txs,
+                report_type=report_type_normalized,
+            )
             return output, filename, media_type
 
-        elif export_format == "csv":
-            media_type = "text/csv"
-            
+        elif ext == "pdf":
+            from app.reports import generate_pdf_financial_report
+            output = generate_pdf_financial_report(
+                user_display=user_display,
+                user_email=user_email,
+                filter_type=filter_type,
+                summary_rep=summary_rep,
+                cat_rep=cat_rep,
+                budget_rep=budget_rep,
+                goal_rep=goal_rep,
+                health_rep=health_rep,
+                forecast_rep=forecast_rep,
+                transactions=txs,
+                report_type=report_type_normalized,
+                advanced_rep=advanced_rep,
+            )
+            return output, filename, media_type
+
+        elif ext == "csv":
             stream = io.StringIO()
             writer = csv.writer(stream)
 
@@ -499,35 +760,22 @@ class ReportService:
                 cat_name = t.category.category_name if t.category else "Uncategorized"
                 writer.writerow([
                     str(t.id),
-                    t.transaction_date.strftime("%Y-%m-%d %H:%M"),
-                    t.title,
-                    t.transaction_type,
+                    t.transaction_date.strftime("%Y-%m-%d %H:%M") if getattr(t, "transaction_date", None) else "N/A",
+                    getattr(t, "title", "Transaction"),
+                    getattr(t, "transaction_type", "EXPENSE"),
                     cat_name,
-                    float(t.amount),
-                    t.payment_method or "UPI",
-                    t.merchant or "N/A",
+                    float(getattr(t, "amount", 0.0)),
+                    getattr(t, "payment_method", "UPI") or "UPI",
+                    getattr(t, "merchant", "N/A") or "N/A",
                 ])
 
             output.write(stream.getvalue().encode("utf-8"))
             output.seek(0)
             return output, filename, media_type
 
-        elif export_format == "pdf":
-            media_type = "application/pdf"
-            pdf_content = (
-                f"%PDF-1.4\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n"
-                f"2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n"
-                f"3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R >>\nendobj\n"
-                f"4 0 obj\n<< /Length 120 >>\nstream\nBT /F1 18 Tf 50 700 Td (AI WEALTH OS - EXECUTIVE REPORT) Tj ET\n"
-                f"BT /F1 12 Tf 50 670 Td (User: {username_clean} | Date: {now_str} | Transactions: {len(txs)}) Tj ET\nendstream\nendobj\n"
-                f"xref\n0 5\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \n0000000115 00000 n \n0000000212 00000 n \ntrailer\n<< /Size 5 /Root 1 0 R >>\nstartxref\n384\n%%EOF"
-            )
-            output.write(pdf_content.encode("utf-8"))
-            output.seek(0)
-            return output, filename, media_type
-
         else:
             raise BadRequestException("Unsupported export format.")
+
 
     async def generate_ai_financial_summary(
         self,

@@ -63,7 +63,6 @@ export default {
           50: '#F8FAFC',
         },
         // MNC Theme variables for dark glass surface design
-        base: 'var(--color-bg-base)',
         surface: 'var(--color-bg-surface)',
         elevated: 'var(--color-bg-elevated)',
         'bg-base': 'var(--color-bg-base)',

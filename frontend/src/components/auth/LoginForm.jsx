@@ -54,25 +54,14 @@ export const LoginForm = () => {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="w-full"
-    >
+    <div className="w-full">
       {/* Header */}
-      <div className="mb-6">
-        <h2 className="text-3xl font-black text-white tracking-tight font-outfit leading-tight">
+      <div className="mb-4 xl:mb-5">
+        <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight font-outfit leading-tight">
           Sign in
         </h2>
-        <p className="mt-2 text-sm text-slate-400 leading-relaxed">
-          Access your AI Wealth OS workspace.{' '}
-          <Link
-            to={ROUTES.AUTH.REGISTER}
-            className="text-emerald-400 hover:text-emerald-300 font-semibold transition-colors"
-          >
-            Create account
-          </Link>
+        <p className="mt-1 text-xs sm:text-sm text-slate-400 leading-relaxed">
+          Access your AI Wealth OS workspace.
         </p>
       </div>
 
@@ -83,7 +72,7 @@ export const LoginForm = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="mb-5 rounded-xl border border-rose-500/30 bg-rose-500/8 p-3.5 flex items-start space-x-3 text-xs text-rose-400 font-semibold"
+            className="mb-4 rounded-xl border border-rose-500/30 bg-rose-500/8 p-3 flex items-start space-x-3 text-xs text-rose-400 font-semibold"
           >
             <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
             <span>{loginError}</span>
@@ -91,10 +80,10 @@ export const LoginForm = () => {
         )}
       </AnimatePresence>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 xl:space-y-3.5">
 
         {/* Email Field */}
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <label htmlFor="email" className="block text-[11px] font-bold uppercase tracking-widest text-slate-500">
             Email Address
           </label>
@@ -114,7 +103,7 @@ export const LoginForm = () => {
                   message: 'Invalid email address format',
                 },
               })}
-              className={`block w-full rounded-xl border py-2.5 pl-11 pr-4 text-sm bg-[#09090B] text-white placeholder-slate-700 transition-all focus:outline-none focus:ring-2 ${
+              className={`block w-full rounded-xl border py-2 xl:py-2.5 pl-11 pr-4 text-sm bg-[#09090B] text-white placeholder-slate-700 transition-all focus:outline-none focus:ring-2 ${
                 errors.email
                   ? 'border-rose-500/50 focus:ring-rose-500/15'
                   : 'border-zinc-800 focus:border-emerald-500/50 focus:ring-emerald-500/10'
@@ -127,7 +116,7 @@ export const LoginForm = () => {
         </div>
 
         {/* Password Field */}
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <div className="flex items-center justify-between">
             <label htmlFor="password" className="block text-[11px] font-bold uppercase tracking-widest text-slate-500">
               Password
@@ -152,7 +141,7 @@ export const LoginForm = () => {
                 required: 'Password is required',
                 minLength: { value: 8, message: 'Password must be at least 8 characters' },
               })}
-              className={`block w-full rounded-xl border py-2.5 pl-11 pr-12 text-sm bg-[#09090B] text-white placeholder-slate-700 transition-all focus:outline-none focus:ring-2 ${
+              className={`block w-full rounded-xl border py-2 xl:py-2.5 pl-11 pr-12 text-sm bg-[#09090B] text-white placeholder-slate-700 transition-all focus:outline-none focus:ring-2 ${
                 errors.password
                   ? 'border-rose-500/50 focus:ring-rose-500/15'
                   : 'border-zinc-800 focus:border-emerald-500/50 focus:ring-emerald-500/10'
@@ -173,7 +162,7 @@ export const LoginForm = () => {
         </div>
 
         {/* Remember Me */}
-        <div className="flex items-center space-x-2.5">
+        <div className="flex items-center space-x-2.5 pt-0.5">
           <input
             id="remember_me"
             type="checkbox"
@@ -189,7 +178,7 @@ export const LoginForm = () => {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full flex items-center justify-center gap-2 rounded-xl bg-white hover:bg-slate-100 py-3.5 px-4 text-sm font-bold text-slate-950 shadow-md transition-all hover:scale-[1.005] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full flex items-center justify-center gap-2 rounded-xl bg-white hover:bg-slate-100 py-3 px-4 text-sm font-bold text-slate-950 shadow-md transition-all hover:scale-[1.005] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {isSubmitting ? (
             <>
@@ -206,8 +195,19 @@ export const LoginForm = () => {
 
         {/* Social Login */}
         <SocialLoginButtons />
+
+        {/* Create Account Link */}
+        <p className="text-center text-xs text-slate-400 pt-0.5">
+          Don't have an account?{' '}
+          <Link
+            to={ROUTES.AUTH.REGISTER}
+            className="font-semibold text-emerald-400 hover:text-emerald-300 transition-colors"
+          >
+            Create account
+          </Link>
+        </p>
       </form>
-    </motion.div>
+    </div>
   );
 };
 

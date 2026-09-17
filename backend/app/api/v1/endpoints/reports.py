@@ -142,9 +142,28 @@ async def get_financial_health_report(
     return APIResponse(success=True, message="Financial health report retrieved successfully.", data=data)
 
 
+@router.get("/advanced-analytics")
+async def get_reports_advanced_analytics(
+    filter_type: str = Query("all", alias="filter"),
+    custom_start: Optional[str] = Query(None),
+    custom_end: Optional[str] = Query(None),
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """GET /api/v1/reports/advanced-analytics - 50/30/20 rule, solvency ratios, tax deductibles, recurring overhead, and anomalies."""
+    service = ReportService(db)
+    data = await service.get_advanced_analytics_report(
+        user_id=current_user.id,
+        filter_type=filter_type,
+        custom_start=custom_start,
+        custom_end=custom_end,
+    )
+    return APIResponse(success=True, message="Advanced reports analytics retrieved successfully.", data=data)
+
+
 @router.get("/export")
 async def export_report_file(
-    export_format: str = Query("csv", alias="format"),
+    export_format: str = Query("pdf", alias="format"),
     report_type: str = Query("executive", alias="type"),
     filter_type: str = Query("this_month", alias="filter"),
     custom_start: Optional[str] = Query(None),
@@ -152,7 +171,7 @@ async def export_report_file(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """GET /api/v1/reports/export - Download PDF, Excel (.xlsx), or CSV formatted report file."""
+    """GET /api/v1/reports/export - Download PDF or Excel (.xlsx) formatted report file."""
     service = ReportService(db)
     file_stream, filename, media_type = await service.export_report_file(
         user_id=current_user.id,
@@ -162,7 +181,10 @@ async def export_report_file(
         custom_start=custom_start,
         custom_end=custom_end,
     )
-    headers = {"Content-Disposition": f'attachment; filename="{filename}"'}
+    headers = {
+        "Content-Disposition": f'attachment; filename="{filename}"',
+        "Access-Control-Expose-Headers": "Content-Disposition",
+    }
     return StreamingResponse(file_stream, media_type=media_type, headers=headers)
 
 

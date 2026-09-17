@@ -71,6 +71,7 @@ def create_application() -> FastAPI:
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
+        expose_headers=["Content-Disposition"],
     )
 
     if settings.is_production and settings.ALLOWED_HOSTS:

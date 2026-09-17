@@ -139,12 +139,7 @@ export const RegisterForm = () => {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: 'easeOut' }}
-      className="w-full"
-    >
+    <div className="w-full">
       {/* Form Header */}
       <div className="mb-3 text-center">
         <div className="mx-auto mb-1.5 flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
@@ -521,7 +516,7 @@ export const RegisterForm = () => {
 
         </AnimatePresence>
       </form>
-    </motion.div>
+    </div>
   );
 };
 

@@ -48,15 +48,15 @@ export const RecentPerformanceGrid = ({ benchmarks }) => {
       className="rounded-3xl border border-zinc-800 bg-[#09090B] p-6 space-y-5 shadow-glass"
     >
       <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
-        <div className="flex items-center space-x-2.5">
-          <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+        <div className="flex items-center space-x-3">
+          <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shrink-0 flex items-center justify-center">
             <Activity className="w-4 h-4" />
           </div>
-          <div>
-            <h3 className="text-base font-black text-white font-outfit uppercase tracking-wider">
-              📊 Recent Performance
+          <div className="flex flex-col justify-center space-y-0.5">
+            <h3 className="text-base font-black text-white font-outfit uppercase tracking-wider leading-tight">
+              Recent Performance
             </h3>
-            <p className="text-xs text-slate-400 font-normal">
+            <p className="text-xs text-slate-400 font-normal leading-normal">
               Empirical historical benchmarks and multi-period rolling expenditure averages
             </p>
           </div>

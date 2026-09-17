@@ -2,7 +2,15 @@ import React from 'react';
 import { FileText, RefreshCw, Sparkles, Download, Layers } from 'lucide-react';
 import ExportButtons from './ExportButtons.jsx';
 
-export const ReportsHeader = ({ onRefresh, isRefreshing, onExport, activeFilter }) => {
+export const ReportsHeader = ({
+  onRefresh,
+  isRefreshing,
+  onExport,
+  activeFilter = 'all',
+  customStart = null,
+  customEnd = null,
+  activeTab = 'executive_summary',
+}) => {
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-bg-surface/80 backdrop-blur-xl border border-border-subtle p-6 rounded-3xl shadow-xl relative overflow-hidden">
       <div className="pointer-events-none absolute -top-24 -left-24 w-60 h-60 bg-primary-500/10 rounded-full blur-3xl" />
@@ -28,16 +36,23 @@ export const ReportsHeader = ({ onRefresh, isRefreshing, onExport, activeFilter 
         <button
           onClick={onRefresh}
           disabled={isRefreshing}
-          className="p-2.5 rounded-2xl bg-bg-card hover:bg-border-subtle/50 border border-border-subtle text-slate-300 hover:text-white transition-all shadow-md active:scale-95 disabled:opacity-50"
+          className="p-2.5 rounded-2xl bg-bg-card hover:bg-border-subtle/50 border border-border-subtle text-slate-300 hover:text-white transition-all shadow-md active:scale-95 disabled:opacity-50 cursor-pointer"
           title="Refresh Reports Data"
         >
           <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-primary-400' : ''}`} />
         </button>
 
-        <ExportButtons onExport={onExport} />
+        <ExportButtons
+          onExport={onExport}
+          activeFilter={activeFilter}
+          customStart={customStart}
+          customEnd={customEnd}
+          activeTab={activeTab}
+        />
       </div>
     </div>
   );
 };
+
 
 export default ReportsHeader;

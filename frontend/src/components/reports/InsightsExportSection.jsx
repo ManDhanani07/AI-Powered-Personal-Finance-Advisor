@@ -5,7 +5,6 @@ import {
   AlertTriangle,
   ShieldAlert,
   FileText,
-  FileSpreadsheet,
   Download,
   Loader2,
   RefreshCw,
@@ -15,6 +14,7 @@ import {
   Compass,
   ArrowRight,
 } from 'lucide-react';
+import { toast } from 'react-toastify';
 import reportService from '../../services/reportService.js';
 import PdfExportModal from './PdfExportModal.jsx';
 import StructuredAiInsightCards from './StructuredAiInsightCards.jsx';
@@ -35,9 +35,7 @@ export const InsightsExportSection = ({
   const [aiInsight, setAiInsight] = useState(null);
   const [loadingAi, setLoadingAi] = useState(false);
   const [aiError, setAiError] = useState(null);
-  const [showPdfModal, setShowPdfModal] = useState(false);
-  const [exportingCsv, setExportingCsv] = useState(false);
-  const [exportingExcel, setExportingExcel] = useState(false);
+  const [exportingPdf, setExportingPdf] = useState(false);
 
   const kpis = summaryData?.kpis || {};
   const totalInc = Number(kpis.total_income || 0);
@@ -67,31 +65,20 @@ export const InsightsExportSection = ({
   };
 
   // Export handlers
-  const handleExportCsv = async () => {
+  const handleExportPdf = async () => {
     try {
-      setExportingCsv(true);
-      await reportService.downloadReportFile('csv', 'executive', activeFilter, customStart, customEnd);
+      setExportingPdf(true);
+      await reportService.downloadReportFile('pdf', 'insights_export', activeFilter, customStart, customEnd);
+      toast.success('Comprehensive Financial Master Dossier PDF downloaded!', { icon: '📄' });
     } catch (err) {
-      console.warn('Export CSV fallback', err);
+      console.warn('Export PDF failed:', err);
+      toast.error('Failed to generate and download PDF report.');
     } finally {
-      setExportingCsv(false);
+      setExportingPdf(false);
     }
   };
 
-  const handleExportPdf = () => {
-    setShowPdfModal(true);
-  };
 
-  const handleExportExcel = async () => {
-    try {
-      setExportingExcel(true);
-      await reportService.downloadReportFile('excel', 'executive', activeFilter, customStart, customEnd);
-    } catch (err) {
-      console.warn('Export Excel fallback', err);
-    } finally {
-      setExportingExcel(false);
-    }
-  };
 
   return (
     <div className="space-y-6 font-sans">
@@ -158,45 +145,19 @@ export const InsightsExportSection = ({
           <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={handleExportPdf}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 text-xs font-bold font-outfit transition-all shadow-md active:scale-95 cursor-pointer"
+              disabled={exportingPdf}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 text-xs font-bold font-outfit transition-all shadow-md active:scale-95 disabled:opacity-50 cursor-pointer"
+              title="Download Formatted PDF Financial Statement"
             >
-              <FileText className="w-4 h-4 text-rose-400" />
-              <span>Export PDF Report</span>
-            </button>
-
-            <button
-              onClick={handleExportExcel}
-              disabled={exportingExcel}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-xs font-bold font-outfit transition-all shadow-md active:scale-95 disabled:opacity-50 cursor-pointer"
-            >
-              {exportingExcel ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileSpreadsheet className="w-4 h-4 text-emerald-400" />}
-              <span>Export Excel (XLSX)</span>
-            </button>
-
-            <button
-              onClick={handleExportCsv}
-              disabled={exportingCsv}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-500/30 text-xs font-bold font-outfit transition-all shadow-md active:scale-95 disabled:opacity-50 cursor-pointer"
-            >
-              {exportingCsv ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4 text-indigo-400" />}
-              <span>Export Raw CSV</span>
+              {exportingPdf ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4 text-rose-400" />}
+              <span>Export PDF Statement</span>
             </button>
           </div>
         </div>
       </div>
-
-      {/* PDF Export Modal */}
-      {showPdfModal && (
-        <PdfExportModal
-          isOpen={showPdfModal}
-          onClose={() => setShowPdfModal(false)}
-          activeFilter={activeFilter}
-          summaryData={summaryData}
-          categories={categories}
-        />
-      )}
     </div>
   );
 };
+
 
 export default InsightsExportSection;

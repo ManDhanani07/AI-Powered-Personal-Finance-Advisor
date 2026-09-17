@@ -85,10 +85,27 @@ export const reportService = {
   },
 
   /**
-   * Download exported report file (PDF, Excel, CSV)
+   * Fetch advanced reporting analytics (50/30/20 allocation, solvency ratios, tax deductibles, recurring audit)
    */
-  async downloadReportFile(format = 'csv', type = 'executive', filter = 'this_month', customStart = null, customEnd = null) {
-    const params = { format, type, filter };
+  async getAdvancedAnalytics(filter = 'all', customStart = null, customEnd = null) {
+    try {
+      const params = { filter };
+      if (customStart) params.custom_start = customStart;
+      if (customEnd) params.custom_end = customEnd;
+      const response = await apiClient.get('/reports/advanced-analytics', { params });
+      return response.data || response;
+    } catch (err) {
+      console.warn('Advanced analytics fetch failed:', err);
+      return null;
+    }
+  },
+
+  /**
+   * Download exported report file (PDF or Excel)
+   */
+  async downloadReportFile(format = 'pdf', type = 'executive', filter = 'this_month', customStart = null, customEnd = null) {
+    const normFormat = format === 'xlsx' || format === 'excel' ? 'xlsx' : 'pdf';
+    const params = { format: normFormat, type, filter };
     if (customStart) params.custom_start = customStart;
     if (customEnd) params.custom_end = customEnd;
 
@@ -97,23 +114,41 @@ export const reportService = {
       responseType: 'blob',
     });
 
-    const disposition = response.headers['content-disposition'];
-    let filename = `Executive_Financial_Report.${format}`;
+    const disposition = response?.headers
+      ? (response.headers['content-disposition'] ||
+         response.headers['Content-Disposition'] ||
+         (typeof response.headers.get === 'function' ? response.headers.get('content-disposition') : null))
+      : null;
+
+    let filename = `Executive_Financial_Report.${normFormat}`;
     if (disposition && disposition.includes('filename=')) {
-      filename = disposition.split('filename=')[1].replace(/"/g, '');
+      const match = disposition.match(/filename=["']?([^"';]+)["']?/i);
+      if (match && match[1]) {
+        filename = match[1].trim();
+      }
     }
 
-    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const mimeType = normFormat === 'xlsx'
+      ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      : 'application/pdf';
+
+    const rawBlob = response?.data instanceof Blob
+      ? response.data
+      : (response instanceof Blob ? response : new Blob([response?.data || response], { type: mimeType }));
+
+    const url = window.URL.createObjectURL(rawBlob);
     const link = document.createElement('a');
     link.href = url;
     link.setAttribute('download', filename);
     document.body.appendChild(link);
     link.click();
     link.remove();
-    window.URL.revokeObjectURL(url);
+    setTimeout(() => window.URL.revokeObjectURL(url), 1000);
 
     return { filename };
   },
+
+
 
   /**
    * Fetch structured AI financial analysis summary
@@ -126,6 +161,16 @@ export const reportService = {
     return response.data;
   },
 
+  async getForecastData() {
+    try {
+      const response = await apiClient.get('/expense-prediction/forecast');
+      return response.data || response;
+    } catch (err) {
+      console.warn('Expense forecast fetch in reportService failed (using fallback):', err);
+      return null;
+    }
+  },
+
   // Compatibility Alias Mappings
   getMonthlyBreakdown(year = null) {
     return this.getMonthlyReport(year);
@@ -135,6 +180,9 @@ export const reportService = {
   },
   getBudgetPerformance() {
     return this.getBudgetAnalysis();
+  },
+  getGoalAnalysis() {
+    return apiClient.get('/reports/goal-analysis').then((res) => res.data || res).catch(() => null);
   },
   getIncomeVsExpense(filter = 'this_month', customStart = null, customEnd = null) {
     return this.getIncomeExpenseReport(filter, customStart, customEnd);

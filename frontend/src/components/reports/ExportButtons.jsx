@@ -1,65 +1,59 @@
 import React, { useState } from 'react';
-import { Download, FileSpreadsheet, FileText, Check, Loader2 } from 'lucide-react';
-import { showToast } from '../common/ToastProvider.jsx';
+import { FileText, Loader2 } from 'lucide-react';
+import { toast } from 'react-toastify';
+import reportService from '../../services/reportService.js';
 
-export const ExportButtons = ({ onExport }) => {
-  const [downloadingFormat, setDownloadingFormat] = useState(null);
+const TAB_TITLES = {
+  executive_summary: 'Executive Summary',
+  spending_analysis: 'Spending & Merchant Analysis',
+  tax_audit: 'Tax & Fiscal Audit',
+  insights_export: 'Comprehensive Financial Master Dossier',
+};
 
-  const handleExport = async (format) => {
+export const ExportButtons = ({
+  onExport,
+  activeFilter = 'all',
+  customStart = null,
+  customEnd = null,
+  activeTab = 'executive_summary',
+}) => {
+  const [downloading, setDownloading] = useState(false);
+
+  const handleExportPdf = async () => {
     try {
-      setDownloadingFormat(format);
-      await onExport(format);
-      showToast.success(`Exported ${format.toUpperCase()} report successfully!`);
+      setDownloading(true);
+      const targetType = activeTab || 'executive_summary';
+      if (typeof onExport === 'function') {
+        await onExport('pdf', targetType);
+      } else {
+        await reportService.downloadReportFile('pdf', targetType, activeFilter, customStart, customEnd);
+      }
+      const pageTitle = TAB_TITLES[activeTab] || 'Financial Report';
+      toast.success(`${pageTitle} PDF statement downloaded!`, { icon: '📄' });
     } catch (err) {
-      console.error(err);
-      showToast.error(`Failed to export ${format.toUpperCase()} report.`);
+      console.error('PDF export download failed:', err);
+      toast.error('Failed to generate and download PDF report.');
     } finally {
-      setDownloadingFormat(null);
+      setDownloading(false);
     }
   };
 
   return (
-    <div className="flex items-center gap-2">
-      <button
-        onClick={() => handleExport('pdf')}
-        disabled={!!downloadingFormat}
-        className="px-3.5 py-2.5 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 text-xs font-extrabold uppercase tracking-wider transition-all shadow-md active:scale-95 flex items-center gap-1.5 disabled:opacity-50"
-      >
-        {downloadingFormat === 'pdf' ? (
-          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-        ) : (
-          <FileText className="w-3.5 h-3.5" />
-        )}
-        <span>PDF</span>
-      </button>
-
-      <button
-        onClick={() => handleExport('xlsx')}
-        disabled={!!downloadingFormat}
-        className="px-3.5 py-2.5 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-extrabold uppercase tracking-wider transition-all shadow-md active:scale-95 flex items-center gap-1.5 disabled:opacity-50"
-      >
-        {downloadingFormat === 'xlsx' ? (
-          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-        ) : (
-          <FileSpreadsheet className="w-3.5 h-3.5" />
-        )}
-        <span>Excel</span>
-      </button>
-
-      <button
-        onClick={() => handleExport('csv')}
-        disabled={!!downloadingFormat}
-        className="px-3.5 py-2.5 rounded-2xl bg-primary-500/10 hover:bg-primary-500/20 border border-primary-500/30 text-primary-300 text-xs font-extrabold uppercase tracking-wider transition-all shadow-md active:scale-95 flex items-center gap-1.5 disabled:opacity-50"
-      >
-        {downloadingFormat === 'csv' ? (
-          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-        ) : (
-          <Download className="w-3.5 h-3.5" />
-        )}
-        <span>CSV</span>
-      </button>
-    </div>
+    <button
+      onClick={handleExportPdf}
+      disabled={downloading}
+      className="px-4 py-2.5 rounded-2xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-400 text-xs font-black uppercase tracking-wider transition-all shadow-md active:scale-95 flex items-center gap-2 disabled:opacity-50 cursor-pointer font-outfit"
+      title="Download Formatted PDF Financial Statement"
+    >
+      {downloading ? (
+        <Loader2 className="w-4 h-4 animate-spin" />
+      ) : (
+        <FileText className="w-4 h-4" />
+      )}
+      <span>Download PDF</span>
+    </button>
   );
 };
 
 export default ExportButtons;
+
