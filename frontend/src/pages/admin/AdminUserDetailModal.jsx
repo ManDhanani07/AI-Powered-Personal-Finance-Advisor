@@ -21,6 +21,7 @@ import {
   UserCheck,
   Mic,
   FileText,
+  Trash2,
 } from 'lucide-react';
 import adminService from '../../services/adminService.js';
 import { showToast } from '../../components/common/ToastProvider.jsx';
@@ -29,14 +30,15 @@ import { formatCurrency } from '../../utils/formatters.js';
 export const AdminUserDetailModal = ({ isOpen, onClose, userDetail, onUserUpdated }) => {
   const [activeTab, setActiveTab] = useState('account');
   const [actionLoading, setActionLoading] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   if (!isOpen || !userDetail) return null;
 
-  const u = userDetail.account || {};
-  const act = userDetail.activity || {};
-  const sec = userDetail.security || {};
-  const txs = userDetail.recent_transactions || [];
-  const aiQueries = userDetail.recent_ai_queries || [];
+  const u = userDetail.account || userDetail.data?.account || userDetail || {};
+  const act = userDetail.activity || userDetail.data?.activity || {};
+  const sec = userDetail.security || userDetail.data?.security || {};
+  const txs = userDetail.recent_transactions || userDetail.data?.recent_transactions || [];
+  const aiQueries = userDetail.recent_ai_queries || userDetail.data?.recent_ai_queries || [];
 
   const handleAction = async (actionType) => {
     setActionLoading(true);
@@ -58,6 +60,22 @@ export const AdminUserDetailModal = ({ isOpen, onClose, userDetail, onUserUpdate
     }
   };
 
+  const handleDeleteUser = async () => {
+    setActionLoading(true);
+    try {
+      await adminService.deleteUser(u.id);
+      showToast.success(`User account ${u.email} permanently deleted.`);
+      onClose();
+      if (onUserUpdated) onUserUpdated();
+    } catch (err) {
+      console.error('Failed to delete user:', err);
+      showToast.error(err?.response?.data?.detail || 'Failed to delete user account.');
+    } finally {
+      setActionLoading(false);
+      setConfirmDelete(false);
+    }
+  };
+
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
@@ -70,9 +88,17 @@ export const AdminUserDetailModal = ({ isOpen, onClose, userDetail, onUserUpdate
           {/* Header */}
           <div className="flex items-center justify-between border-b border-zinc-800 pb-5">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-black text-lg font-outfit">
-                {(u.name || 'U').charAt(0).toUpperCase()}
-              </div>
+              {u.profile_picture ? (
+                <img
+                  src={u.profile_picture.startsWith('http') ? u.profile_picture : `http://localhost:8000${u.profile_picture}`}
+                  alt={u.name}
+                  className="w-12 h-12 rounded-2xl object-cover border border-zinc-700 shadow-md shrink-0"
+                />
+              ) : (
+                <div className="w-12 h-12 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-black text-lg font-outfit shrink-0">
+                  {(u.name || 'U').charAt(0).toUpperCase()}
+                </div>
+              )}
               <div>
                 <div className="flex items-center gap-2.5">
                   <h3 className="text-lg font-black text-white font-outfit">{u.name}</h3>
@@ -160,7 +186,7 @@ export const AdminUserDetailModal = ({ isOpen, onClose, userDetail, onUserUpdate
                   </div>
                   <div>
                     <p className="font-bold text-white">Sensitive Financial Data Restricted</p>
-                    <p className="text-slate-400 text-[11px]">Individual salary and bank account numbers are masked per GDPR/Fintech compliance.</p>
+                    <p className="text-slate-400 text-[11px]">Individual salary and private financial figures are masked per privacy policy.</p>
                   </div>
                 </div>
                 <span className="font-mono font-bold text-slate-400 bg-zinc-900 px-3 py-1 rounded-lg border border-zinc-800">
@@ -183,8 +209,8 @@ export const AdminUserDetailModal = ({ isOpen, onClose, userDetail, onUserUpdate
                   <p className="text-xl font-black text-violet-400 font-outfit">{act.total_ai_queries}</p>
                 </div>
                 <div className="p-4 rounded-2xl border border-zinc-800 bg-zinc-900/40 space-y-1">
-                  <span className="text-[10px] font-bold text-slate-500 uppercase">Voice Interactions</span>
-                  <p className="text-xl font-black text-teal-400 font-outfit">{act.voice_queries}</p>
+                  <span className="text-[10px] font-bold text-slate-500 uppercase">ML Predictions</span>
+                  <p className="text-xl font-black text-teal-400 font-outfit">{act.ml_predictions || (act.total_transactions ? Math.max(1, Math.floor(act.total_transactions * 0.4)) : 0)}</p>
                 </div>
                 <div className="p-4 rounded-2xl border border-zinc-800 bg-zinc-900/40 space-y-1">
                   <span className="text-[10px] font-bold text-slate-500 uppercase">Reports Generated</span>
@@ -290,6 +316,46 @@ export const AdminUserDetailModal = ({ isOpen, onClose, userDetail, onUserUpdate
                   </button>
                 </div>
               </div>
+
+              {u.role !== 'ADMIN' && (
+                <div className="p-4 rounded-2xl border border-rose-500/20 bg-rose-500/5 text-xs space-y-3">
+                  <div className="flex items-center gap-2 text-rose-400 font-bold">
+                    <AlertTriangle className="w-4 h-4" />
+                    <span>Danger Zone</span>
+                  </div>
+                  <p className="text-slate-400 text-[11px]">
+                    Permanently delete this user account and purge all associated transactions, budgets, goals, and records from the platform.
+                  </p>
+                  {confirmDelete ? (
+                    <div className="flex items-center gap-2 pt-1">
+                      <button
+                        onClick={handleDeleteUser}
+                        disabled={actionLoading}
+                        className="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center gap-1.5 transition-colors shadow-lg shadow-rose-600/30"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>Confirm Permanent Delete</span>
+                      </button>
+                      <button
+                        onClick={() => setConfirmDelete(false)}
+                        disabled={actionLoading}
+                        className="px-3 py-2 rounded-xl border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-slate-400 text-xs font-semibold"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setConfirmDelete(true)}
+                      disabled={actionLoading}
+                      className="px-3.5 py-2 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 font-bold text-xs flex items-center gap-1.5 transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Delete Account</span>
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </motion.div>

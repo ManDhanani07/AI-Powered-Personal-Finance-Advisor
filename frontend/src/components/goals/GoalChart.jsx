@@ -47,6 +47,7 @@ export const GoalChart = ({ goals = [] }) => {
               <XAxis dataKey="name" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} />
               <Tooltip
+                cursor={false}
                 contentStyle={{
                   backgroundColor: '#1E293B',
                   borderColor: '#334155',

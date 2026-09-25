@@ -6,9 +6,8 @@ import {
   Receipt,
   Cpu,
   ShieldAlert,
-  BarChart3,
   Database,
-  Bell,
+  Tag,
   LifeBuoy,
   Server,
   ShieldCheck,
@@ -18,6 +17,8 @@ import {
   ChevronDown,
   Menu,
   X,
+  AlertTriangle,
+  RefreshCw,
 } from 'lucide-react';
 import useAuth from '../../hooks/useAuth.js';
 import NotificationPopover from '../../components/layout/NotificationPopover.jsx';
@@ -26,29 +27,41 @@ const ADMIN_EMAIL = 'fintech0707@gmail.com';
 
 const NAV_GROUPS = [
   {
-    group: 'CORE OPERATIONS',
+    group: 'OVERVIEW',
     items: [
-      { path: '/admin/overview', label: 'Overview', icon: LayoutDashboard },
-      { path: '/admin/users', label: 'Users', icon: Users },
+      { path: '/admin/overview', label: 'Dashboard', icon: LayoutDashboard },
+    ],
+  },
+  {
+    group: 'USERS',
+    items: [
+      { path: '/admin/users', label: 'Users Directory', icon: Users },
+    ],
+  },
+  {
+    group: 'FINANCIAL DATA',
+    items: [
       { path: '/admin/transactions', label: 'Transactions', icon: Receipt },
+      { path: '/admin/data-management', label: 'Categorization Rules', icon: Tag },
     ],
   },
   {
-    group: 'INTELLIGENCE & RISK',
+    group: 'AI & ML',
     items: [
-      { path: '/admin/ai-ml', label: 'AI & ML Ops', icon: Cpu, badge: 'v2.3' },
-      { path: '/admin/risk-security', label: 'Risk & Security', icon: ShieldAlert, alert: true },
-      { path: '/admin/analytics', label: 'Platform Analytics', icon: BarChart3 },
-      { path: '/admin/data-management', label: 'Data Management', icon: Database },
+      { path: '/admin/ai-ml', label: 'Model Control Center', icon: Cpu, badge: 'v4.0' },
     ],
   },
   {
-    group: 'PLATFORM MANAGEMENT',
+    group: 'SECURITY',
     items: [
-      { path: '/admin/notifications', label: 'Notifications', icon: Bell },
-      { path: '/admin/support', label: 'Support Queue', icon: LifeBuoy },
-      { path: '/admin/system', label: 'System Console', icon: Server },
-      { path: '/admin/audit-logs', label: 'Audit Logs', icon: ShieldCheck },
+      { path: '/admin/risk-security', label: 'Security Events', icon: ShieldAlert },
+    ],
+  },
+  {
+    group: 'SYSTEM',
+    items: [
+      { path: '/admin/system', label: 'System Health', icon: Server },
+      { path: '/admin/support', label: 'Problem Reports', icon: LifeBuoy },
     ],
   },
 ];
@@ -85,10 +98,10 @@ export const AdminLayout = () => {
               </div>
               <div>
                 <span className="font-black text-sm text-white tracking-tight font-outfit">
-                  Fintech Ops Console
+                  FinTech AI
                 </span>
                 <span className="block text-[9px] font-extrabold uppercase tracking-widest text-indigo-400 font-mono">
-                  Super Admin
+                  Platform Admin
                 </span>
               </div>
             </div>
@@ -149,12 +162,20 @@ export const AdminLayout = () => {
         <div className="p-3.5 border-t border-zinc-800/80 bg-zinc-950">
           <div className="flex items-center justify-between p-2 rounded-xl bg-zinc-900/60 border border-zinc-800/60">
             <div className="flex items-center space-x-2.5 min-w-0">
-              <div className="w-8 h-8 rounded-lg bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-bold text-xs shrink-0">
-                SA
-              </div>
+              {user?.profile_picture ? (
+                <img
+                  src={user.profile_picture.startsWith('http') ? user.profile_picture : `http://localhost:8000${user.profile_picture}`}
+                  alt="Admin"
+                  className="w-8 h-8 rounded-lg object-cover border border-indigo-500/30 shrink-0"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-lg bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-bold text-xs shrink-0">
+                  {user?.first_name ? user.first_name.charAt(0).toUpperCase() : 'SA'}
+                </div>
+              )}
               <div className="min-w-0">
                 <p className="text-xs font-bold text-white truncate font-outfit">
-                  Super Admin
+                  {user?.first_name ? `${user.first_name} ${user.last_name || ''}`.trim() : 'Super Admin'}
                 </p>
                 <p className="text-[10px] text-slate-400 truncate font-mono">
                   {user?.email || ADMIN_EMAIL}
@@ -219,11 +240,54 @@ export const AdminLayout = () => {
 
         {/* Main Routed View */}
         <main className="p-4 sm:p-8 flex-1 overflow-x-hidden">
-          <Outlet />
+          <AdminErrorBoundary>
+            <Outlet />
+          </AdminErrorBoundary>
         </main>
       </div>
     </div>
   );
 };
+
+class AdminErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('Admin Console Uncaught Error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="p-8 max-w-xl mx-auto text-center space-y-4 rounded-3xl border border-rose-500/30 bg-rose-950/10 shadow-2xl mt-12">
+          <div className="w-12 h-12 rounded-2xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center text-rose-400 mx-auto">
+            <AlertTriangle className="w-6 h-6" />
+          </div>
+          <div>
+            <h3 className="text-base font-bold text-white font-outfit">Console View Recovered</h3>
+            <p className="text-xs text-slate-400 mt-1">
+              A runtime anomaly occurred in this administrative component. The console environment has been protected.
+            </p>
+          </div>
+          <button
+            onClick={() => this.setState({ hasError: false, error: null })}
+            className="inline-flex items-center space-x-2 px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-xs font-semibold text-white transition-colors"
+          >
+            <RefreshCw className="w-3.5 h-3.5 text-rose-400" />
+            <span>Reset View</span>
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 export default AdminLayout;

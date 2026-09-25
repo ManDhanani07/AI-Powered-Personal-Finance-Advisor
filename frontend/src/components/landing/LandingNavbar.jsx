@@ -53,7 +53,7 @@ export const LandingNavbar = () => {
     navigate(ROUTES.AUTH.LOGIN);
   };
 
-  const handleGetStarted = () => {
+  const handleSignUp = () => {
     navigate(ROUTES.AUTH.REGISTER);
   };
 
@@ -129,10 +129,10 @@ export const LandingNavbar = () => {
             </button>
 
             <button
-              onClick={handleGetStarted}
+              onClick={handleSignUp}
               className="px-5 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-950 font-bold text-xs shadow-sm transition-all flex items-center space-x-1.5 cursor-pointer hover:scale-[1.02] active:scale-[0.98] font-outfit"
             >
-              <span>Get Started</span>
+              <span>Sign Up</span>
               <ArrowRight className="w-3.5 h-3.5 text-slate-950" />
             </button>
           </div>
@@ -163,15 +163,15 @@ export const LandingNavbar = () => {
             <div className="pt-3 border-t border-zinc-800 flex flex-col space-y-2.5">
               <button
                 onClick={handleSignIn}
-                className="w-full py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-slate-300 text-xs font-bold text-center"
+                className="w-full py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-slate-300 hover:text-white text-xs font-bold text-center font-outfit cursor-pointer"
               >
                 Sign In
               </button>
               <button
-                onClick={handleGetStarted}
-                className="w-full py-2.5 rounded-xl bg-white text-slate-950 text-xs font-bold text-center flex items-center justify-center space-x-1.5"
+                onClick={handleSignUp}
+                className="w-full py-2.5 rounded-xl bg-white text-slate-950 text-xs font-bold text-center flex items-center justify-center space-x-1.5 font-outfit cursor-pointer"
               >
-                <span>Get Started</span>
+                <span>Sign Up</span>
                 <ArrowRight className="w-3.5 h-3.5 text-slate-950" />
               </button>
             </div>

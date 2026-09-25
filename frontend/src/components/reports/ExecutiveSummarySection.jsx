@@ -319,7 +319,7 @@ export const ExecutiveSummarySection = ({ summaryData, monthlyReport, comparison
                   axisLine={false}
                   tickFormatter={(v) => formatCompactFinancial(v)}
                 />
-                <Tooltip content={<CustomChartTooltip />} />
+                <Tooltip content={<CustomChartTooltip />} cursor={false} />
                 <Legend
                   verticalAlign="top"
                   align="right"
@@ -356,7 +356,7 @@ export const ExecutiveSummarySection = ({ summaryData, monthlyReport, comparison
                   axisLine={false}
                   tickFormatter={(v) => formatCompactFinancial(v)}
                 />
-                <Tooltip content={<CustomChartTooltip />} />
+                <Tooltip content={<CustomChartTooltip />} cursor={false} />
                 <Legend
                   verticalAlign="top"
                   align="right"

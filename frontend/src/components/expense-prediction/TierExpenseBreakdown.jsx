@@ -2,17 +2,17 @@ import React from 'react';
 import { PieChart, Landmark, ShoppingBag, Utensils, AlertTriangle } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters.js';
 
-export const TierExpenseBreakdown = ({ summary }) => {
-  const fixed = Number(summary?.fixed_bills || summary?.recurring_bills || 0);
-  const routine = Number(summary?.routine_spend || 0);
-  const disc = Number(summary?.disc_spend || 0);
-  const shock = Number(summary?.shock_amount || 0);
+export const TierExpenseBreakdown = ({ summary, fixedVsVariable }) => {
+  const fixed = fixedVsVariable ? Number(fixedVsVariable.fixed_amount) : Number(summary?.fixed_bills || summary?.recurring_bills || 0);
+  const routine = fixedVsVariable ? Number(fixedVsVariable.routine_amount) : Number(summary?.routine_spend || 0);
+  const disc = fixedVsVariable ? Number(fixedVsVariable.discretionary_amount) : Number(summary?.disc_spend || 0);
+  const shock = fixedVsVariable ? Number(fixedVsVariable.shock_amount) : Number(summary?.shock_amount || 0);
   const total = fixed + routine + disc + shock || 1;
 
-  const fixedPct = ((fixed / total) * 100).toFixed(0);
-  const routinePct = ((routine / total) * 100).toFixed(0);
-  const discPct = ((disc / total) * 100).toFixed(0);
-  const shockPct = ((shock / total) * 100).toFixed(0);
+  const fixedPct = fixedVsVariable ? Number(fixedVsVariable.fixed_pct).toFixed(0) : ((fixed / total) * 100).toFixed(0);
+  const routinePct = fixedVsVariable ? Number(fixedVsVariable.routine_pct).toFixed(0) : ((routine / total) * 100).toFixed(0);
+  const discPct = fixedVsVariable ? Number(fixedVsVariable.discretionary_pct).toFixed(0) : ((disc / total) * 100).toFixed(0);
+  const shockPct = fixedVsVariable ? Number(fixedVsVariable.shock_pct).toFixed(0) : ((shock / total) * 100).toFixed(0);
 
   const tiers = [
     {

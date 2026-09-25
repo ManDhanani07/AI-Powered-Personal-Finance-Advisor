@@ -15,6 +15,7 @@ from app.models.login_activity import LoginActivity
 from app.models.system_health_log import SystemHealthLog
 from app.models.admin_notification import AdminNotification
 from app.models.admin_activity_summary import AdminActivitySummary
+from app.models.support_ticket import SupportTicket
 
 __all__ = [
     "Base",
@@ -38,4 +39,5 @@ __all__ = [
     "SystemHealthLog",
     "AdminNotification",
     "AdminActivitySummary",
+    "SupportTicket",
 ]

@@ -498,11 +498,21 @@ class BudgetService(BaseService[BudgetRepository]):
                         health_reasons = ["Overspending" if is_exceeded else "Safe Spending Limits"]
 
                     if self.health_repo:
-                        history_records = await self.health_repo.get_history(user_id, limit=2)
-                        if len(history_records) > 1:
-                            prev_health_score = float(history_records[1].health_score)
+                        history_records = await self.health_repo.get_history(user_id, limit=50)
+                        # Find the most recent record that has a distinct score from curr_health_score
+                        distinct_prev = next(
+                            (r for r in history_records if abs(float(r.health_score) - curr_health_score) >= 0.1),
+                            None
+                        )
+                        if distinct_prev:
+                            prev_health_score = float(distinct_prev.health_score)
                         elif curr_health_score > 0:
-                            prev_health_score = round(max(0.0, curr_health_score + (10.7 if is_exceeded else -4.2)), 1)
+                            # If no distinct historical record exists yet, compute baseline before budget adherence
+                            if is_exceeded:
+                                penalty = min(15.0, max(5.0, round(exceeded_amount / 1000.0 * 2.0, 1)))
+                                prev_health_score = round(min(100.0, curr_health_score + penalty), 1)
+                            else:
+                                prev_health_score = round(max(10.0, curr_health_score - 4.5), 1)
                         else:
                             prev_health_score = 0.0
             except Exception as ex:
@@ -512,17 +522,46 @@ class BudgetService(BaseService[BudgetRepository]):
                 latest_h = await self.health_repo.get_latest_score(user_id)
                 if latest_h:
                     curr_health_score = float(latest_h.health_score)
-                    history_records = await self.health_repo.get_history(user_id, limit=2)
-                    if len(history_records) > 1:
-                        prev_health_score = float(history_records[1].health_score)
+                    history_records = await self.health_repo.get_history(user_id, limit=50)
+                    distinct_prev = next(
+                        (r for r in history_records if abs(float(r.health_score) - curr_health_score) >= 0.1),
+                        None
+                    )
+                    if distinct_prev:
+                        prev_health_score = float(distinct_prev.health_score)
                     elif curr_health_score > 0:
-                        prev_health_score = round(max(0.0, curr_health_score + (10.7 if is_exceeded else -4.2)), 1)
+                        if is_exceeded:
+                            penalty = min(15.0, max(5.0, round(exceeded_amount / 1000.0 * 2.0, 1)))
+                            prev_health_score = round(min(100.0, curr_health_score + penalty), 1)
+                        else:
+                            prev_health_score = round(max(10.0, curr_health_score - 4.5), 1)
                     else:
                         prev_health_score = 0.0
             except Exception as ex:
                 logger.warning(f"Financial health repo lookup error in budget service: {ex}")
 
-        # 6. Goal Impact
+        # Compute dynamic Financial Health Impact explanation
+        score_diff = round(curr_health_score - prev_health_score, 1)
+        if is_exceeded:
+            health_explanation = (
+                f"Budget overruns in category envelopes reduced your Financial Health Score by {abs(score_diff):.1f} pts "
+                f"(from {prev_health_score:.1f} to {curr_health_score:.1f}). Reallocating surplus funds will help recover lost points."
+            )
+        elif score_diff > 0:
+            health_explanation = (
+                f"Your disciplined budget usage is maintaining an optimal burn-rate, contributing a +{score_diff:.1f} pts boost "
+                f"to your Financial Health Score (from {prev_health_score:.1f} to {curr_health_score:.1f})."
+            )
+        elif score_diff < 0:
+            health_explanation = (
+                f"Recent spending velocity has dipped your Financial Health Score by {abs(score_diff):.1f} pts "
+                f"(from {prev_health_score:.1f} to {curr_health_score:.1f}). Pacing discretionary expenses will restore your trajectory."
+            )
+        else:
+            health_explanation = (
+                "Your current budget usage is maintaining an optimal burn-rate, contributing positively to your net worth trajectory."
+            )
+
         goal_impacts = []
         if self.goal_repo:
             try:
@@ -599,7 +638,9 @@ class BudgetService(BaseService[BudgetRepository]):
             "financial_health_impact": {
                 "previous_score": prev_health_score,
                 "current_score": curr_health_score,
+                "score_diff": score_diff,
                 "reasons": health_reasons,
+                "explanation": health_explanation,
             },
             "goal_impact": {
                 "overspending_amount": exceeded_amount,

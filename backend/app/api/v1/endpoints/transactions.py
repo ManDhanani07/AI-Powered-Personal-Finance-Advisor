@@ -4,7 +4,10 @@ from uuid import UUID
 from datetime import datetime
 from decimal import Decimal
 from fastapi import APIRouter, Depends, Query, status, UploadFile, File, Form, Response
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import text
 
+from app.database.session import get_db
 from app.dependencies.auth import get_current_user
 from app.dependencies.service import get_transaction_service, get_csv_import_service
 from app.services.transaction_service import TransactionService
@@ -377,6 +380,7 @@ async def confirm_csv_import(
     payload: CsvConfirmImportRequest,
     current_user: User = Depends(get_current_user),
     csv_service: CsvImportService = Depends(get_csv_import_service),
+    db: AsyncSession = Depends(get_db),
 ):
     result = await csv_service.execute_batch_import(
         user_id=current_user.id,
@@ -385,6 +389,65 @@ async def confirm_csv_import(
         default_account_type=payload.default_account_type or "SAVINGS",
         default_payment_method=payload.default_payment_method or "UPI",
     )
+
+    # Record operational import job in database for admin monitoring & data quality center
+    try:
+        import secrets
+        from datetime import timezone
+        job_code = f"IMP-{secrets.token_hex(3).upper()}"
+        total_req = len(payload.transactions)
+        imported = result.imported_count
+        duplicates = result.skipped_duplicates
+        failed = max(0, total_req - imported - duplicates)
+        
+        status_val = "Completed"
+        if failed > 0 and imported > 0:
+            status_val = "Partially Completed"
+        elif failed > 0 and imported == 0:
+            status_val = "Failed"
+
+        error_details = []
+        if duplicates > 0:
+            error_details.append({
+                "reason": "Existing transaction matched by duplicate detection rules",
+                "count": duplicates,
+            })
+        if failed > 0:
+            error_details.append({
+                "reason": "Invalid or unparseable record schema",
+                "count": failed,
+            })
+
+        await db.execute(
+            text("""
+                INSERT INTO import_jobs (
+                    job_code, user_id, user_email, filename, file_type, status,
+                    records_processed, successful_records, failed_records, duplicates, skipped_records,
+                    error_summary, created_at, completed_at
+                ) VALUES (
+                    :job_code, :user_id, :user_email, :filename, 'CSV', :status,
+                    :records_processed, :successful_records, :failed_records, :duplicates, :skipped_records,
+                    :error_summary, NOW(), NOW()
+                );
+            """),
+            {
+                "job_code": job_code,
+                "user_id": current_user.id,
+                "user_email": current_user.email,
+                "filename": getattr(request, "filename", None) or "transactions.csv",
+                "status": status_val,
+                "records_processed": total_req,
+                "successful_records": imported,
+                "failed_records": failed,
+                "duplicates": duplicates,
+                "skipped_records": duplicates,
+                "error_summary": json.dumps(error_details) if error_details else None,
+            }
+        )
+        await db.commit()
+    except Exception as e:
+        logger.error(f"Error logging import job telemetry: {e}")
+        pass
 
     return APIResponse(
         success=True,

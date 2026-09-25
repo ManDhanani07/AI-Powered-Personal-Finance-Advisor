@@ -235,3 +235,114 @@ class DashboardCompleteResponse(BaseModel):
     goals_overview: DashboardGoalsOverviewResponse
     spending_analysis: DashboardSpendingAnalysisResponse
 
+
+# ─────────────────────────────────────────────
+# Phase 2: Income Sources, Patterns, Anomalies & Accounts
+# ─────────────────────────────────────────────
+
+class IncomeSourceSummary(BaseModel):
+    category_name: str
+    total_amount: Decimal
+    percentage: Decimal
+    stream_type: str  # "STABLE" or "VARIABLE"
+    transaction_count: int
+
+
+class MonthlyIncomeStreamPoint(BaseModel):
+    month: str
+    total: Decimal
+    breakdown: Dict[str, Decimal]
+
+
+class DashboardIncomeSourcesResponse(BaseModel):
+    monthly_streams: List[MonthlyIncomeStreamPoint]
+    categories: List[str]
+    sources_summary: List[IncomeSourceSummary]
+    total_income: Decimal
+    stability_score: Decimal
+    stability_level: str
+    stable_amount: Decimal
+    variable_amount: Decimal
+    stable_percentage: Decimal
+    variable_percentage: Decimal
+    ai_insight: str
+
+
+class DayOfWeekSpendingItem(BaseModel):
+    day_index: int
+    day_name: str
+    total_spent: Decimal
+    avg_per_day: Decimal
+    transaction_count: int
+    percentage: Decimal
+    intensity: int
+
+
+class WeekdayWeekendMetric(BaseModel):
+    weekday_total: Decimal
+    weekday_avg: Decimal
+    weekend_total: Decimal
+    weekend_avg: Decimal
+    weekend_multiplier: Decimal
+    insight: str
+
+
+class TimeOfMonthMetric(BaseModel):
+    early_month_total: Decimal
+    early_month_pct: Decimal
+    mid_month_total: Decimal
+    mid_month_pct: Decimal
+    late_month_total: Decimal
+    late_month_pct: Decimal
+    insight: str
+
+
+class DashboardSpendingPatternsResponse(BaseModel):
+    heatmap_7day: List[DayOfWeekSpendingItem]
+    weekday_vs_weekend: WeekdayWeekendMetric
+    time_of_month: TimeOfMonthMetric
+    payment_methods: List[PaymentMethodChartPoint]
+
+
+class AnomalyItem(BaseModel):
+    id: str
+    date: str
+    category_name: str
+    title: str
+    actual_amount: Decimal
+    baseline_amount: Decimal
+    multiplier: Decimal
+    severity: str  # "CRITICAL", "HIGH", "MODERATE"
+    explanation: str
+    status: str    # "FLAGGED", "REVIEWED"
+    transactions: List[MiniTransactionSchema] = []
+
+
+class DashboardAnomalyTimelineResponse(BaseModel):
+    total_anomalies: int
+    critical_count: int
+    high_count: int
+    moderate_count: int
+    anomalies: List[AnomalyItem]
+
+
+class AccountItem(BaseModel):
+    id: str
+    name: str
+    institution: str
+    account_type: str
+    balance: Decimal
+    available_credit: Optional[Decimal] = None
+    credit_limit: Optional[Decimal] = None
+    utilization_pct: Optional[Decimal] = None
+    is_primary: bool
+    last_sync: str
+
+
+class DashboardAccountsResponse(BaseModel):
+    total_net_worth: Decimal
+    total_liquid_balance: Decimal
+    total_credit_used: Decimal
+    accounts: List[AccountItem]
+    payment_method_breakdown: List[PaymentMethodChartPoint]
+

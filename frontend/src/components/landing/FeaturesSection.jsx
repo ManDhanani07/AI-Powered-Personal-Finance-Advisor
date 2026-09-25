@@ -40,7 +40,7 @@ const PILLARS = [
       { icon: Tag,          label: 'Smart Category Regex', sub: 'Zero manual tagging' },
       { icon: Bell,         label: 'Overspend Triggers',   sub: 'Push, web & in-app alerts' },
       { icon: TrendingUp,   label: 'Income vs Burn Velocity', sub: 'Daily pace metric' },
-      { icon: CheckCircle2, label: 'Bank Aggregator API',  sub: 'Live account sync' },
+      { icon: CheckCircle2, label: 'Multi-Format CSV Import', sub: 'Instant statement ingestion' },
     ],
   },
   {
@@ -84,7 +84,7 @@ const PILLARS = [
     icon: BrainCircuit,
     title: 'AI Expense Prediction',
     tag: 'Pillar 4',
-    badge: { text: 'Multi-Scale Adaptive ML (98.86% Acc)', color: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' },
+    badge: { text: 'Multi-Scale Adaptive ML', color: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' },
     desc: 'Multi-scale adaptive machine learning forecasting next-month spending, 3-tier expense breakdown, P10–P90 quantile intervals, and safe budget ceilings.',
     color: 'text-emerald-400',
     bgColor: 'bg-emerald-500/10 border-emerald-500/20',
@@ -94,7 +94,7 @@ const PILLARS = [
       { icon: Binary,           label: 'Adaptive Multi-Scale', sub: 'Fast, medium & slow EMAs' },
       { icon: ShieldCheck,      label: 'Quantile Pinball Bounds', sub: 'P10 minimum to P90 ceiling' },
       { icon: SlidersHorizontal, label: 'Scenario Simulator', sub: 'Income & discretionary shifts' },
-      { icon: Zap,              label: 'Safe Budget Buffer',   sub: '98.89% protection rate' },
+      { icon: Zap,              label: 'Safe Budget Buffer',   sub: 'Adaptive variance coverage' },
     ],
   },
   {
@@ -130,7 +130,7 @@ const PILLARS = [
       { icon: FileSpreadsheet, label: 'Executive PDF Digest', sub: 'Comprehensive financial report' },
       { icon: TrendingUp,      label: 'Income vs Expense',    sub: 'Net margin analytics' },
       { icon: Tag,             label: 'Tax Tagging (80C)',    sub: 'Sec 80C & GST classification' },
-      { icon: ShieldCheck,     label: 'Audit Trail',          sub: 'Bank-reconciled history' },
+      { icon: ShieldCheck,     label: 'Audit Trail',          sub: 'Verified ledger history' },
     ],
   },
 ];

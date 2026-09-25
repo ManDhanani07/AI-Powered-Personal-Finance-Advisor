@@ -67,6 +67,8 @@ async def update_user_profile(
     )
 
 
+from app.services.cloudinary_service import cloudinary_service
+
 @router.post(
     "/upload-profile-picture",
     response_model=APIResponse[dict],
@@ -85,17 +87,15 @@ async def upload_profile_picture(
     if len(file_contents) > MAX_IMAGE_SIZE_BYTES:
         raise BadRequestException("File size exceeds maximum limit of 5MB.")
 
-    # Generate unique filename
-    ext = file.filename.split(".")[-1].lower() if "." in file.filename else "jpg"
-    unique_filename = f"avatar_{current_user.id}_{uuid.uuid4().hex[:8]}.{ext}"
-    file_path = UPLOAD_DIR / unique_filename
-
-    # Save image file to filesystem
-    with open(file_path, "wb") as f:
-        f.write(file_contents)
-
-    # Public image URL
-    avatar_url = f"/static/uploads/avatars/{unique_filename}"
+    # Upload via Cloudinary CDN service (or fallback to local if credentials not yet configured)
+    full_name = f"{current_user.first_name or ''} {current_user.last_name or ''}".strip()
+    avatar_url = await cloudinary_service.upload_avatar(
+        file_bytes=file_contents,
+        user_id=str(current_user.id),
+        filename=file.filename,
+        email=current_user.email,
+        full_name=full_name,
+    )
 
     # Update User profile_picture field in DB
     await user_repo.update(current_user.id, {"profile_picture": avatar_url})
@@ -117,6 +117,13 @@ async def remove_profile_picture(
     current_user: User = Depends(get_current_user),
     user_repo: UserRepository = Depends(get_user_repository),
 ):
+    full_name = f"{current_user.first_name or ''} {current_user.last_name or ''}".strip()
+    await cloudinary_service.delete_avatar(
+        user_id=str(current_user.id),
+        current_url=current_user.profile_picture,
+        email=current_user.email,
+        full_name=full_name,
+    )
     await user_repo.update(current_user.id, {"profile_picture": None})
     return APIResponse(
         success=True,

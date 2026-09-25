@@ -55,3 +55,13 @@ class FinancialHealthRepository:
         )
         result = await self.db.execute(stmt)
         return list(result.scalars().all())
+
+    async def get_latest_score(self, user_id: UUID) -> Optional[FinancialHealthHistory]:
+        stmt = (
+            select(FinancialHealthHistory)
+            .where(FinancialHealthHistory.user_id == user_id)
+            .order_by(FinancialHealthHistory.calculated_at.desc())
+            .limit(1)
+        )
+        result = await self.db.execute(stmt)
+        return result.scalars().first()

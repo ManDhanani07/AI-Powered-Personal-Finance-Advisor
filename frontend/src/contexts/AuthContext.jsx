@@ -9,8 +9,8 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [accessToken, setAccessToken] = useState(() => getItem(STORAGE_KEYS.AUTH_TOKEN) || null);
   const [refreshToken, setRefreshToken] = useState(() => getItem(STORAGE_KEYS.REFRESH_TOKEN) || null);
-  const [isAuthenticated, setIsAuthenticated] = useState(() => !!getItem(STORAGE_KEYS.AUTH_TOKEN));
-  const [isLoading, setIsLoading] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(() => Boolean(getItem(STORAGE_KEYS.AUTH_TOKEN)));
 
   /**
    * Clear session state & local storage
@@ -60,7 +60,6 @@ export const AuthProvider = ({ children }) => {
       if (urlAccess) {
         setItem(STORAGE_KEYS.AUTH_TOKEN, urlAccess);
         setAccessToken(urlAccess);
-        setIsAuthenticated(true);
         if (urlRefresh) {
           setItem(STORAGE_KEYS.REFRESH_TOKEN, urlRefresh);
           setRefreshToken(urlRefresh);
@@ -74,21 +73,27 @@ export const AuthProvider = ({ children }) => {
 
     const token = getItem(STORAGE_KEYS.AUTH_TOKEN);
     if (!token) {
+      setIsLoading(false);
+      setIsAuthenticated(false);
+      setUser(null);
       return;
     }
 
     try {
+      setIsLoading(true);
       const res = await authService.getCurrentUser();
-      if (res?.data) {
-        setUser(res.data);
+      const userData = res?.data?.data ?? res?.data;
+      if (userData && (userData.id || userData.email)) {
+        setUser(userData);
         setIsAuthenticated(true);
-      }
-    } catch (err) {
-      console.warn('Silent auto-login session refresh notice:', err);
-      // Only clear if status is 401
-      if (err?.status === 401) {
+      } else {
         clearAuthState();
       }
+    } catch (err) {
+      console.warn('Session verification notice (clearing unauthenticated state):', err);
+      clearAuthState();
+    } finally {
+      setIsLoading(false);
     }
   }, [clearAuthState]);
 
@@ -97,7 +102,6 @@ export const AuthProvider = ({ children }) => {
 
     const handleGlobalLogout = () => {
       clearAuthState();
-      window.location.href = '/';
     };
 
     window.addEventListener('auth:logout', handleGlobalLogout);
@@ -192,6 +196,16 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  /**
+   * Optimistically update user fields in state without full page reload
+   */
+  const updateUser = useCallback((updatedFields) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      return { ...prev, ...updatedFields };
+    });
+  }, []);
+
   const value = {
     user,
     accessToken,
@@ -206,6 +220,7 @@ export const AuthProvider = ({ children }) => {
     resetPassword,
     changePassword,
     loadCurrentUser,
+    updateUser,
     saveAuthState,
   };
 

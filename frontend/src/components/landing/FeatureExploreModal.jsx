@@ -17,7 +17,7 @@ import useAuth from '../../hooks/useAuth.js';
 import { ROUTES } from '../../constants/index.js';
 import { formatCurrency } from '../../utils/formatters.js';
 
-export const FeatureExploreModal = ({ feature, isOpen, onClose, onOpenLogin }) => {
+export const FeatureExploreModal = ({ feature, isOpen, onClose }) => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
 
@@ -36,8 +36,6 @@ export const FeatureExploreModal = ({ feature, isOpen, onClose, onOpenLogin }) =
     onClose();
     if (isAuthenticated && feature.route) {
       navigate(feature.route);
-    } else if (onOpenLogin) {
-      onOpenLogin();
     } else {
       navigate(ROUTES.AUTH.LOGIN);
     }
@@ -246,8 +244,8 @@ export const FeatureExploreModal = ({ feature, isOpen, onClose, onOpenLogin }) =
                         </span>
                       </div>
                       <div>
-                        <span className="text-slate-400 text-[10px] uppercase block">Multi-Scale Model Accuracy</span>
-                        <span className="font-extrabold text-emerald-400 text-sm">98.86% WPA (R²: 0.999)</span>
+                        <span className="text-slate-400 text-[10px] uppercase block">Model Evaluation Metric</span>
+                        <span className="font-extrabold text-emerald-400 text-sm">Adaptive Quantile Regressor</span>
                       </div>
                     </div>
                   </div>
@@ -342,7 +340,7 @@ export const FeatureExploreModal = ({ feature, isOpen, onClose, onOpenLogin }) =
                   </div>
                   <div className="flex items-center space-x-2 p-2.5 rounded-xl bg-bg-elevated/40 border border-border-subtle">
                     <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span className="text-slate-300">Bank-Grade 256-Bit Encryption Security</span>
+                    <span className="text-slate-300">Client-Side 256-Bit Data Encryption</span>
                   </div>
                 </div>
               </div>

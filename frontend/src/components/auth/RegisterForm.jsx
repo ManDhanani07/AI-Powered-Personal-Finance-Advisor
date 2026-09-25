@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Mail,
@@ -20,12 +20,56 @@ import {
   Eye,
   EyeOff,
   Lock,
+  Shield,
+  Crown,
+  Zap,
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 
 import useAuth from '../../hooks/useAuth.js';
 import SocialLoginButtons from './SocialLoginButtons.jsx';
 import { ROUTES } from '../../constants/index.js';
+
+const MEMBERSHIP_PLANS = [
+  {
+    id: 'starter',
+    name: 'Starter Account',
+    tierLabel: 'Free Forever',
+    price: '₹0',
+    period: 'forever',
+    icon: Shield,
+    badge: 'FREE',
+    badgeColor: 'border-emerald-500/40 text-emerald-400 bg-emerald-500/10',
+    desc: 'Essential tracking for students & early career starters.',
+    highlights: ['Manual & CSV Logging', 'Up to 3 Active Budgets', 'Standard Reports'],
+  },
+  {
+    id: 'pro',
+    name: 'Professional Wealth',
+    tierLabel: 'Most Popular',
+    price: '₹299',
+    period: '/ month',
+    trialNote: '14-Day Free Trial',
+    icon: Crown,
+    badge: 'RECOMMENDED',
+    badgeColor: 'border-amber-500/50 text-amber-300 bg-amber-500/15',
+    desc: 'Full AI Wealth OS with automated ML predictions & copilot.',
+    highlights: ['Gemini AI Copilot', 'ML Expense Forecasting', 'Unlimited Budgets', 'Anomaly Alerts'],
+  },
+  {
+    id: 'business',
+    name: 'Business Suite & HNIs',
+    tierLabel: 'Elite Tier',
+    price: '₹799',
+    period: '/ month',
+    trialNote: '14-Day Free Trial',
+    icon: Zap,
+    badge: 'UNLIMITED',
+    badgeColor: 'border-violet-500/50 text-violet-300 bg-violet-500/15',
+    desc: 'Multi-portfolio tracking for business owners & family hubs.',
+    highlights: ['Multi-Entity Family Hub', 'CA-Ready Tally Export', 'Priority AI Advisory'],
+  },
+];
 
 const PERSONAS = [
   {
@@ -60,8 +104,14 @@ const LABEL_BASE = 'block text-[10px] font-bold uppercase tracking-widest text-s
 export const RegisterForm = () => {
   const { register: registerAuth } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  const planParam = (searchParams.get('plan') || '').toLowerCase();
+  const validPlans = ['starter', 'pro', 'business'];
+  const defaultPlan = validPlans.includes(planParam) ? planParam : 'pro';
 
   const [step, setStep] = useState(1);
+  const [selectedPlan, setSelectedPlan] = useState(defaultPlan);
   const [selectedPersona, setSelectedPersona] = useState('professional');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -121,6 +171,7 @@ export const RegisterForm = () => {
         phone: data.phone || null,
         monthly_income: parseFloat(data.monthly_income) || 0.0,
         occupation: selectedPersona,
+        membership_tier: selectedPlan,
       };
       const res = await registerAuth(payload);
       toast.success('Verification code sent to your email! Please enter the 6-digit code.', { icon: '✉️' });
@@ -146,15 +197,15 @@ export const RegisterForm = () => {
           <UserPlus className="h-4 w-4" />
         </div>
         <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white font-outfit">
-          Create Free Account
+          {step === 1 ? 'Create Account' : step === 2 ? 'Choose Membership' : 'Financial Profile'}
         </h2>
         <p className="mt-0.5 text-[11px] text-slate-500">
-          Step {step} of 2: {step === 1 ? 'Account Credentials' : 'Personal Financial Setup'}
+          Step {step} of 3: {step === 1 ? 'Account Credentials' : step === 2 ? 'Select Membership Tier' : 'Personal Financial Setup'}
         </p>
 
         {/* Step Progress Dots */}
         <div className="mt-2 flex items-center justify-center gap-1.5">
-          {[1, 2].map((s) => (
+          {[1, 2, 3].map((s) => (
             <div
               key={s}
               className={`h-1 rounded-full transition-all duration-300 ${
@@ -389,9 +440,9 @@ export const RegisterForm = () => {
                 type="button"
                 onClick={goToStep2}
                 disabled={passedCount < 5}
-                className="w-full flex items-center justify-center gap-2 rounded-xl bg-white py-2.5 text-xs font-bold text-slate-950 transition-all hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed mt-1"
+                className="w-full flex items-center justify-center gap-2 rounded-xl bg-white py-2.5 text-xs font-bold text-slate-950 transition-all hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed mt-1 cursor-pointer"
               >
-                <span>Continue to Financial Setup</span>
+                <span>Continue to Choose Membership</span>
                 <ArrowRight className="h-3.5 w-3.5" />
               </button>
 
@@ -404,10 +455,118 @@ export const RegisterForm = () => {
             </motion.div>
           )}
 
-          {/* ── STEP 2: PERSONA & MONTHLY INCOME ── */}
+          {/* ── STEP 2: MEMBERSHIP PLAN SELECTION ── */}
           {step === 2 && (
             <motion.div
               key="step2"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.22 }}
+              className="space-y-3"
+            >
+              <div>
+                <label className={LABEL_BASE}>Select Your Membership Tier</label>
+                <div className="space-y-2">
+                  {MEMBERSHIP_PLANS.map((plan) => {
+                    const Icon = plan.icon;
+                    const isSelected = selectedPlan === plan.id;
+                    return (
+                      <div
+                        key={plan.id}
+                        onClick={() => setSelectedPlan(plan.id)}
+                        className={`relative rounded-2xl border p-2.5 cursor-pointer transition-all duration-200 select-none ${
+                          isSelected
+                            ? 'border-emerald-500/80 bg-emerald-500/[0.08] shadow-[0_0_20px_rgba(16,185,129,0.12)] ring-1 ring-emerald-500/40'
+                            : 'border-zinc-800/80 bg-[#09090B] hover:border-zinc-700 hover:bg-zinc-900/40'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-center gap-2.5">
+                            <div className={`p-2 rounded-xl border ${
+                              isSelected
+                                ? 'border-emerald-500/40 bg-emerald-500/20 text-emerald-300'
+                                : 'border-zinc-800 bg-zinc-900 text-slate-400'
+                            }`}>
+                              <Icon className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <h3 className="text-xs font-black text-white font-outfit">{plan.name}</h3>
+                                <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${plan.badgeColor}`}>
+                                  {plan.badge}
+                                </span>
+                              </div>
+                              <p className="text-[10px] text-slate-400 mt-0.5">{plan.desc}</p>
+                            </div>
+                          </div>
+
+                          <div className="text-right shrink-0">
+                            <div className="flex items-baseline justify-end gap-1">
+                              <span className="text-sm font-black text-white font-outfit">{plan.price}</span>
+                              <span className="text-[10px] text-slate-400 font-semibold">{plan.period}</span>
+                            </div>
+                            {plan.trialNote && (
+                              <span className="text-[9px] font-bold text-emerald-400 font-mono block">
+                                {plan.trialNote}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Feature bullets */}
+                        <div className="mt-2 pt-2 border-t border-zinc-800/60 flex flex-wrap gap-1.5">
+                          {plan.highlights.map((h, i) => (
+                            <span
+                              key={i}
+                              className="inline-flex items-center gap-1 text-[9px] font-medium text-slate-300 bg-zinc-900/80 px-2 py-0.5 rounded-md border border-zinc-800"
+                            >
+                              <Check className="w-2.5 h-2.5 text-emerald-400 shrink-0" />
+                              <span>{h}</span>
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="mt-2 rounded-xl bg-zinc-900/50 border border-zinc-800/80 p-2 flex items-center justify-between text-[10px] text-slate-400 font-medium">
+                  <span className="flex items-center gap-1 text-slate-300">
+                    <Check className="w-3 h-3 text-emerald-400" />
+                    14-day free trial on Pro &amp; Business
+                  </span>
+                  <span className="text-slate-500 font-mono">No card required</span>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setStep(1)}
+                  className="flex items-center justify-center gap-1.5 rounded-xl border border-zinc-800 bg-[#09090B] px-4 py-2.5 text-xs font-semibold text-slate-300 hover:bg-zinc-800 cursor-pointer"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5" />
+                  <span>Back</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setStep(3)}
+                  className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-white py-2.5 text-xs font-bold text-slate-950 transition-all hover:bg-slate-100 shadow-md cursor-pointer"
+                >
+                  <span>Continue with {MEMBERSHIP_PLANS.find((p) => p.id === selectedPlan)?.name || 'Plan'}</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </motion.div>
+          )}
+
+          {/* ── STEP 3: PERSONA & MONTHLY INCOME ── */}
+          {step === 3 && (
+            <motion.div
+              key="step3"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
@@ -428,7 +587,7 @@ export const RegisterForm = () => {
                           setSelectedPersona(p.id);
                           setValue('monthly_income', p.defaultIncome);
                         }}
-                        className={`w-full flex items-start gap-2.5 rounded-xl border p-2.5 text-left transition-all ${
+                        className={`w-full flex items-start gap-2.5 rounded-xl border p-2.5 text-left transition-all cursor-pointer ${
                           isSelected
                             ? 'border-emerald-500/60 bg-emerald-500/10 text-white'
                             : 'border-zinc-800 bg-[#09090B] text-slate-400 hover:border-zinc-700'
@@ -482,12 +641,26 @@ export const RegisterForm = () => {
                 </div>
               </div>
 
-              {/* Submit Buttons */}
-              <div className="flex gap-2 pt-2">
+              {/* Selected Plan Summary Banner */}
+              <div className="rounded-xl border border-zinc-800 bg-[#121216] px-3 py-2 flex items-center justify-between">
+                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                  Plan: <span className="text-white font-bold">{MEMBERSHIP_PLANS.find(p => p.id === selectedPlan)?.name}</span>
+                </span>
                 <button
                   type="button"
-                  onClick={() => setStep(1)}
-                  className="flex items-center justify-center gap-1.5 rounded-xl border border-zinc-800 bg-[#09090B] px-4 py-2.5 text-xs font-semibold text-slate-300 hover:bg-zinc-800"
+                  onClick={() => setStep(2)}
+                  className="text-[10px] font-bold text-emerald-400 hover:underline cursor-pointer"
+                >
+                  Change Plan
+                </button>
+              </div>
+
+              {/* Submit Buttons */}
+              <div className="flex gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setStep(2)}
+                  className="flex items-center justify-center gap-1.5 rounded-xl border border-zinc-800 bg-[#09090B] px-4 py-2.5 text-xs font-semibold text-slate-300 hover:bg-zinc-800 cursor-pointer"
                 >
                   <ArrowLeft className="h-3.5 w-3.5" />
                   <span>Back</span>
@@ -496,7 +669,7 @@ export const RegisterForm = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 py-2.5 text-xs font-black uppercase tracking-wider text-slate-950 shadow-lg shadow-emerald-500/20 hover:scale-[1.01] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 py-2.5 text-xs font-black uppercase tracking-wider text-slate-950 shadow-lg shadow-emerald-500/20 hover:scale-[1.01] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
                   {isSubmitting ? (
                     <>

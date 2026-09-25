@@ -8,7 +8,7 @@ const STEPS = [
     id: 'transactions',
     stepNum: '1',
     title: 'Add Transactions',
-    desc: 'Log income, expenses, and transfers in seconds with AI regex merchant auto-categorization and bank aggregator sync.',
+    desc: 'Log income, expenses, and transfers in seconds with intelligent merchant auto-categorization and CSV file import.',
     gradient: 'bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 bg-clip-text text-transparent',
     dotColor: 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]',
   },

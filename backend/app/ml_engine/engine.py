@@ -60,8 +60,11 @@ class FinancialAdvisorEngine:
             'electronics', 'gadgets', 'vacation & trip', 'vacation', 'miscellaneous', 'travel', 'outing', 'movies'
         ]
         self.shock_cats = [
-            'medical emergency', 'hospitalization', 'surgery', 'home renovation & interior', 'home renovation', 'interior',
-            'emergency', 'wedding & marriage', 'wedding', 'marriage', 'charity & donation', 'donation', 'legal fees'
+            'medical emergency', 'hospitalization', 'hospital', 'surgery', 'icu', 'ambulance', 'accident', 'emergency',
+            'home renovation & interior', 'home renovation', 'renovation', 'interior', 'interior design',
+            'wedding & marriage', 'wedding', 'marriage', 'charity & donation', 'donation', 'legal fees', 'court fees',
+            'vacation & trip', 'vacation', 'holiday', 'resort', 'flight', 'airline', 'airways', 'hotel booking', 'tour package', 'travel booking',
+            'vehicle repair', 'car repair', 'accident repair', 'car service overhaul'
         ]
 
     def sanitize(self, transactions, days_active=30, historical_incomes=None, historical_spends=None):
@@ -143,7 +146,16 @@ class FinancialAdvisorEngine:
         fixed_bills = float(cat_net[is_fixed]['amount'].sum())
 
         var_df = cat_net[~is_fixed]
-        is_shock = (var_df['cat_clean'].isin(self.shock_cats)) | (var_df['amount'] > shock_thresh)
+        
+        # Routine living categories (Groceries, Food & Dining, Supermarket, Fuel, Transit, Basic Pharmacy)
+        # represent ongoing baseline sustenance and should NEVER be flagged as shocks solely due to amount!
+        is_explicit_shock_cat = var_df['cat_clean'].isin(self.shock_cats)
+        is_routine_cat = var_df['cat_clean'].isin(self.routine_cats)
+        
+        # A category is a shock ONLY if:
+        # 1. It explicitly belongs to known shock categories (e.g. hospitalization, surgery, holiday vacation, vehicle repair), OR
+        # 2. It is a NON-ROUTINE category (discretionary or uncategorized) exceeding the high shock threshold
+        is_shock = is_explicit_shock_cat | ((~is_routine_cat) & (var_df['amount'] > shock_thresh))
         shock_amt = float(var_df[is_shock]['amount'].sum())
         
         clean_var_df = var_df[~is_shock]
@@ -151,7 +163,7 @@ class FinancialAdvisorEngine:
         routine_spend = float(clean_var_df[is_routine]['amount'].sum())
         disc_spend = float(clean_var_df[~is_routine]['amount'].sum())
 
-        # If a variable category experienced a one-off shock but belongs to routine living (e.g. hospitalization), retain essential baseline
+        # If a variable category experienced a one-off shock but belongs to routine living (e.g. hospitalization under medical), retain essential baseline
         for _, r in var_df[is_shock].iterrows():
             if r['cat_clean'] in self.routine_cats:
                 base_allotted = min(float(r['amount']), max(1500.0, user_scale * 0.12))
@@ -188,7 +200,7 @@ class FinancialAdvisorEngine:
             'avg_tx_size': round(float(exp_df['amount'].mean()), 2)
         }
 
-    def predict(self, transactions, target_month=None, days_active=30, historical_incomes=None, historical_spends=None, current_month=None):
+    def predict(self, transactions, target_month=None, days_active=30, historical_incomes=None, historical_spends=None, current_month=None, historical_shock_amount=None):
         """
         Generates master multi-scale next-month expense forecasts, confidence bounds, and safety buffers.
         """
@@ -214,6 +226,8 @@ class FinancialAdvisorEngine:
         upper_shock_cap = user_q75 + 1.2 * iqr
 
         clean_series = raw_series.apply(lambda x: min(x, upper_shock_cap) if x > upper_shock_cap else x)
+        hist_shocks = [float(val - user_med) for val in raw_series if val > upper_shock_cap]
+        detected_shock_amount = round(float(max(hist_shocks)) if hist_shocks else float(prep.get('shock_amount', 0.0)), 2)
         
         # Calendar configuration
         if target_month is None:
@@ -309,7 +323,8 @@ class FinancialAdvisorEngine:
                     category_anchor = fixed + routine + (disc * 0.70)
                 pred_anchor = 0.55 * macro_anchor + 0.45 * category_anchor
             elif delta_pct < -0.12:
-                pred_anchor = 0.40 * last_val + 0.35 * roll_mean_6 + 0.25 * ema_fast
+                # Contraction month (transient dip) -> Econometric mean-reversion towards steady lifestyle equilibrium
+                pred_anchor = 0.60 * clean_user_med + 0.35 * ema_slow + 0.05 * roll_mean_6
             else:
                 pred_anchor = 0.35 * ema_fast + 0.35 * ema_med + 0.15 * roll_mean_3 + 0.15 * roll_mean_6
 
@@ -394,6 +409,16 @@ class FinancialAdvisorEngine:
         
         safe_total_ceiling = round(predicted_routine + emergency_buffer, 2)
         disposable_savings = round(max(0.0, income - predicted_routine), 2)
+
+        # Scenarios: Normal, Emergency, Frugal
+        if historical_shock_amount and float(historical_shock_amount) > 0:
+            effective_shock = round(float(historical_shock_amount), 2)
+        elif detected_shock_amount > 0:
+            effective_shock = detected_shock_amount
+        else:
+            effective_shock = emergency_buffer
+        emergency_spend = round(predicted_routine + effective_shock, 2)
+        frugal_spend = round(p10_min, 2)
         
         burn_rate = predicted_routine / (income + 1.0) if income > 0 else 1.0
         if burn_rate > 0.85:
@@ -418,7 +443,10 @@ class FinancialAdvisorEngine:
                 "recommended_emergency_buffer": emergency_buffer,
                 "safe_total_budget_ceiling": safe_total_ceiling,
                 "estimated_monthly_savings": disposable_savings,
-                "confidence_tier": model_confidence
+                "confidence_tier": model_confidence,
+                "emergency_scenario_spend": emergency_spend,
+                "emergency_shock_amount": round(effective_shock, 2),
+                "frugal_survival_spend": frugal_spend
             },
             "financial_health_audit": {
                 "risk_status": risk_flag,

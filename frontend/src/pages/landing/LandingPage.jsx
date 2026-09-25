@@ -1,4 +1,4 @@
-import React, { useState, Suspense, lazy } from 'react';
+import React, { Suspense, lazy } from 'react';
 
 // ─── CRITICAL ABOVE-THE-FOLD COMPONENTS (Instant Render) ────────────────
 import { LandingNavbar } from '../../components/landing/LandingNavbar.jsx';
@@ -16,14 +16,8 @@ const PricingSection = lazy(() => import('../../components/landing/PricingSectio
 const FAQSection = lazy(() => import('../../components/landing/FAQSection.jsx').then(m => ({ default: m.FAQSection })));
 const CTASection = lazy(() => import('../../components/landing/CTASection.jsx').then(m => ({ default: m.CTASection })));
 const LandingFooter = lazy(() => import('../../components/landing/LandingFooter.jsx').then(m => ({ default: m.LandingFooter })));
-const LandingLoginModal = lazy(() => import('../../components/landing/LandingLoginModal.jsx').then(m => ({ default: m.LandingLoginModal })));
 
 export const LandingPage = () => {
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-
-  const handleOpenLogin = () => setIsLoginModalOpen(true);
-  const handleCloseLogin = () => setIsLoginModalOpen(false);
-
   return (
     <div className="min-h-screen bg-[#000000] text-slate-100 font-sans selection:bg-emerald-500/30 selection:text-white relative overflow-x-hidden">
 
@@ -33,10 +27,10 @@ export const LandingPage = () => {
       {/* Content Layer */}
       <div className="relative z-10 space-y-0">
         {/* ─── 1. STICKY NAVIGATION BAR ─────────────────────────────────── */}
-        <LandingNavbar onOpenLogin={handleOpenLogin} />
+        <LandingNavbar />
 
         {/* ─── 2. HERO SECTION ─────────────────────────────────────────── */}
-        <HeroSection onOpenLogin={handleOpenLogin} />
+        <HeroSection />
 
         <Suspense fallback={null}>
           {/* ─── INTEGRATION PARTNERS MARQUEE ───────────────────────────── */}
@@ -64,13 +58,10 @@ export const LandingPage = () => {
           <FAQSection />
 
           {/* ─── 10. CALL TO ACTION BANNER ────────────────────────────────── */}
-          <CTASection onOpenLogin={handleOpenLogin} />
+          <CTASection />
 
           {/* ─── 11. PROFESSIONAL FOOTER ─────────────────────────────────── */}
           <LandingFooter />
-
-          {/* ─── QUICK LOGIN MODAL OVERLAY ───────────────────────────────── */}
-          <LandingLoginModal isOpen={isLoginModalOpen} onClose={handleCloseLogin} />
         </Suspense>
       </div>
     </div>

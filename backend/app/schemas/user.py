@@ -16,6 +16,7 @@ class UpdateProfileRequest(BaseModel):
     city: Optional[str] = Field(None, max_length=100)
     state: Optional[str] = Field(None, max_length=100)
     country: Optional[str] = Field(None, max_length=100)
+    membership_tier: Optional[str] = Field(None, max_length=50)
 
 
 class DeleteAccountRequest(BaseModel):

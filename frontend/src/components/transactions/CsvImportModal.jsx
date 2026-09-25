@@ -230,6 +230,7 @@ export const CsvImportModal = ({ isOpen, onClose, onImportSuccess, categories = 
         skip_duplicates: skipDuplicates,
         default_account_type: defaultAccount,
         default_payment_method: defaultPaymentMethod,
+        filename: selectedFile?.name || 'transactions.csv',
       };
 
       const res = await transactionService.confirmCsvImport(payload);
@@ -354,7 +355,7 @@ export const CsvImportModal = ({ isOpen, onClose, onImportSuccess, categories = 
                 ) : (
                   <div className="space-y-1">
                     <p className="text-sm font-semibold text-white">
-                      Click to upload or drag & drop your bank statement CSV
+                      Click to upload or drag & drop your statement CSV file
                     </p>
                     <p className="text-xs text-slate-500">
                       Supports HDFC, SBI, ICICI, Axis, Zerodha, and generic CSV formats (up to 5,000 rows)

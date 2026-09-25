@@ -4,16 +4,16 @@ import { ChevronDown, HelpCircle } from 'lucide-react';
 
 const FAQS = [
   {
-    q: 'Is my banking data safe? Can you move money from my accounts?',
-    a: 'Absolutely not. We operate exclusively via Secure Bank Aggregator consent which grants read-only access. We cannot initiate any transfer, payment, or debit from your accounts. All data is encrypted end-to-end with 256-bit AES TLS 1.3 and stored in ISO 27001-certified infrastructure.',
+    q: 'Is my financial data safe? Can you access my bank account?',
+    a: 'We never connect directly to your bank or ask for bank login credentials. We do not have any ability to access, withdraw, or move your funds. You track your finances safely by logging transactions or importing your own CSV statements. All stored records are protected with industry-standard 256-bit AES encryption.',
   },
   {
-    q: 'Which Indian banks, brokerages, and apps are supported?',
-    a: 'We support HDFC Bank, ICICI Bank, SBI, Axis Bank, Kotak Mahindra, Zerodha, Groww, Paytm Money, CRED, and NSDL/CDSL demat accounts via direct open banking APIs.',
+    q: 'How do I add and track my transactions?',
+    a: 'You can easily log transactions manually in seconds, or import standard CSV/Excel statement files exported from any financial institution, mobile wallet, or credit card portal.',
   },
   {
     q: 'How does the AI Expense Prediction Engine work?',
-    a: 'Our multi-scale adaptive engine decomposes your spending into Fixed Contractual, Essential Routine, and Elastic Discretionary tiers. It combines adaptive exponential moving averages with gradient-boosted residual regressors to generate P10–P90 quantile intervals and safe budget ceilings with 98.86% verified accuracy.',
+    a: 'Our multi-scale adaptive engine decomposes your spending into Fixed Contractual, Essential Routine, and Elastic Discretionary tiers. It combines adaptive exponential moving averages with gradient-boosted residual regressors to generate realistic P10–P90 quantile forecast intervals and safe budget ceilings based on your real transaction history.',
   },
   {
     q: 'How does the Financial Health Score work?',
@@ -25,7 +25,7 @@ const FAQS = [
   },
   {
     q: 'Can I import past transaction history?',
-    a: 'Yes. You can import up to 24 months of transaction history via CSV/XLS export from your bank statements, or via automatic AA framework consent sync.',
+    a: 'Yes. You can import your past transaction history using our CSV importer. Simply export a CSV or Excel statement from your accounts and upload it directly into your ledger.',
   },
   {
     q: 'What does the Gemini AI Wealth Copilot actually do?',
@@ -54,7 +54,7 @@ export const FAQSection = () => {
             Frequently Asked Questions
           </h2>
           <p className="mt-4 text-base sm:text-lg text-slate-300">
-            Everything you need to know about security, bank integrations, and AI capabilities.
+            Everything you need to know about security, statement imports, and AI capabilities.
           </p>
         </motion.div>
 

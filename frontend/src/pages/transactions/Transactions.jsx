@@ -252,6 +252,26 @@ export const Transactions = () => {
     loadSummary();
   };
 
+  const handleInlineRecategorize = async (transactionId, newCategoryId) => {
+    try {
+      const catObj = categories.find((c) => c.id === newCategoryId);
+      setTransactions((prev) =>
+        prev.map((t) =>
+          t.id === transactionId
+            ? { ...t, category_id: newCategoryId, category: catObj || t.category }
+            : t
+        )
+      );
+      await transactionService.updateTransaction(transactionId, { category_id: newCategoryId });
+      toast.success(`Recategorized to ${catObj?.category_name || 'selected category'}`);
+      loadSummary();
+    } catch (err) {
+      console.error('Failed to recategorize transaction:', err);
+      toast.error('Failed to update category.');
+      loadTransactions(true);
+    }
+  };
+
   const handleDeleteSuccess = (deletedId) => {
     const targetId = deletedId || deletingTransaction?.id;
     if (targetId) {
@@ -372,6 +392,8 @@ export const Transactions = () => {
       <TransactionTable
         loading={loading}
         transactions={transactions}
+        categories={categories}
+        onRecategorize={handleInlineRecategorize}
         onRowClick={handleRowClick}
         onEdit={handleEditClick}
         onDelete={handleDeleteClick}

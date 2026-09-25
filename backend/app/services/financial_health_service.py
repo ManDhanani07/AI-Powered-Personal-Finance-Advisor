@@ -394,22 +394,33 @@ class FinancialHealthService:
             )
 
         # ─── STORE HISTORY IN POSTGRESQL ────────────────────────────────────────
-        history_record = FinancialHealthHistory(
-            user_id=user_id,
-            health_score=Decimal(str(overall_score)),
-            grade=grade,
-            saving_score=Decimal(str(round(savings_score, 2))),
-            budget_score=Decimal(str(round(budget_score, 2))),
-            income_score=Decimal(str(round(income_score, 2))),
-            expense_score=Decimal(str(round(expense_score, 2))),
-            goal_score=Decimal(str(round(goal_score, 2))),
-            emergency_score=Decimal(str(round(emergency_score, 2))),
-            debt_score=Decimal(str(round(debt_score, 2))),
-            breakdown={"overall_score": overall_score, "grade": grade, "summary": summary_text},
-            recommendations=[r.model_dump() for r in recommendations],
-            calculated_at=now,
-        )
-        await self.repo.save_history(history_record)
+        latest_record = await self.repo.get_latest_score(user_id)
+        should_save = True
+        if latest_record:
+            score_diff = abs(float(latest_record.health_score) - overall_score)
+            calc_at = latest_record.calculated_at.replace(tzinfo=None) if latest_record.calculated_at else now
+            time_diff = (now - calc_at).total_seconds()
+            # Skip redundant duplicate write if score has not changed and recorded within the last hour
+            if score_diff < 0.05 and time_diff < 3600:
+                should_save = False
+
+        if should_save:
+            history_record = FinancialHealthHistory(
+                user_id=user_id,
+                health_score=Decimal(str(overall_score)),
+                grade=grade,
+                saving_score=Decimal(str(round(savings_score, 2))),
+                budget_score=Decimal(str(round(budget_score, 2))),
+                income_score=Decimal(str(round(income_score, 2))),
+                expense_score=Decimal(str(round(expense_score, 2))),
+                goal_score=Decimal(str(round(goal_score, 2))),
+                emergency_score=Decimal(str(round(emergency_score, 2))),
+                debt_score=Decimal(str(round(debt_score, 2))),
+                breakdown={"overall_score": overall_score, "grade": grade, "summary": summary_text},
+                recommendations=[r.model_dump() for r in recommendations],
+                calculated_at=now,
+            )
+            await self.repo.save_history(history_record)
 
         return FinancialHealthResponse(
             overall_score=overall_score,

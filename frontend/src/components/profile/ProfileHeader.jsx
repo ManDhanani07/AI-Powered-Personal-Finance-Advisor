@@ -2,7 +2,15 @@ import React from 'react';
 import { ShieldCheck, Calendar, MapPin, Briefcase, Sparkles, Edit3, Phone, Mail } from 'lucide-react';
 import UserAvatar from './UserAvatar.jsx';
 
-export const ProfileHeader = ({ user, onAvatarChange, onEditClick, isEditing }) => {
+export const ProfileHeader = ({
+  user,
+  avatarSrc,
+  onFileSelect,
+  onPhotoRemove,
+  onEditClick,
+  isEditing,
+  isSaving = false,
+}) => {
   const fullName = `${user?.first_name || ''} ${user?.last_name || ''}`.trim() || 'User Profile';
   const memberSince = user?.created_at
     ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
@@ -20,11 +28,12 @@ export const ProfileHeader = ({ user, onAvatarChange, onEditClick, isEditing }) 
       <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start justify-between gap-6">
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
           <UserAvatar
-            src={user?.profile_picture}
+            src={avatarSrc !== undefined ? avatarSrc : user?.profile_picture}
             name={fullName}
-            onAvatarChange={onAvatarChange}
+            showControls={isEditing}
+            onFileSelect={onFileSelect}
+            onPhotoRemove={onPhotoRemove}
             size="lg"
-            showControls={true}
           />
 
           <div className="space-y-2">
@@ -33,11 +42,23 @@ export const ProfileHeader = ({ user, onAvatarChange, onEditClick, isEditing }) 
                 {fullName}
               </h1>
 
-              {/* Pro Member Badge */}
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500/20 via-violet-500/20 to-indigo-500/20 px-3 py-1 text-xs font-bold text-amber-300 border border-amber-500/30 shadow-sm">
-                <Sparkles className="h-3 w-3 text-amber-400" />
-                Pro Member
-              </span>
+              {/* Dynamic Membership Badge */}
+              {user?.membership_tier === 'business' ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-violet-500/20 via-purple-500/20 to-indigo-500/20 px-3 py-1 text-xs font-bold text-violet-300 border border-violet-500/30 shadow-sm">
+                  <Sparkles className="h-3 w-3 text-violet-400" />
+                  Business HNI
+                </span>
+              ) : user?.membership_tier === 'starter' || user?.membership_tier === 'free' ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-emerald-500/20 to-teal-500/20 px-3 py-1 text-xs font-bold text-emerald-300 border border-emerald-500/30 shadow-sm">
+                  <ShieldCheck className="h-3 w-3 text-emerald-400" />
+                  Starter Plan
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500/20 via-violet-500/20 to-indigo-500/20 px-3 py-1 text-xs font-bold text-amber-300 border border-amber-500/30 shadow-sm">
+                  <Sparkles className="h-3 w-3 text-amber-400" />
+                  Pro Member
+                </span>
+              )}
 
               {/* Verified Pill */}
               {isVerified ? (

@@ -4,10 +4,12 @@ Transaction Service providing financial transaction processing, auto-merchant ca
 
 import uuid
 import secrets
+import re
 from typing import Dict, Any, Optional, List
 from uuid import UUID
 from datetime import datetime, timedelta
 from decimal import Decimal
+from sqlalchemy import text
 
 from app.models.transaction import Transaction
 from app.repositories.transaction_repository import TransactionRepository
@@ -528,7 +530,7 @@ class TransactionService(BaseService[TransactionRepository]):
         self.budget_repository = budget_repository
 
     async def _auto_detect_category(self, merchant_name: Optional[str], transaction_type: str) -> Optional[UUID]:
-        """Auto-detect category ID based on merchant rules."""
+        """Auto-detect category ID based on dynamic database rules and built-in patterns."""
         if not merchant_name:
             uncat = await self.category_repository.get_by_name("Uncategorized")
             return uncat.id if uncat else None
@@ -536,10 +538,41 @@ class TransactionService(BaseService[TransactionRepository]):
         lower_merchant = merchant_name.lower().strip()
         matched_cat_name = None
 
-        for keyword, cat_name in MERCHANT_CATEGORY_RULES.items():
-            if keyword in lower_merchant:
-                matched_cat_name = cat_name
-                break
+        # 1. Query live active rules from PostgreSQL (dynamic admin additions, updates, toggles)
+        db_queried = False
+        try:
+            db_res = await self.category_repository.db.execute(
+                text("SELECT merchant_pattern, category, match_type FROM merchant_categorization_rules WHERE is_active = TRUE ORDER BY LENGTH(merchant_pattern) DESC;")
+            )
+            rows = db_res.fetchall()
+            db_queried = True
+            for pattern, cat_name, match_type in rows:
+                m_type = (match_type or "Pattern").lower()
+                if m_type == "exact":
+                    if pattern.lower().strip() == lower_merchant:
+                        matched_cat_name = cat_name
+                        break
+                elif m_type == "regex":
+                    try:
+                        if re.search(pattern, lower_merchant, re.IGNORECASE):
+                            matched_cat_name = cat_name
+                            break
+                    except Exception:
+                        pass
+                else:  # Pattern match with pipe alias support
+                    aliases = [a.strip().lower() for a in pattern.split("|") if a.strip()]
+                    if any(a in lower_merchant for a in aliases):
+                        matched_cat_name = cat_name
+                        break
+        except Exception:
+            db_queried = False
+
+        # 2. Only fallback to built-in rules if DB rules table was completely inaccessible
+        if not db_queried and not matched_cat_name:
+            for keyword, cat_name in MERCHANT_CATEGORY_RULES.items():
+                if keyword in lower_merchant:
+                    matched_cat_name = cat_name
+                    break
 
         if matched_cat_name:
             found_cat = await self.category_repository.get_by_name(matched_cat_name)

@@ -86,6 +86,7 @@ class CsvConfirmImportRequest(BaseModel):
     skip_duplicates: bool = True
     default_account_type: Optional[str] = "SAVINGS"
     default_payment_method: Optional[str] = "UPI"
+    filename: Optional[str] = "transactions.csv"
 
 
 class CsvConfirmImportResponse(BaseModel):

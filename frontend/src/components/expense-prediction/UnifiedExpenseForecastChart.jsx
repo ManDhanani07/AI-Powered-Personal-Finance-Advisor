@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   ResponsiveContainer,
@@ -11,7 +11,7 @@ import {
   CartesianGrid,
 } from 'recharts';
 import { LineChart as ChartIcon, Sparkles } from 'lucide-react';
-import { formatCurrency, formatCompactFinancial } from '../../utils/formatters.js';
+import { formatCurrency } from '../../utils/formatters.js';
 
 const CustomForecastTooltip = ({ active, payload, label }) => {
   if (!active || !payload || !payload.length) return null;
@@ -23,8 +23,14 @@ const CustomForecastTooltip = ({ active, payload, label }) => {
   const p10Val = point?.p10;
   const p90Val = point?.p90;
 
+  let diffText = null;
+  if (actualVal !== null && actualVal !== undefined && forecastVal !== null && forecastVal !== undefined) {
+    const diff = forecastVal - actualVal;
+    diffText = diff > 0 ? `+${formatCurrency(diff)}` : formatCurrency(diff);
+  }
+
   return (
-    <div className="rounded-2xl border border-zinc-700/80 bg-[#09090B]/95 p-4 shadow-2xl backdrop-blur-xl space-y-2 min-w-[200px]">
+    <div className="rounded-2xl border border-zinc-700/80 bg-[#09090B]/95 p-4 shadow-2xl backdrop-blur-xl space-y-2 min-w-[210px]">
       <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
         <span className="text-xs font-black text-white font-outfit">
           {point?.period || label}
@@ -40,7 +46,7 @@ const CustomForecastTooltip = ({ active, payload, label }) => {
         </span>
       </div>
 
-      <div className="space-y-1 text-xs">
+      <div className="space-y-1 text-xs font-outfit">
         {actualVal !== null && actualVal !== undefined && (
           <div className="flex items-center justify-between">
             <span className="text-slate-400">Actual Outflow:</span>
@@ -56,6 +62,13 @@ const CustomForecastTooltip = ({ active, payload, label }) => {
             <span className="font-black font-mono text-cyan-300">
               {formatCurrency(forecastVal)}
             </span>
+          </div>
+        )}
+
+        {diffText && (
+          <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-zinc-800/80">
+            <span>Variance:</span>
+            <span className="font-mono font-bold text-slate-200">{diffText}</span>
           </div>
         )}
 
@@ -77,9 +90,12 @@ const CustomForecastTooltip = ({ active, payload, label }) => {
 };
 
 export const UnifiedExpenseForecastChart = ({ historicalTrend, multiHorizonForecast, forecast }) => {
+  const [granularity, setGranularity] = useState('monthly'); // 'monthly' | 'weekly' | 'daily'
+
+  const divisor = granularity === 'daily' ? 30 : granularity === 'weekly' ? 4.33 : 1;
+
   const chartData = useMemo(() => {
     if (multiHorizonForecast && multiHorizonForecast.length > 0) {
-      // Find the transition point between actual and forecast
       const histPoints = multiHorizonForecast.filter((p) => !p.is_forecast);
       const forePoints = multiHorizonForecast.filter((p) => p.is_forecast);
       const lastHist = histPoints[histPoints.length - 1];
@@ -88,12 +104,12 @@ export const UnifiedExpenseForecastChart = ({ historicalTrend, multiHorizonForec
 
       histPoints.forEach((p, idx) => {
         const isLastHist = idx === histPoints.length - 1;
+        const scaledAmt = Math.round(p.amount / divisor);
         combined.push({
           name: p.month_name,
           period: p.period,
-          actual: p.amount,
-          // Bridge point connects actual to forecast line
-          forecast: isLastHist ? p.amount : null,
+          actual: scaledAmt,
+          forecast: isLastHist ? scaledAmt : null,
           p10: null,
           p90: null,
           isForecast: false,
@@ -105,9 +121,9 @@ export const UnifiedExpenseForecastChart = ({ historicalTrend, multiHorizonForec
           name: p.month_name,
           period: p.period,
           actual: null,
-          forecast: p.amount,
-          p10: p.p10,
-          p90: p.p90,
+          forecast: Math.round(p.amount / divisor),
+          p10: p.p10 ? Math.round(p.p10 / divisor) : null,
+          p90: p.p90 ? Math.round(p.p90 / divisor) : null,
           isForecast: true,
         });
       });
@@ -117,19 +133,22 @@ export const UnifiedExpenseForecastChart = ({ historicalTrend, multiHorizonForec
 
     // Fallback using historicalTrend
     if (historicalTrend && historicalTrend.length > 0) {
-      return historicalTrend.map((h) => ({
-        name: h.month_name?.split(' ')[0] || h.year_month,
-        period: h.month_name,
-        actual: !h.is_projected ? h.expense : null,
-        forecast: h.is_projected ? h.expense : null,
-        p10: h.is_projected ? h.expense * 0.85 : null,
-        p90: h.is_projected ? h.expense * 1.15 : null,
-        isForecast: h.is_projected,
-      }));
+      return historicalTrend.map((h) => {
+        const scaledExp = Math.round(h.expense / divisor);
+        return {
+          name: h.month_name?.split(' ')[0] || h.year_month,
+          period: h.month_name,
+          actual: !h.is_projected ? scaledExp : null,
+          forecast: h.is_projected ? scaledExp : null,
+          p10: h.is_projected ? Math.round(scaledExp * 0.85) : null,
+          p90: h.is_projected ? Math.round(scaledExp * 1.15) : null,
+          isForecast: h.is_projected,
+        };
+      });
     }
 
     return [];
-  }, [multiHorizonForecast, historicalTrend]);
+  }, [multiHorizonForecast, historicalTrend, divisor]);
 
   return (
     <motion.div
@@ -138,15 +157,15 @@ export const UnifiedExpenseForecastChart = ({ historicalTrend, multiHorizonForec
       transition={{ duration: 0.35 }}
       className="rounded-3xl border border-zinc-800 bg-[#09090B] p-6 space-y-6 shadow-glass"
     >
-      {/* Header with Title and Legend */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800/80 pb-4">
+      {/* Header with Title, Granularity Toggles, and Legend */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-800/80 pb-4">
         <div className="flex items-center space-x-3">
           <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
             <ChartIcon className="w-4 h-4" />
           </div>
           <div>
             <h3 className="text-base font-black text-white font-outfit uppercase tracking-wide">
-              Expense Forecast
+              Spending Forecast Visualization
             </h3>
             <p className="text-xs text-slate-400 font-normal">
               Seamless trajectory from historical actuals to ML multi-horizon projection
@@ -154,19 +173,36 @@ export const UnifiedExpenseForecastChart = ({ historicalTrend, multiHorizonForec
           </div>
         </div>
 
-        {/* Legend */}
-        <div className="flex items-center space-x-4 self-start sm:self-auto text-xs font-bold font-outfit">
-          <div className="flex items-center space-x-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm" />
-            <span className="text-slate-300">Actual</span>
+        <div className="flex flex-wrap items-center gap-4">
+          {/* Granularity Selector */}
+          <div className="flex items-center p-1 rounded-xl bg-zinc-900 border border-zinc-800 text-xs">
+            {[
+              { id: 'monthly', label: 'Monthly' },
+              { id: 'weekly', label: 'Weekly Run-Rate' },
+              { id: 'daily', label: 'Daily Average' },
+            ].map((g) => (
+              <button
+                key={g.id}
+                onClick={() => setGranularity(g.id)}
+                className={`px-2.5 py-1 rounded-lg font-bold font-outfit transition-all cursor-pointer ${
+                  granularity === g.id ? 'bg-zinc-800 text-white shadow-sm' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {g.label}
+              </button>
+            ))}
           </div>
-          <div className="flex items-center space-x-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 border border-cyan-300 border-dashed" />
-            <span className="text-cyan-300">Forecast</span>
-          </div>
-          <div className="flex items-center space-x-1.5">
-            <span className="w-3 h-2 rounded bg-cyan-500/20 border border-cyan-500/40" />
-            <span className="text-slate-400 text-[11px]">P10–P90 Range</span>
+
+          {/* Legend */}
+          <div className="flex items-center space-x-3 text-xs font-bold font-outfit">
+            <div className="flex items-center space-x-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm" />
+              <span className="text-slate-300">Actual</span>
+            </div>
+            <div className="flex items-center space-x-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 border border-cyan-300 border-dashed" />
+              <span className="text-cyan-300">Forecast</span>
+            </div>
           </div>
         </div>
       </div>
@@ -258,8 +294,8 @@ export const UnifiedExpenseForecastChart = ({ historicalTrend, multiHorizonForec
 
       {/* Axis Phase Demarcation Labels */}
       <div className="flex items-center justify-between pt-2 border-t border-zinc-900 text-xs font-black uppercase text-slate-500 font-outfit">
-        <span>◀ Historical Data</span>
-        <span className="text-cyan-400">Multi-Horizon Forecast ▶</span>
+        <span>◀ Historical Ledger</span>
+        <span className="text-cyan-400">Multi-Horizon Projection ▶</span>
       </div>
     </motion.div>
   );

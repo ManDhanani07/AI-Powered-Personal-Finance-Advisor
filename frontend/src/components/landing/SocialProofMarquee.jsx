@@ -43,7 +43,7 @@ const WEBSITE_CAPABILITIES = [
     color: 'text-teal-400',
   },
   {
-    name: '256-Bit Bank-Grade Vault',
+    name: '256-Bit Encrypted Vault',
     badge: 'Zero-Knowledge Data Security',
     icon: ShieldCheck,
     color: 'text-cyan-400',

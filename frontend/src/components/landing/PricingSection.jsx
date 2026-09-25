@@ -34,7 +34,7 @@ const PLANS = [
     badge: 'MOST POPULAR',
     features: [
       'Full AI Auto Categorization Engine',
-      'Bank Account Aggregator Direct Sync',
+      'Smart CSV & Statement Import Engine',
       'AI Expense Prediction & What-If Simulator',
       'Executive Financial Analytics & Reports',
       'Unlimited Budgets & Savings Goals',
@@ -56,7 +56,7 @@ const PLANS = [
     features: [
       'Everything in Pro Wealth Plan',
       'Multi-Entity & Family Wealth Hub',
-      'Zerodha, Groww & Crypto API Sync',
+      'Multi-Portfolio & Investment Tracking',
       'Export Ledger to Tally & Excel (CA Ready)',
       'Dedicated Wealth Strategist Call',
       '24/7 Priority Support',

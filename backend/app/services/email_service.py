@@ -90,7 +90,7 @@ class EmailService:
                 <p style="margin: 0; color: #94a3b8; font-size: 13px;">
                   • <strong>Email Registered:</strong> {recipient_email}<br>
                   • <strong>Sender ID:</strong> {self.sender_email}<br>
-                  • <strong>Security Protocol:</strong> 256-Bit Bank Grade Encryption<br>
+                  • <strong>Security Protocol:</strong> 256-Bit AES End-to-End Encryption<br>
                   • <strong>Status:</strong> Verified & Active
                 </p>
               </div>

@@ -120,6 +120,11 @@ apiClient.interceptors.response.use(
           window.dispatchEvent(new Event('auth:logout'));
           return Promise.reject(customError);
         }
+      } else {
+        removeItem(STORAGE_KEYS.AUTH_TOKEN);
+        removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+        window.dispatchEvent(new Event('auth:logout'));
+        return Promise.reject(customError);
       }
     }
 

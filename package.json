@@ -1,0 +1,13 @@
+{
+  "name": "ai-powered-personal-finance-advisor",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "FinTech AI — AI-Powered Personal Finance Advisor",
+  "scripts": {
+    "dev": "node run-dev.js",
+    "dev:all": "node run-dev.js",
+    "build": "npm run build --prefix frontend",
+    "preview": "npm run preview --prefix frontend"
+  }
+}

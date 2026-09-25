@@ -37,20 +37,6 @@ export const userService = {
   },
 
   /**
-   * Get User Preferences
-   */
-  async getPreferences() {
-    return await apiClient.get('/user/preferences');
-  },
-
-  /**
-   * Save User Preferences
-   */
-  async updatePreferences(preferences) {
-    return await apiClient.put('/user/preferences', { preferences });
-  },
-
-  /**
    * Toggle Two-Factor Authentication
    */
   async toggle2FA(enabled) {

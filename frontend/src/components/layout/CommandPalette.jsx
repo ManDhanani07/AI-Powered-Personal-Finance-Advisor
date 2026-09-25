@@ -13,7 +13,6 @@ import {
   Bot,
   User,
   BrainCircuit,
-  Settings,
   PlusCircle,
   Sparkles,
 } from 'lucide-react';
@@ -28,7 +27,6 @@ const COMMAND_ITEMS = [
   { id: 'reports', label: 'Reports & Analytics', category: 'Navigation', icon: FileBarChart, path: ROUTES.REPORTS },
   { id: 'advisor', label: 'AI Advisor Chat', category: 'AI Assistant', icon: Bot, path: ROUTES.AI_ADVISOR },
   { id: 'profile', label: 'User Profile', category: 'Account', icon: User, path: ROUTES.PROFILE },
-  { id: 'settings', label: 'Account Preferences', category: 'Account', icon: Settings, path: ROUTES.SETTINGS },
   { id: 'new-tx', label: 'Add New Transaction', category: 'Actions', icon: PlusCircle, path: ROUTES.TRANSACTIONS },
   { id: 'new-goal', label: 'Create Savings Goal', category: 'Actions', icon: Sparkles, path: ROUTES.GOALS },
 ];

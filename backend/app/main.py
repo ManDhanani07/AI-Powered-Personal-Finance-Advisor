@@ -32,8 +32,11 @@ from app.exceptions.handlers import (
 )
 from app.database.init_health_table import ensure_financial_health_schema
 from app.database.init_notification_table import ensure_notification_schema
+from app.database.init_data_management_tables import ensure_data_management_schema
+from app.database.init_membership_table import ensure_membership_schema
+from app.database.init_support_ticket_table import ensure_support_ticket_schema
 
-static_dir = Path(__file__).resolve().parent.parent / "static"
+static_dir = Path(__file__).resolve().parent / "static"
 static_dir.mkdir(parents=True, exist_ok=True)
 
 
@@ -42,8 +45,11 @@ async def lifespan(app: FastAPI):
     """Lifespan context manager for application startup and shutdown events."""
     logger.info(f"Starting {settings.APP_NAME} in [{settings.APP_ENV.value}] mode...")
     try:
+        await ensure_membership_schema()
         await ensure_financial_health_schema()
         await ensure_notification_schema()
+        await ensure_data_management_schema()
+        await ensure_support_ticket_schema()
     except Exception as err:
         logger.error(f"Startup schema migration error: {err}")
     yield

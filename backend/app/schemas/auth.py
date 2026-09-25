@@ -15,10 +15,12 @@ class RegisterRequest(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=8)
     phone: Optional[str] = Field(None, max_length=20)
+    occupation: Optional[str] = Field(None, max_length=100)
     monthly_income: Optional[Decimal] = Field(default=Decimal("0.00"), ge=Decimal("0.00"))
     currency: Optional[str] = Field(default="INR", max_length=10)
     city: Optional[str] = Field(None, max_length=100)
     country: Optional[str] = Field(default="India", max_length=100)
+    membership_tier: Optional[str] = Field(default="starter", max_length=50)
 
 
 class LoginRequest(BaseModel):
@@ -52,6 +54,7 @@ class UserResponse(BaseModel):
     state: Optional[str] = None
     country: str
     profile_picture: Optional[str] = None
+    membership_tier: str = "starter"
     is_verified: bool
     is_active: bool
     email_verified: bool

@@ -15,7 +15,7 @@ const VALUE_PROPOSITIONS = [
     icon: DatabaseZap,
     title: 'Automated Financial Intelligence',
     subtitle: 'Zero Manual Data Entry Required',
-    desc: 'Seamlessly sync bank accounts, investments, and expenses with instant AI merchant categorization and live transaction tagging.',
+    desc: 'Seamlessly organize transactions, investments, and expenses with instant AI merchant categorization and smart transaction tagging.',
     points: ['Live merchant auto-tagging', 'Real-time transaction alerts', 'Zero manual spreadsheet entry'],
     color: 'text-[#FF5A5F]',
     bgColor: 'bg-[#FF5A5F]/15 border-[#FF5A5F]/20',
@@ -25,18 +25,18 @@ const VALUE_PROPOSITIONS = [
     icon: Globe2,
     title: 'Unified Net Worth Aggregation',
     subtitle: 'Everything in One Dark Dashboard',
-    desc: 'Get a single, real-time view of your complete net worth across bank accounts, mutual funds, stocks, and savings vaults.',
-    points: ['Cross-bank balance tracking', 'Net worth growth trajectories', 'Multi-currency support'],
+    desc: 'Get a single, real-time view of your complete net worth across accounts, mutual funds, investments, and savings vaults.',
+    points: ['Multi-account balance tracking', 'Net worth growth trajectories', 'Multi-currency support'],
     color: 'text-[#00F2FE]',
     bgColor: 'bg-[#00F2FE]/15 border-[#00F2FE]/20',
     checkColor: 'text-[#00F2FE]',
   },
   {
     icon: Fingerprint,
-    title: 'Bank-Grade 256-Bit Encryption',
+    title: 'Private 256-Bit AES Encryption',
     subtitle: 'Zero-Knowledge Security',
-    desc: 'Read-only financial integration pipelines protected by 256-bit SSL encryption. We never sell or share user data.',
-    points: ['Read-only bank access', '256-bit AES encryption', 'Zero third-party data sharing'],
+    desc: 'Secure financial tracking pipelines protected by 256-bit SSL encryption. We never sell or share user data.',
+    points: ['Zero bank credentials required', '256-bit AES encryption', 'Zero third-party data sharing'],
     color: 'text-purple-400',
     bgColor: 'bg-purple-500/15 border-purple-500/20',
     checkColor: 'text-purple-400',
@@ -81,7 +81,7 @@ export const WhyUsSection = () => {
         >
           <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-[#141418] border border-purple-500/20 text-purple-400 text-xs font-extrabold uppercase tracking-widest mb-4">
             <Lock className="w-4 h-4 text-purple-400" />
-            <span>Bank-Grade Platform Security</span>
+            <span>Enterprise-Grade Privacy & Security</span>
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight font-outfit">
             Built for Privacy, Security & Wealth Growth

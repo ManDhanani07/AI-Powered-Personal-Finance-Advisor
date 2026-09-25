@@ -4,95 +4,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Loader2, Save, Sparkles, IndianRupee, Receipt } from 'lucide-react';
 import { toast } from 'react-toastify';
 import transactionService from '../../services/transactionService.js';
+import categoryService from '../../services/categoryService.js';
 import budgetService from '../../services/budgetService.js';
 import TransactionValidationModal from '../budgets/TransactionValidationModal.jsx';
 
-const MERCHANT_SUGGESTIONS = {
-  // Food & Dining
-  mcdonald: 'Food & Dining',
-  starbucks: 'Food & Dining',
-  zomato: 'Food & Dining',
-  swiggy: 'Food & Dining',
-  domino: 'Food & Dining',
-  pizzahut: 'Food & Dining',
-  kfc: 'Food & Dining',
-  burgerking: 'Food & Dining',
-  subway: 'Food & Dining',
-  cafe: 'Food & Dining',
-  restaurant: 'Food & Dining',
-  blinkit: 'Food & Dining',
-  zepto: 'Food & Dining',
-  instamart: 'Food & Dining',
-  bigbasket: 'Food & Dining',
-  dmart: 'Food & Dining',
-
-  // Transportation & Fuel
-  uber: 'Transportation',
-  ola: 'Transportation',
-  rapido: 'Transportation',
-  irctc: 'Transportation',
-  makemytrip: 'Transportation',
-  indigo: 'Transportation',
-  redbus: 'Transportation',
-  petrol: 'Transportation',
-  shell: 'Transportation',
-  hpcl: 'Transportation',
-  bpcl: 'Transportation',
-  iocl: 'Transportation',
-  fuel: 'Transportation',
-
-  // Shopping & Retail
-  amazon: 'Shopping',
-  flipkart: 'Shopping',
-  myntra: 'Shopping',
-  ajio: 'Shopping',
-  meesho: 'Shopping',
-  zara: 'Shopping',
-  hm: 'Shopping',
-  croma: 'Shopping',
-  reliance: 'Shopping',
-  apple: 'Shopping',
-  nike: 'Shopping',
-  adidas: 'Shopping',
-  puma: 'Shopping',
-  decathlon: 'Shopping',
-  clothes: 'Shopping',
-  shoes: 'Shopping',
-
-  // Healthcare & Pharmacy
-  apollo: 'Healthcare',
-  pharmeasy: 'Healthcare',
-  tata1mg: 'Healthcare',
-  netmeds: 'Healthcare',
-  medplus: 'Healthcare',
-  medical: 'Healthcare',
-  hospital: 'Healthcare',
-  pharmacy: 'Healthcare',
-
-  // Entertainment & Subscriptions
-  netflix: 'Entertainment',
-  spotify: 'Entertainment',
-  youtube: 'Entertainment',
-  prime: 'Entertainment',
-  hotstar: 'Entertainment',
-  bookmyshow: 'Entertainment',
-  steam: 'Entertainment',
-
-  // Utilities & Bills
-  electricity: 'Utilities',
-  water: 'Utilities',
-  gas: 'Utilities',
-  jio: 'Utilities',
-  airtel: 'Utilities',
-  vodafone: 'Utilities',
-  tataplay: 'Utilities',
-
-  // Income & Salary
-  salary: 'Salary',
-  company: 'Salary',
-  tech: 'Salary',
-  freelance: 'Salary',
-};
 
 const getLocalDateTimeString = (dateInput) => {
   const d = dateInput ? new Date(dateInput) : new Date();
@@ -114,8 +29,39 @@ export const TransactionForm = ({
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestedCategory, setSuggestedCategory] = useState(null);
+  const [activeRules, setActiveRules] = useState([]);
 
   const isEdit = !!initialData?.id;
+
+  // Load live active categorization rules from DB
+  useEffect(() => {
+    let isMounted = true;
+    const fetchRules = async () => {
+      try {
+        const rules = await categoryService.getActiveRules();
+        if (isMounted && Array.isArray(rules)) {
+          setActiveRules(rules);
+        }
+      } catch (err) {
+        console.warn('Failed to load categorization rules:', err);
+      }
+    };
+
+    if (isOpen) {
+      fetchRules();
+    }
+
+    const handleRulesUpdate = () => {
+      categoryService.clearRulesCache();
+      fetchRules();
+    };
+
+    window.addEventListener('categorization_rules_updated', handleRulesUpdate);
+    return () => {
+      isMounted = false;
+      window.removeEventListener('categorization_rules_updated', handleRulesUpdate);
+    };
+  }, [isOpen]);
 
   const {
     register,
@@ -142,6 +88,7 @@ export const TransactionForm = ({
   });
 
   const watchMerchant = watch('merchant', '');
+  const watchCategoryId = watch('category_id', '');
   const watchPaymentMethod = watch('payment_method', 'UPI');
 
   // When Payment Method is Cash, auto-set account_type to CASH
@@ -151,20 +98,42 @@ export const TransactionForm = ({
     }
   }, [watchPaymentMethod, setValue]);
 
-  // Live Auto-Merchant Recognition Detection
+  // Live Auto-Merchant Recognition Detection based on active database rules
   useEffect(() => {
-    if (!watchMerchant || isEdit) {
+    if (!watchMerchant || isEdit || !activeRules.length) {
       setSuggestedCategory(null);
       return;
     }
 
-    const lower = watchMerchant.toLowerCase();
+    const lower = watchMerchant.toLowerCase().trim();
     let foundCatName = null;
 
-    for (const [key, val] of Object.entries(MERCHANT_SUGGESTIONS)) {
-      if (lower.includes(key)) {
-        foundCatName = val;
-        break;
+    for (const rule of activeRules) {
+      const pattern = rule.merchant_pattern || '';
+      const matchType = (rule.match_type || 'Pattern').toLowerCase();
+
+      if (matchType === 'exact') {
+        if (pattern.toLowerCase().trim() === lower) {
+          foundCatName = rule.category;
+          break;
+        }
+      } else if (matchType === 'regex') {
+        try {
+          const reg = new RegExp(pattern, 'i');
+          if (reg.test(lower)) {
+            foundCatName = rule.category;
+            break;
+          }
+        } catch (e) {
+          // ignore invalid regex
+        }
+      } else {
+        // Pattern match with '|' alias support
+        const aliases = pattern.split('|').map((a) => a.trim().toLowerCase()).filter(Boolean);
+        if (aliases.some((alias) => lower.includes(alias))) {
+          foundCatName = rule.category;
+          break;
+        }
       }
     }
 
@@ -175,11 +144,13 @@ export const TransactionForm = ({
       if (targetCat) {
         setSuggestedCategory(targetCat);
         setValue('category_id', targetCat.id);
+      } else {
+        setSuggestedCategory(null);
       }
     } else {
       setSuggestedCategory(null);
     }
-  }, [watchMerchant, categories, isEdit, setValue]);
+  }, [watchMerchant, categories, isEdit, setValue, activeRules]);
 
   useEffect(() => {
     if (initialData) {
@@ -403,6 +374,7 @@ export const TransactionForm = ({
                 <input
                   type="text"
                   placeholder="McDonald's, Uber, Amazon..."
+                  autoComplete="off"
                   {...register('merchant')}
                   className="w-full rounded-xl bg-[#12131A] border border-zinc-800 py-2.5 px-3.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-400/80 transition-all font-sans"
                 />
@@ -410,7 +382,7 @@ export const TransactionForm = ({
             </div>
 
             {/* Auto Merchant Recommendation Callout */}
-            {suggestedCategory && (
+            {suggestedCategory && watchCategoryId === suggestedCategory.id && (
               <div className="flex items-center space-x-2 rounded-xl border border-indigo-500/25 bg-indigo-500/10 p-2.5 text-[11px] text-indigo-300 font-sans">
                 <Sparkles className="h-3.5 w-3.5 text-indigo-400 shrink-0" />
                 <span>

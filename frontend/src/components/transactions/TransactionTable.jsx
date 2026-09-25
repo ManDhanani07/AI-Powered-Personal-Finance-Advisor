@@ -11,6 +11,7 @@ import {
   ArrowDownLeft,
   ArrowLeftRight,
   Loader2,
+  RotateCw,
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '../../utils/formatters.js';
 
@@ -334,6 +335,12 @@ export const TransactionTable = ({
             const isIncome = tx.transaction_type === 'INCOME';
             const isTransfer = tx.transaction_type === 'TRANSFER';
             const merchantName = tx.merchant || '';
+            const isRecurring = Boolean(
+              tx.is_recurring ||
+              /netflix|spotify|prime|hotstar|rent|sip|gym|icloud|youtube|emi|broadband|wifi|electricity|water bill|gas bill|apple\.com|patreon/i.test(
+                `${tx.title || ''} ${merchantName}`
+              )
+            );
 
             return (
               <tr
@@ -342,14 +349,25 @@ export const TransactionTable = ({
                 className="group cursor-pointer transition-colors duration-100 hover:bg-zinc-900/80"
               >
 
-                {/* Transaction: avatar + title + merchant */}
+                {/* Transaction: avatar + title + merchant + recurring badge */}
                 <td className="py-3.5 px-3">
                   <div className="flex items-center gap-3 min-w-0">
                     <TxAvatar tx={tx} />
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-white truncate max-w-[200px] leading-tight">
-                        {tx.title}
-                      </p>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <p className="text-sm font-semibold text-white truncate max-w-[200px] leading-tight">
+                          {tx.title}
+                        </p>
+                        {isRecurring && (
+                          <span
+                            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-extrabold uppercase font-mono tracking-tight bg-indigo-500/15 text-indigo-400 border border-indigo-500/30 shrink-0"
+                            title="Recurring subscription / periodic payment"
+                          >
+                            <RotateCw className="w-2.5 h-2.5" />
+                            Recurring
+                          </span>
+                        )}
+                      </div>
                       {merchantName && (
                         <p className="text-xs text-slate-500 truncate max-w-[180px] leading-tight mt-0.5">
                           {merchantName}
@@ -359,7 +377,7 @@ export const TransactionTable = ({
                   </div>
                 </td>
 
-                {/* Category */}
+                {/* Category — display only */}
                 <td className="py-3.5 px-3">
                   <span
                     className="text-xs font-medium"

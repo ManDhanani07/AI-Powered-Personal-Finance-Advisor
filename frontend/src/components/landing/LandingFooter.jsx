@@ -26,7 +26,7 @@ export const LandingFooter = () => {
             {/* Live Status Pill */}
             <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-[11px] font-bold">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>All Systems Operational (Bank Synced)</span>
+              <span>All Systems Operational (Encrypted & Secure)</span>
             </div>
           </div>
 
@@ -109,7 +109,7 @@ export const LandingFooter = () => {
         {/* Regulatory Disclaimers */}
         <div className="pt-8 space-y-2 text-[10px] text-slate-500 leading-relaxed border-b border-zinc-900 pb-6 mb-6">
           <p>
-            <strong>Regulatory Disclosure:</strong> AI-Powered Personal Finance Advisor (Wealth OS) operates strictly as a financial organization and tracking technology SaaS platform. Financial data aggregation is conducted via RBI-regulated Account Aggregator (AA) frameworks.
+            <strong>Platform Disclosure:</strong> AI-Powered Personal Finance Advisor (Wealth OS) operates strictly as an autonomous personal financial organization, budgeting, and expense tracking SaaS platform. No bank credentials are requested or stored, and all data is entered directly by the user or imported via secure file uploads.
           </p>
         </div>
 
@@ -119,7 +119,7 @@ export const LandingFooter = () => {
           <div className="flex items-center space-x-4">
             <span className="flex items-center space-x-1 text-slate-400">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-              <span>RBI Account Aggregator Framework</span>
+              <span>Private & Secure Data Encryption</span>
             </span>
           </div>
         </div>

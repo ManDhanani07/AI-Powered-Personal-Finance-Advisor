@@ -130,7 +130,7 @@ export const HeaderControlBar = ({
           <button
             onClick={onImportCSV}
             className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-emerald-400 hover:text-emerald-300 text-xs font-medium transition-colors cursor-pointer"
-            title="Import transactions from bank CSV statement"
+            title="Import transactions from CSV statement"
           >
             <Upload className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Import CSV</span>

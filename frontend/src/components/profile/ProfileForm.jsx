@@ -4,7 +4,7 @@ import { Loader2, Save, X, User, Phone, Briefcase, IndianRupee, MapPin } from 'l
 import { toast } from 'react-toastify';
 import userService from '../../services/userService.js';
 
-export const ProfileForm = ({ user, onCancel, onSuccess }) => {
+export const ProfileForm = ({ user, onCancel, onSuccess, onSave, isSaving = false }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -25,19 +25,24 @@ export const ProfileForm = ({ user, onCancel, onSuccess }) => {
   });
 
   const onSubmit = async (data) => {
+    const payload = {
+      first_name: data.first_name.trim(),
+      last_name: data.last_name.trim(),
+      phone: data.phone?.trim() || null,
+      occupation: data.occupation?.trim() || null,
+      monthly_income: parseFloat(data.monthly_income) || 0.0,
+      city: data.city?.trim() || null,
+      state: data.state?.trim() || null,
+      country: data.country?.trim() || 'India',
+    };
+
+    if (onSave) {
+      await onSave(payload);
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      const payload = {
-        first_name: data.first_name.trim(),
-        last_name: data.last_name.trim(),
-        phone: data.phone?.trim() || null,
-        occupation: data.occupation?.trim() || null,
-        monthly_income: parseFloat(data.monthly_income) || 0.0,
-        city: data.city?.trim() || null,
-        state: data.state?.trim() || null,
-        country: data.country?.trim() || 'India',
-      };
-
       const res = await userService.updateProfile(payload);
       toast.success('Profile details updated successfully! ✨');
       if (onSuccess) {
@@ -182,7 +187,8 @@ export const ProfileForm = ({ user, onCancel, onSuccess }) => {
             <button
               type="button"
               onClick={onCancel}
-              className="flex items-center gap-1.5 rounded-xl border border-zinc-800 px-4 py-2.5 text-xs font-semibold text-slate-300 hover:bg-zinc-900 cursor-pointer transition-colors"
+              disabled={isSubmitting || isSaving}
+              className="flex items-center gap-1.5 rounded-xl border border-zinc-800 px-4 py-2.5 text-xs font-semibold text-slate-300 hover:bg-zinc-900 cursor-pointer transition-colors disabled:opacity-50"
             >
               <X className="h-4 w-4" />
               Cancel
@@ -191,10 +197,10 @@ export const ProfileForm = ({ user, onCancel, onSuccess }) => {
 
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isSaving}
             className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white px-6 py-2.5 text-xs font-black uppercase tracking-wider shadow-lg shadow-indigo-500/25 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
           >
-            {isSubmitting ? (
+            {isSubmitting || isSaving ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Saving...

@@ -12,16 +12,27 @@ import {
 import { ROUTES } from '../../constants/index.js';
 import { TextGenerateEffect } from '../ui/TextGenerateEffect.jsx';
 import { SparklesCore } from '../ui/SparklesCore.jsx';
+import useAuth from '../../hooks/useAuth.js';
 
-export const HeroSection = ({ onOpenLogin }) => {
+export const HeroSection = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
+  const isUserAuthenticated = Boolean(isAuthenticated && user);
 
   const handleGetStarted = () => {
-    navigate(ROUTES.AUTH.REGISTER);
+    if (isUserAuthenticated) {
+      navigate(ROUTES.DASHBOARD);
+    } else {
+      navigate(ROUTES.AUTH.REGISTER);
+    }
   };
 
   const handleExplore = () => {
-    navigate(ROUTES.DASHBOARD);
+    if (isUserAuthenticated) {
+      navigate(ROUTES.DASHBOARD);
+    } else {
+      navigate(ROUTES.AUTH.LOGIN);
+    }
   };
 
   return (
@@ -91,7 +102,7 @@ export const HeroSection = ({ onOpenLogin }) => {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="text-base sm:text-lg lg:text-xl text-slate-400 font-normal leading-relaxed max-w-2xl mx-auto"
           >
-            Automate transaction tracking, project next-month outflows with AI expense prediction (98.8% accuracy), track category budgets, and receive real-time financial advisory.
+            Automate transaction tracking, project next-month outflows with intelligent AI expense forecasting, track category budgets, and receive real-time financial advisory.
           </motion.p>
 
           {/* CTA Action Buttons */}
@@ -131,11 +142,11 @@ export const HeroSection = ({ onOpenLogin }) => {
             </div>
             <div className="flex items-center space-x-1.5">
               <ShieldCheck className="w-4 h-4 text-slate-300" />
-              <span>256-Bit Bank Level Security</span>
+              <span>256-Bit AES Data Encryption</span>
             </div>
             <div className="flex items-center space-x-1.5">
               <DatabaseZap className="w-4 h-4 text-slate-300" />
-              <span>Real-time Bank Aggregator</span>
+              <span>Smart Statement & CSV Import</span>
             </div>
           </motion.div>
 

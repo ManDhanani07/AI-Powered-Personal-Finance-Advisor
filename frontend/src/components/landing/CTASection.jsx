@@ -10,16 +10,27 @@ import {
   Lock,
 } from 'lucide-react';
 import { ROUTES } from '../../constants/index.js';
+import useAuth from '../../hooks/useAuth.js';
 
-export const CTASection = ({ onOpenLogin }) => {
+export const CTASection = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
+  const isUserAuthenticated = Boolean(isAuthenticated && user);
 
   const handleGetStarted = () => {
-    navigate(ROUTES.AUTH.REGISTER);
+    if (isUserAuthenticated) {
+      navigate(ROUTES.DASHBOARD);
+    } else {
+      navigate(ROUTES.AUTH.REGISTER);
+    }
   };
 
   const handleSignIn = () => {
-    navigate(ROUTES.AUTH.LOGIN);
+    if (isUserAuthenticated) {
+      navigate(ROUTES.DASHBOARD);
+    } else {
+      navigate(ROUTES.AUTH.LOGIN);
+    }
   };
 
   return (
@@ -56,7 +67,7 @@ export const CTASection = ({ onOpenLogin }) => {
               </h2>
 
               <p className="text-base text-slate-300 max-w-xl font-normal leading-relaxed">
-                Join 50,000+ Indians automating their finances, optimizing category budgets, and forecasting net worth with institutional accuracy.
+                Join 50,000+ Indians automating their finances, optimizing category budgets, and forecasting net worth with predictive intelligence.
               </p>
 
               {/* Trust Highlights */}
@@ -67,11 +78,11 @@ export const CTASection = ({ onOpenLogin }) => {
                 </div>
                 <div className="flex items-center space-x-1.5">
                   <ShieldCheck className="w-4 h-4 text-slate-300" />
-                  <span>256-Bit Bank Encryption</span>
+                  <span>256-Bit AES Encryption</span>
                 </div>
                 <div className="flex items-center space-x-1.5">
                   <DatabaseZap className="w-4 h-4 text-slate-300" />
-                  <span>Bank Aggregator Sync</span>
+                  <span>Smart Statement Import</span>
                 </div>
               </div>
 

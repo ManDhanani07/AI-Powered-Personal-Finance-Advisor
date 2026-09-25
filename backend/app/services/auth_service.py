@@ -127,15 +127,20 @@ class AuthService:
                 "email": email,
                 "password_hash": hashed_pwd,
                 "phone": payload.phone.strip() if payload.phone else None,
+                "occupation": payload.occupation.strip() if payload.occupation else None,
                 "monthly_income": payload.monthly_income or Decimal("0.00"),
                 "currency": payload.currency or "INR",
                 "city": payload.city.strip() if payload.city else None,
                 "country": payload.country.strip() if payload.country else "India",
+                "membership_tier": (payload.membership_tier or "starter").strip().lower(),
                 "is_verified": False,
                 "is_active": True,
                 "email_verified": False,
                 "auth_provider": "email",
                 "email_verification_token": generate_random_token(32),
+                "preferences": {
+                    "membership_tier": (payload.membership_tier or "starter").strip().lower()
+                },
             }
 
             user = await self.user_repository.create(user_data)

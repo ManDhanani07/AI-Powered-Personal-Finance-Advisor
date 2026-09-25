@@ -6,7 +6,6 @@ import {
   Briefcase,
   IndianRupee,
   MapPin,
-  Edit3,
   ShieldCheck,
   AlertTriangle,
   Sparkles,
@@ -18,7 +17,7 @@ import { formatCurrency } from '../../utils/formatters.js';
 import { toast } from 'react-toastify';
 import authService from '../../services/authService.js';
 
-export const ProfileCard = ({ user, onEditClick, onVerifySuccess }) => {
+export const ProfileCard = ({ user, onVerifySuccess }) => {
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [otp, setOtp] = useState('');
   const [sendingOtp, setSendingOtp] = useState(false);
@@ -124,16 +123,6 @@ export const ProfileCard = ({ user, onEditClick, onVerifySuccess }) => {
             <h3 className="text-lg font-bold text-white font-outfit">Personal Information</h3>
             <p className="text-xs text-slate-400">Your core identity details and contact information</p>
           </div>
-          {onEditClick && (
-            <button
-              type="button"
-              onClick={onEditClick}
-              className="flex items-center gap-1.5 rounded-xl border border-indigo-500/30 bg-indigo-500/10 px-3.5 py-2 text-xs font-bold text-indigo-400 transition-all hover:bg-indigo-500/20 cursor-pointer active:scale-95"
-            >
-              <Edit3 className="h-3.5 w-3.5" />
-              Edit Profile
-            </button>
-          )}
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -217,14 +206,30 @@ export const ProfileCard = ({ user, onEditClick, onVerifySuccess }) => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="p-4 rounded-2xl border border-violet-500/20 bg-gradient-to-b from-violet-950/20 to-black/40 space-y-1 hover:border-violet-500/40 transition-colors">
             <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Current Plan</p>
-            <p className="text-base font-black text-white font-outfit">Pro Member</p>
-            <p className="text-[11px] text-violet-400 font-medium">Full AI Advisor Access</p>
+            <p className="text-base font-black text-white font-outfit">
+              {user?.membership_tier === 'business'
+                ? 'Business Suite & HNIs'
+                : user?.membership_tier === 'starter' || user?.membership_tier === 'free'
+                ? 'Starter Account (Free)'
+                : 'Professional Wealth'}
+            </p>
+            <p className="text-[11px] text-violet-400 font-medium">
+              {user?.membership_tier === 'business'
+                ? 'Multi-Entity & Family Wealth Hub'
+                : user?.membership_tier === 'starter' || user?.membership_tier === 'free'
+                ? 'Essential Money & Budget Tracking'
+                : 'Full AI Advisor Access'}
+            </p>
           </div>
 
           <div className="p-4 rounded-2xl border border-emerald-500/20 bg-gradient-to-b from-emerald-950/20 to-black/40 space-y-1 hover:border-emerald-500/40 transition-colors">
             <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Plan Status</p>
             <p className="text-base font-black text-emerald-400 font-outfit">Active &amp; Good Standing</p>
-            <p className="text-[11px] text-slate-400">Unlimited Predictions</p>
+            <p className="text-[11px] text-slate-400">
+              {user?.membership_tier === 'starter' || user?.membership_tier === 'free'
+                ? 'Standard Predictions'
+                : 'Unlimited AI Predictions'}
+            </p>
           </div>
 
           <div className="p-4 rounded-2xl border border-sky-500/20 bg-gradient-to-b from-sky-950/20 to-black/40 space-y-1 hover:border-sky-500/40 transition-colors">

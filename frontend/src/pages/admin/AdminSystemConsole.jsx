@@ -7,7 +7,6 @@ import {
   ShieldCheck,
   Lock,
   Sliders,
-  Users,
   CheckCircle2,
   AlertTriangle,
   RefreshCw,
@@ -70,7 +69,6 @@ export const AdminSystemConsole = () => {
 
   const services = telemetry?.services || [];
   const storage = telemetry?.storage || {};
-  const roles = config?.rbac_roles || [];
 
   return (
     <div className="space-y-6 max-w-[1920px] w-full mx-auto">
@@ -82,13 +80,13 @@ export const AdminSystemConsole = () => {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-base font-black text-white font-outfit">System Health, Configuration & RBAC</h2>
+              <h2 className="text-base font-black text-white font-outfit">System Health & Configuration</h2>
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                 Uptime: {telemetry?.server_uptime || '99.98%'}
               </span>
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
-              Infrastructure health gauges, runtime threshold controls, and role-based access matrix.
+              Infrastructure health gauges and runtime threshold controls.
             </p>
           </div>
         </div>
@@ -107,7 +105,6 @@ export const AdminSystemConsole = () => {
         {[
           { id: 'telemetry', label: 'Services & Telemetry', icon: Activity },
           { id: 'config', label: 'Platform & AI Configuration', icon: Sliders },
-          { id: 'rbac', label: 'Admin RBAC Permissions Matrix', icon: Users },
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -264,38 +261,6 @@ export const AdminSystemConsole = () => {
         </form>
       )}
 
-      {/* ── Tab 3: RBAC Roles Matrix ── */}
-      {activeTab === 'rbac' && (
-        <div className="border border-zinc-800 bg-[#09090B] rounded-2xl overflow-hidden shadow-sm">
-          <div className="p-4 border-b border-zinc-800 flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-black text-white font-outfit">Role-Based Access Control (RBAC) Hierarchy</h3>
-              <p className="text-xs text-slate-400 mt-0.5">Least-privilege operational access separation matrix.</p>
-            </div>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className="border-b border-zinc-800 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                  <th className="py-3.5 px-4">Administrative Role</th>
-                  <th className="py-3.5 px-4">Active Admins</th>
-                  <th className="py-3.5 px-4">Assigned Permission Scope</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-900">
-                {roles.map((r, i) => (
-                  <tr key={i} className="hover:bg-zinc-900/50 transition-colors">
-                    <td className="py-3 px-4 font-bold text-white whitespace-nowrap">{r.role}</td>
-                    <td className="py-3 px-4 font-mono font-bold text-indigo-400">{r.users_count} assigned</td>
-                    <td className="py-3 px-4 text-slate-300">{r.permissions}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

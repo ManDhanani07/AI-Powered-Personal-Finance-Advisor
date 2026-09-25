@@ -727,6 +727,13 @@ class ReportService:
 
         elif ext == "pdf":
             from app.reports import generate_pdf_financial_report
+            ai_summary_rep = None
+            if "insight" in report_type_normalized or "comprehensive" in report_type_normalized:
+                try:
+                    ai_summary_rep = await self.generate_ai_financial_summary(user_id, filter_type, custom_start, custom_end)
+                except Exception:
+                    pass
+
             output = generate_pdf_financial_report(
                 user_display=user_display,
                 user_email=user_email,
@@ -740,6 +747,7 @@ class ReportService:
                 transactions=txs,
                 report_type=report_type_normalized,
                 advanced_rep=advanced_rep,
+                ai_summary_rep=ai_summary_rep,
             )
             return output, filename, media_type
 

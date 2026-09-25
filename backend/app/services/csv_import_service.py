@@ -12,10 +12,10 @@ import uuid
 from uuid import UUID
 import secrets
 from typing import Dict, Any, List, Optional, Tuple
-from datetime import datetime, timezone, date
+from datetime import datetime, timezone, date, timedelta
 from decimal import Decimal, InvalidOperation
 from dateutil import parser as date_parser
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.transaction import Transaction
@@ -126,14 +126,50 @@ class CsvImportService:
                 if clean_raw in cat.category_name.lower() or cat.category_name.lower() in clean_raw:
                     return cat.id, cat.category_name, cat.color, False
 
-        # 2. Rule-based merchant/description keyword matching
+        # 2. Rule-based merchant/description keyword matching from dynamic database rules
         text_corpus = f"{merchant or ''} {description or ''}".lower().strip()
         if text_corpus:
-            for kw, cat_name in MERCHANT_CATEGORY_RULES.items():
-                if kw in text_corpus:
-                    for cat in categories:
-                        if cat.category_name.lower() == cat_name.lower():
-                            return cat.id, cat.category_name, cat.color, False
+            matched_cat_name = None
+            db_queried = False
+            try:
+                db_res = await self.db.execute(
+                    text("SELECT merchant_pattern, category, match_type FROM merchant_categorization_rules WHERE is_active = TRUE ORDER BY LENGTH(merchant_pattern) DESC;")
+                )
+                rows = db_res.fetchall()
+                db_queried = True
+                for pattern, cat_name, match_type in rows:
+                    m_type = (match_type or "Pattern").lower()
+                    if m_type == "exact":
+                        if pattern.lower().strip() == text_corpus or pattern.lower().strip() == (merchant or "").lower().strip():
+                            matched_cat_name = cat_name
+                            break
+                    elif m_type == "regex":
+                        try:
+                            if re.search(pattern, text_corpus, re.IGNORECASE):
+                                matched_cat_name = cat_name
+                                break
+                        except Exception:
+                            pass
+                    else:
+                        aliases = [a.strip().lower() for a in pattern.split("|") if a.strip()]
+                        if any(a in text_corpus for a in aliases):
+                            matched_cat_name = cat_name
+                            break
+            except Exception:
+                db_queried = False
+
+            if matched_cat_name:
+                for cat in categories:
+                    if cat.category_name.lower() == matched_cat_name.lower():
+                        return cat.id, cat.category_name, cat.color, False
+
+            # Only fallback to built-in rules dictionary if DB query failed
+            if not db_queried:
+                for kw, cat_name in MERCHANT_CATEGORY_RULES.items():
+                    if kw in text_corpus:
+                        for cat in categories:
+                            if cat.category_name.lower() == cat_name.lower():
+                                return cat.id, cat.category_name, cat.color, False
 
         # 3. Fallback based on transaction type
         if transaction_type == "INCOME":
@@ -352,23 +388,32 @@ class CsvImportService:
             "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d %H:%M:%S",
         ]
 
+        now_utc = datetime.now(timezone.utc)
+        max_allowed = now_utc + timedelta(days=1)
+        min_allowed_year = 1990
+
         for fmt in common_formats:
             try:
                 dt = datetime.strptime(val_str, fmt)
-                # Check realistic year range (1990 to 2100)
-                if 1990 <= dt.year <= 2100:
-                    return dt.replace(tzinfo=timezone.utc), None
+                if dt.tzinfo is None:
+                    dt = dt.replace(tzinfo=timezone.utc)
+                if min_allowed_year <= dt.year and dt <= max_allowed:
+                    return dt, None
+                elif dt > max_allowed:
+                    return None, f"Future-dated transactions are not supported: '{val_str}'"
             except ValueError:
                 continue
 
         # 2. Dateutil parser with dayfirst heuristic
         try:
             dt = date_parser.parse(val_str, dayfirst=True)
-            if 1990 <= dt.year <= 2100:
-                if dt.tzinfo is None:
-                    dt = dt.replace(tzinfo=timezone.utc)
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            if min_allowed_year <= dt.year and dt <= max_allowed:
                 return dt, None
-            return None, f"Date year out of valid range (1990-2100): '{val_str}'"
+            elif dt > max_allowed:
+                return None, f"Future-dated transactions are not supported: '{val_str}'"
+            return None, f"Date year out of valid range (1990 to present): '{val_str}'"
         except Exception:
             return None, f"Unable to parse date format: '{val_str}'"
 

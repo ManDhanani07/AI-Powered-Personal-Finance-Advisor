@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Wallet, TrendingUp, TrendingDown, PiggyBank, ShieldCheck } from 'lucide-react';
-import { formatCurrency, formatCompactFinancial } from '../../utils/formatters.js';
+import { formatCurrency } from '../../utils/formatters.js';
 
 const MiniStat = ({ label, value, icon: Icon, badgeStyle }) => (
   <div className="flex items-center space-x-3.5 p-3.5 rounded-2xl bg-[#121216] border border-zinc-800/80 hover:border-zinc-700/80 transition-all shadow-md group">
@@ -124,19 +124,19 @@ export const FinancialSummary = ({ summary, overview, budgetOverview, loading })
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MiniStat
           label="Monthly Income"
-          value={formatCompactFinancial(income)}
+          value={formatCurrency(income)}
           icon={TrendingUp}
           badgeStyle="border border-emerald-500/30 text-emerald-400 bg-transparent"
         />
         <MiniStat
           label="Monthly Expense"
-          value={formatCompactFinancial(expense)}
+          value={formatCurrency(expense)}
           icon={TrendingDown}
           badgeStyle="border border-rose-500/30 text-rose-400 bg-transparent"
         />
         <MiniStat
           label="Net Surplus"
-          value={formatCompactFinancial(savings)}
+          value={formatCurrency(savings)}
           icon={PiggyBank}
           badgeStyle="border border-sky-500/30 text-sky-400 bg-transparent"
         />

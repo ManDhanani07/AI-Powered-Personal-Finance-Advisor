@@ -39,8 +39,8 @@ export const QuantileRangeGauge = ({ confidenceRange, predictedSpend, safeCeilin
           </div>
         </div>
 
-        <span className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-[11px] font-mono font-bold border border-emerald-500/20 self-start sm:self-auto">
-          98.89% Accuracy Score
+        <span className="px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 text-[11px] font-mono font-bold border border-cyan-500/20 self-start sm:self-auto">
+          P10–P90 Range Model
         </span>
       </div>
 

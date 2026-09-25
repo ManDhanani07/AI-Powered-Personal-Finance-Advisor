@@ -95,7 +95,7 @@ class BaseRepository(Generic[ModelType]):
                 raise NotFoundException(f"{self.model.__name__} with ID {id} not found")
 
             for field, value in obj_in.items():
-                if hasattr(db_obj, field) and value is not None:
+                if field != "id" and hasattr(db_obj, field):
                     setattr(db_obj, field, value)
 
             if hasattr(db_obj, "updated_at"):

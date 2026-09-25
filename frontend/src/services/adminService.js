@@ -28,14 +28,44 @@ export const adminService = {
     return res.data || res;
   },
 
-  // ── 3. Transaction Monitoring & Data Quality ──
+  deleteUser: async (userId) => {
+    const res = await apiClient.delete(`/admin/users/${userId}`);
+    return res.data || res;
+  },
+
+  // ── 3. Transaction Operations & Data Quality Center ──
+  getTransactionSummary: async (range = '30d') => {
+    const res = await apiClient.get('/admin/transactions/summary', { params: { range } });
+    return res.data || res;
+  },
+
+  getTransactionQuality: async (range = '30d') => {
+    const res = await apiClient.get('/admin/transactions/quality', { params: { range } });
+    return res.data || res;
+  },
+
+  getTransactionTrends: async (range = '30d') => {
+    const res = await apiClient.get('/admin/transactions/trends', { params: { range } });
+    return res.data || res;
+  },
+
+  getTransactionExceptions: async (range = '30d') => {
+    const res = await apiClient.get('/admin/transactions/exceptions', { params: { range } });
+    return res.data || res;
+  },
+
   getTransactions: async (params = {}) => {
     const res = await apiClient.get('/admin/transactions', { params });
     return res.data || res;
   },
 
-  getTransactionQuality: async () => {
-    const res = await apiClient.get('/admin/transactions/quality');
+  getTransactionDetail: async (transactionId) => {
+    const res = await apiClient.get(`/admin/transactions/${transactionId}`);
+    return res.data || res;
+  },
+
+  executeTransactionAction: async (transactionId, payload) => {
+    const res = await apiClient.post(`/admin/transactions/${transactionId}/action`, payload);
     return res.data || res;
   },
 
@@ -71,33 +101,40 @@ export const adminService = {
     return res.data || res;
   },
 
-  // ── 6. Platform Analytics ──
-  getPlatformAnalytics: async (params = {}) => {
-    const res = await apiClient.get('/admin/analytics/platform', { params });
-    return res.data || res;
-  },
-
   // ── 7. Data Management & Imports ──
   getDatasets: async () => {
     const res = await apiClient.get('/admin/data-management/datasets');
     return res.data || res;
   },
 
-  getImportJobs: async () => {
-    const res = await apiClient.get('/admin/data-management/import-jobs');
+  getImportJobs: async (params = {}) => {
+    const res = await apiClient.get('/admin/data-management/import-jobs', { params });
     return res.data || res;
   },
 
-  // ── 8. Notifications & Platform Broadcasts ──
-  getNotifications: async () => {
-    const res = await apiClient.get('/admin/notifications');
+  getCategorizationRules: async (params = {}) => {
+    const res = await apiClient.get('/admin/data-management/categorization-rules', { params });
     return res.data || res;
   },
 
-  createBroadcast: async (payload) => {
-    const res = await apiClient.post('/admin/notifications', payload);
+  createCategorizationRule: async (payload) => {
+    const res = await apiClient.post('/admin/data-management/categorization-rules', payload);
+    window.dispatchEvent(new CustomEvent('categorization_rules_updated'));
     return res.data || res;
   },
+
+  updateCategorizationRule: async (ruleId, payload) => {
+    const res = await apiClient.put(`/admin/data-management/categorization-rules/${ruleId}`, payload);
+    window.dispatchEvent(new CustomEvent('categorization_rules_updated'));
+    return res.data || res;
+  },
+
+  deleteCategorizationRule: async (ruleId) => {
+    const res = await apiClient.delete(`/admin/data-management/categorization-rules/${ruleId}`);
+    window.dispatchEvent(new CustomEvent('categorization_rules_updated'));
+    return res.data || res;
+  },
+
 
   // ── 9. Support & Issue Ticketing ──
   getSupportTickets: async () => {

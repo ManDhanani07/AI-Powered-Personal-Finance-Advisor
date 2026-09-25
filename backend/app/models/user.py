@@ -36,6 +36,7 @@ class User(Base, UUIDMixin, TimestampMixin):
     state: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     country: Mapped[str] = mapped_column(String(100), default="India", nullable=False)
     profile_picture: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    membership_tier: Mapped[str] = mapped_column(String(50), default="starter", nullable=False)
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 

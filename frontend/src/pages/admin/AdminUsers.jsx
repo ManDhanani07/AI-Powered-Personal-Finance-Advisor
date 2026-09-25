@@ -1,20 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Users,
   Search,
-  Filter,
   Eye,
-  UserX,
-  UserCheck,
   ChevronLeft,
   ChevronRight,
-  ShieldCheck,
-  ShieldAlert,
   Loader2,
   CheckCircle2,
-  AlertTriangle,
-  ArrowUpDown,
-  RefreshCw,
+  Sparkles,
 } from 'lucide-react';
 import adminService from '../../services/adminService.js';
 import AdminUserDetailModal from './AdminUserDetailModal.jsx';
@@ -26,6 +18,7 @@ export const AdminUsers = () => {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [roleFilter, setRoleFilter] = useState('all');
+  const [planFilter, setPlanFilter] = useState('all');
   const [sortBy, setSortBy] = useState('created_at');
   const [sortOrder, setSortOrder] = useState('desc');
   const [page, setPage] = useState(1);
@@ -35,6 +28,16 @@ export const AdminUsers = () => {
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [userDetail, setUserDetail] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [inspectLoadingId, setInspectLoadingId] = useState(null);
+
+  const getPlanTier = (u) => {
+    if (u.plan_tier) return u.plan_tier;
+    if (u.role === 'ADMIN') return 'Enterprise';
+    if ((u.transactions_count || 0) > 40) return 'Pro';
+    return 'Free';
+  };
+
+
 
   const loadUsers = async () => {
     setLoading(true);
@@ -65,26 +68,22 @@ export const AdminUsers = () => {
   }, [search, statusFilter, roleFilter, sortBy, sortOrder, page]);
 
   const handleViewUser = async (userId) => {
+    setInspectLoadingId(userId);
     try {
-      const detail = await adminService.getUserDetails(userId);
+      const res = await adminService.getUserDetails(userId);
+      const detail = res?.data || res || {};
       setUserDetail(detail);
       setSelectedUserId(userId);
       setIsModalOpen(true);
-    } catch {
+    } catch (err) {
+      console.error('Failed to load user details:', err);
       showToast.error('Failed to load user details.');
+    } finally {
+      setInspectLoadingId(null);
     }
   };
 
-  const handleToggleStatus = async (userObj) => {
-    const newStatus = !userObj.is_active;
-    try {
-      await adminService.updateUserStatus(userObj.id, newStatus);
-      showToast.success(`User ${newStatus ? 'activated' : 'suspended'} successfully.`);
-      loadUsers();
-    } catch {
-      showToast.error('Failed to update user status.');
-    }
-  };
+
 
   return (
     <div className="space-y-5 max-w-[1920px] w-full mx-auto">
@@ -128,6 +127,7 @@ export const AdminUsers = () => {
               <option value="all">All Statuses</option>
               <option value="active">Active Only</option>
               <option value="suspended">Suspended Only</option>
+              <option value="blocked">Blocked Only</option>
               <option value="verified">Verified Only</option>
               <option value="unverified">Unverified Only</option>
             </select>
@@ -144,6 +144,21 @@ export const AdminUsers = () => {
               <option value="all">All Roles</option>
               <option value="USER">Standard User</option>
               <option value="ADMIN">Administrator</option>
+            </select>
+          </div>
+
+          {/* Plan Tier Filter */}
+          <div className="flex items-center space-x-1.5">
+            <span className="font-semibold text-slate-500">Plan:</span>
+            <select
+              value={planFilter}
+              onChange={(e) => { setPlanFilter(e.target.value); setPage(1); }}
+              className="rounded-xl border border-zinc-800 bg-zinc-900 py-2 px-3 text-xs font-medium text-slate-300 focus:outline-none focus:ring-1 focus:ring-zinc-600"
+            >
+              <option value="all">All Plans</option>
+              <option value="Free">Free Tier</option>
+              <option value="Pro">Pro Plan</option>
+              <option value="Enterprise">Enterprise</option>
             </select>
           </div>
 
@@ -181,6 +196,7 @@ export const AdminUsers = () => {
                 <tr className="border-b border-zinc-800 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                   <th className="py-3.5 px-4">User</th>
                   <th className="py-3.5 px-4">Role</th>
+                  <th className="py-3.5 px-4">Plan Tier</th>
                   <th className="py-3.5 px-4">Verification</th>
                   <th className="py-3.5 px-4">Joined</th>
                   <th className="py-3.5 px-4">Last Active</th>
@@ -192,83 +208,113 @@ export const AdminUsers = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-900">
-                {users.map((u) => (
-                  <tr key={u.id} className="hover:bg-zinc-900/50 transition-colors">
-                    <td className="py-3 px-4">
-                      <div>
-                        <p className="font-bold text-white">{u.name}</p>
-                        <p className="text-[11px] text-slate-500 font-mono">{u.email}</p>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className="font-mono text-[11px] text-slate-300">{u.role}</span>
-                    </td>
-                    <td className="py-3 px-4">
-                      {u.is_verified ? (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded-full border border-sky-500/20">
-                          <CheckCircle2 className="w-2.5 h-2.5" /> Verified
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
-                          Unverified
-                        </span>
-                      )}
-                    </td>
-                    <td className="py-3 px-4 text-slate-400 font-mono text-[11px] whitespace-nowrap">{u.joined}</td>
-                    <td className="py-3 px-4 text-slate-400 whitespace-nowrap">{u.last_active}</td>
-                    <td className="py-3 px-4 text-center font-mono text-sky-400 font-bold">{u.transactions_count}</td>
-                    <td className="py-3 px-4 text-center font-mono text-violet-400 font-bold">{u.ai_queries_count}</td>
-                    <td className="py-3 px-4">
-                      <span
-                        className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                          u.risk_level === 'High'
-                            ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
-                            : u.risk_level === 'Medium'
-                            ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                            : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                        }`}
-                      >
-                        <span className={`w-1.5 h-1.5 rounded-full ${
-                          u.risk_level === 'High' ? 'bg-rose-500' : u.risk_level === 'Medium' ? 'bg-amber-500' : 'bg-emerald-500'
-                        }`} />
-                        {u.risk_level}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">
-                      <span
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase border ${
-                          u.is_active
-                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                            : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
-                        }`}
-                      >
-                        {u.status}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      <div className="flex items-center justify-end space-x-1">
-                        <button
-                          onClick={() => handleViewUser(u.id)}
-                          className="p-1.5 rounded-lg border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-slate-300 transition-colors"
-                          title="Inspect Account Details"
-                        >
-                          <Eye className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => handleToggleStatus(u)}
-                          className={`p-1.5 rounded-lg border transition-colors ${
-                            u.is_active
-                              ? 'border-rose-500/30 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20'
-                              : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20'
-                          }`}
-                          title={u.is_active ? 'Suspend Account' : 'Activate Account'}
-                        >
-                          {u.is_active ? <UserX className="w-3.5 h-3.5" /> : <UserCheck className="w-3.5 h-3.5" />}
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                {users
+                  .filter((u) => planFilter === 'all' || getPlanTier(u) === planFilter)
+                  .map((u) => {
+                    const tier = getPlanTier(u);
+                    return (
+                      <tr key={u.id} className="hover:bg-zinc-900/50 transition-colors">
+                        <td className="py-3 px-4">
+                          <div className="flex items-center space-x-3">
+                            {u.profile_picture ? (
+                              <img
+                                src={u.profile_picture.startsWith('http') ? u.profile_picture : `http://localhost:8000${u.profile_picture}`}
+                                alt={u.name}
+                                className="w-8 h-8 rounded-xl object-cover border border-zinc-800 shrink-0"
+                              />
+                            ) : (
+                              <div className="w-8 h-8 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center font-bold text-xs text-indigo-400 shrink-0">
+                                {(u.name || 'U').charAt(0).toUpperCase()}
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <p className="font-bold text-white truncate">{u.name}</p>
+                              <p className="text-[11px] text-slate-500 font-mono truncate">{u.email}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className="font-mono text-[11px] text-slate-300">{u.role}</span>
+                        </td>
+                        <td className="py-3 px-4">
+                          <span
+                            className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                              tier === 'Enterprise'
+                                ? 'bg-purple-500/10 text-purple-400 border-purple-500/20'
+                                : tier === 'Pro'
+                                ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
+                                : 'bg-zinc-800 text-slate-400 border-zinc-700/60'
+                            }`}
+                          >
+                            <Sparkles className="w-2.5 h-2.5" />
+                            {tier}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4">
+                          {u.is_verified ? (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded-full border border-sky-500/20">
+                              <CheckCircle2 className="w-2.5 h-2.5" /> Verified
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+                              Unverified
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4 text-slate-400 font-mono text-[11px] whitespace-nowrap">{u.joined}</td>
+                        <td className="py-3 px-4 text-slate-400 whitespace-nowrap">{u.last_active}</td>
+                        <td className="py-3 px-4 text-center font-mono text-sky-400 font-bold">{u.transactions_count}</td>
+                        <td className="py-3 px-4 text-center font-mono text-violet-400 font-bold">{u.ai_queries_count}</td>
+                        <td className="py-3 px-4">
+                          <span
+                            className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                              u.risk_level === 'High'
+                                ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                                : u.risk_level === 'Medium'
+                                ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                                : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                            }`}
+                          >
+                            <span
+                              className={`w-1.5 h-1.5 rounded-full ${
+                                u.risk_level === 'High'
+                                  ? 'bg-rose-500'
+                                  : u.risk_level === 'Medium'
+                                  ? 'bg-amber-500'
+                                  : 'bg-emerald-500'
+                              }`}
+                            />
+                            {u.risk_level}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4">
+                          <span
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase border ${
+                              u.is_active
+                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                            }`}
+                          >
+                            {u.status}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          <button
+                            onClick={() => handleViewUser(u.id)}
+                            disabled={inspectLoadingId === u.id}
+                            className="p-1.5 rounded-lg border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-slate-300 hover:text-indigo-400 transition-colors disabled:opacity-50"
+                            title="Inspect Account Details"
+                          >
+                            {inspectLoadingId === u.id ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-400" />
+                            ) : (
+                              <Eye className="w-3.5 h-3.5" />
+                            )}
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
               </tbody>
             </table>
           </div>
@@ -306,6 +352,8 @@ export const AdminUsers = () => {
         userDetail={userDetail}
         onUserUpdated={loadUsers}
       />
+
+
     </div>
   );
 };

@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { User, Settings, Shield, LogOut, ChevronDown } from 'lucide-react';
+import { User, Shield, LogOut, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ROUTES } from '../../constants/index.js';
 import useAuth from '../../hooks/useAuth.js';
-import { toast } from 'react-toastify';
+import UserAvatar from '../profile/UserAvatar.jsx';
 
 export const ProfileDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -39,16 +39,24 @@ export const ProfileDropdown = () => {
     <div className="relative" ref={containerRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2.5 p-1.5 rounded-xl hover:bg-[#09090B] border border-transparent hover:border-zinc-800 transition-all"
+        className="flex items-center space-x-2.5 p-1.5 rounded-xl hover:bg-[#09090B] border border-transparent hover:border-zinc-800 transition-all cursor-pointer"
       >
-        <div className="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-bold text-xs">
-          {userName.charAt(0).toUpperCase()}
-        </div>
+        <UserAvatar
+          src={user?.profile_picture}
+          name={userName}
+          size="xs"
+        />
         <div className="hidden sm:block text-left">
           <p className="text-xs font-bold text-white leading-tight truncate max-w-[100px]">
             {userName}
           </p>
-          <p className="text-[10px] text-slate-400 truncate max-w-[100px]">Pro Member</p>
+          <p className="text-[10px] text-slate-400 truncate max-w-[100px]">
+            {user?.membership_tier === 'business'
+              ? 'Business HNI'
+              : user?.membership_tier === 'starter' || user?.membership_tier === 'free'
+              ? 'Starter Plan'
+              : 'Pro Member'}
+          </p>
         </div>
         <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
@@ -63,9 +71,16 @@ export const ProfileDropdown = () => {
             className="absolute right-0 mt-2 w-56 rounded-2xl bg-[#09090B] border border-zinc-800 shadow-2xl z-50 p-1.5"
           >
             {/* Header info */}
-            <div className="px-3 py-2.5 border-b border-zinc-800/80 mb-1">
-              <p className="text-xs font-bold text-white">{userName}</p>
-              <p className="text-[11px] text-slate-400 truncate">{userEmail}</p>
+            <div className="px-3 py-2.5 border-b border-zinc-800/80 mb-1 flex items-center space-x-2.5">
+              <UserAvatar
+                src={user?.profile_picture}
+                name={userName}
+                size="sm"
+              />
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-white truncate">{userName}</p>
+                <p className="text-[11px] text-slate-400 truncate font-mono">{userEmail}</p>
+              </div>
             </div>
 
             {/* Menu Links */}
@@ -77,14 +92,6 @@ export const ProfileDropdown = () => {
               >
                 <User className="w-4 h-4 text-slate-400" />
                 <span>My Profile</span>
-              </Link>
-              <Link
-                to={ROUTES.SETTINGS}
-                onClick={() => setIsOpen(false)}
-                className="flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-300 hover:bg-zinc-900 hover:text-white transition-colors"
-              >
-                <Settings className="w-4 h-4 text-slate-400" />
-                <span>Preferences & Settings</span>
               </Link>
               <Link
                 to={ROUTES.SECURITY}

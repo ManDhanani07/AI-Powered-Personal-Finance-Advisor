@@ -30,7 +30,6 @@ const ResetPassword = lazy(() => import('../pages/auth/ResetPassword.jsx'));
 const Profile = lazy(() => import('../pages/profile/Profile.jsx'));
 const EditProfile = lazy(() => import('../pages/profile/EditProfile.jsx'));
 const SecuritySettings = lazy(() => import('../pages/profile/SecuritySettings.jsx'));
-const Preferences = lazy(() => import('../pages/profile/Preferences.jsx'));
 
 // Statically loaded core entry pages (Zero waterfall / instant cold render)
 import LandingPage from '../pages/landing/LandingPage.jsx';
@@ -45,6 +44,7 @@ const FinancialHealth = lazy(() => import('../pages/financial-health/FinancialHe
 const ExpensePredictionPage = lazy(() => import('../pages/expense-prediction/ExpensePredictionPage.jsx'));
 const ReportsPage = lazy(() => import('../pages/reports/ReportsPage.jsx'));
 const AiAdvisorPage = lazy(() => import('../pages/ai/AiAdvisorPage.jsx'));
+const SupportPage = lazy(() => import('../pages/support/SupportPage.jsx'));
 
 // Dynamic Lazy-Loaded Admin Portal Pages (Fintech + AI Operations Console)
 const AdminLayout = lazy(() => import('../pages/admin/AdminLayout.jsx'));
@@ -53,12 +53,9 @@ const AdminUsers = lazy(() => import('../pages/admin/AdminUsers.jsx'));
 const AdminTransactions = lazy(() => import('../pages/admin/AdminTransactions.jsx'));
 const AdminAiMlOps = lazy(() => import('../pages/admin/AdminAiMlOps.jsx'));
 const AdminRiskSecurity = lazy(() => import('../pages/admin/AdminRiskSecurity.jsx'));
-const AdminPlatformAnalytics = lazy(() => import('../pages/admin/AdminPlatformAnalytics.jsx'));
 const AdminDataManagement = lazy(() => import('../pages/admin/AdminDataManagement.jsx'));
-const AdminNotifications = lazy(() => import('../pages/admin/AdminNotifications.jsx'));
 const AdminSupport = lazy(() => import('../pages/admin/AdminSupport.jsx'));
 const AdminSystemConsole = lazy(() => import('../pages/admin/AdminSystemConsole.jsx'));
-const AdminAuditLogs = lazy(() => import('../pages/admin/AdminAuditLogs.jsx'));
 
 export const AppRoutes = () => {
   return (
@@ -164,20 +161,20 @@ export const AppRoutes = () => {
           <Route path="transactions" element={<AdminTransactions />} />
           <Route path="ai-ml" element={<AdminAiMlOps />} />
           <Route path="risk-security" element={<AdminRiskSecurity />} />
-          <Route path="analytics" element={<AdminPlatformAnalytics />} />
           <Route path="data-management" element={<AdminDataManagement />} />
-          <Route path="notifications" element={<AdminNotifications />} />
+          <Route path="notifications" element={<Navigate to="/admin/overview" replace />} />
           <Route path="support" element={<AdminSupport />} />
           <Route path="system" element={<AdminSystemConsole />} />
-          <Route path="audit-logs" element={<AdminAuditLogs />} />
+          <Route path="audit-logs" element={<Navigate to="/admin/overview" replace />} />
 
           {/* Backward Compatibility Alias Redirects */}
+          <Route path="analytics" element={<Navigate to="/admin/overview" replace />} />
           <Route path="ai-usage" element={<Navigate to="/admin/ai-ml" replace />} />
-          <Route path="financial-activity" element={<Navigate to="/admin/analytics" replace />} />
-          <Route path="budgets-goals" element={<Navigate to="/admin/analytics" replace />} />
+          <Route path="financial-activity" element={<Navigate to="/admin/overview" replace />} />
+          <Route path="budgets-goals" element={<Navigate to="/admin/overview" replace />} />
           <Route path="system-health" element={<Navigate to="/admin/system" replace />} />
           <Route path="settings" element={<Navigate to="/admin/system" replace />} />
-          <Route path="reports" element={<Navigate to="/admin/analytics" replace />} />
+          <Route path="reports" element={<Navigate to="/admin/overview" replace />} />
         </Route>
 
         {/* Protected User Dashboard Routes */}
@@ -197,6 +194,9 @@ export const AppRoutes = () => {
           <Route path={ROUTES.EXPENSE_PREDICTION} element={<ExpensePredictionPage />} />
           <Route path={ROUTES.REPORTS} element={<ReportsPage />} />
           <Route path={ROUTES.AI_ADVISOR} element={<AiAdvisorPage />} />
+          <Route path={ROUTES.SUPPORT} element={<SupportPage />} />
+          <Route path="/report-issue" element={<Navigate to={ROUTES.SUPPORT} replace />} />
+          <Route path="/report-problem" element={<Navigate to={ROUTES.SUPPORT} replace />} />
         </Route>
 
         {/* Dedicated Account & Profile Routes */}
@@ -209,11 +209,11 @@ export const AppRoutes = () => {
         >
           <Route path={ROUTES.PROFILE} element={<Profile />} />
           <Route path={`${ROUTES.PROFILE}/edit`} element={<EditProfile />} />
-          <Route path={`${ROUTES.PROFILE}/account`} element={<Preferences />} />
-          <Route path={`${ROUTES.PROFILE}/preferences`} element={<Preferences />} />
-          <Route path={ROUTES.SETTINGS} element={<Preferences />} />
           <Route path={`${ROUTES.PROFILE}/security`} element={<SecuritySettings />} />
           <Route path={ROUTES.SECURITY} element={<SecuritySettings />} />
+          <Route path={`${ROUTES.PROFILE}/account`} element={<Navigate to={ROUTES.PROFILE} replace />} />
+          <Route path={`${ROUTES.PROFILE}/preferences`} element={<Navigate to={ROUTES.PROFILE} replace />} />
+          <Route path="/settings" element={<Navigate to={ROUTES.PROFILE} replace />} />
         </Route>
 
         {/* 404 Route */}

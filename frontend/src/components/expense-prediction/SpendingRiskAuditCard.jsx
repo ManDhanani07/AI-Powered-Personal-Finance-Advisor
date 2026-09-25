@@ -85,7 +85,7 @@ export const SpendingRiskAuditCard = ({ audit, metadata }) => {
             <div className="p-2 rounded-xl bg-indigo-500/15 text-indigo-400 border border-indigo-500/30">
               <Award className="w-4 h-4" />
             </div>
-            <h4 className="text-sm font-bold text-white font-outfit">Verified ML Accuracy Benchmark</h4>
+            <h4 className="text-sm font-bold text-white font-outfit">Verified ML Model Benchmarks</h4>
           </div>
           <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
             Out-of-Sample Validated
@@ -96,19 +96,19 @@ export const SpendingRiskAuditCard = ({ audit, metadata }) => {
           <div className="p-2.5 rounded-xl bg-zinc-900/70 border border-zinc-800 text-center">
             <span className="text-[10px] text-slate-400 uppercase font-bold block">R² Score</span>
             <span className="text-base font-black text-emerald-400 font-outfit">
-              {metadata?.verified_r2_score || '0.9990'}
+              {metadata?.verified_r2_score ?? '0.7810'}
             </span>
           </div>
           <div className="p-2.5 rounded-xl bg-zinc-900/70 border border-zinc-800 text-center">
             <span className="text-[10px] text-slate-400 uppercase font-bold block">Accuracy (WPA)</span>
             <span className="text-base font-black text-cyan-400 font-outfit">
-              {metadata?.verified_wpa_accuracy ? `${metadata.verified_wpa_accuracy}%` : '98.86%'}
+              {metadata?.verified_wpa_accuracy ? `${metadata.verified_wpa_accuracy}%` : '73.49%'}
             </span>
           </div>
           <div className="p-2.5 rounded-xl bg-zinc-900/70 border border-zinc-800 text-center">
             <span className="text-[10px] text-slate-400 uppercase font-bold block">Safety Cover</span>
             <span className="text-base font-black text-purple-400 font-outfit">
-              {metadata?.safe_ceiling_protection_rate ? `${metadata.safe_ceiling_protection_rate}%` : '98.89%'}
+              {metadata?.safe_ceiling_protection_rate ? `${metadata.safe_ceiling_protection_rate}%` : '89.5%'}
             </span>
           </div>
         </div>

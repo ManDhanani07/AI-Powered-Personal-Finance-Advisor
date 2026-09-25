@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   Receipt,
   PieChart,
+  Wallet,
   Target,
   Activity,
   FileBarChart,
@@ -12,6 +13,7 @@ import {
   BrainCircuit,
   Bot,
   ShieldCheck,
+  LifeBuoy,
 } from 'lucide-react';
 import { ROUTES } from '../../constants/index.js';
 import useAuth from '../../hooks/useAuth.js';
@@ -21,12 +23,13 @@ const ADMIN_EMAIL = 'fintech0707@gmail.com';
 const NAV_ITEMS = [
   { label: 'Dashboard', path: ROUTES.DASHBOARD, icon: LayoutDashboard },
   { label: 'Transactions', path: ROUTES.TRANSACTIONS, icon: Receipt },
-  { label: 'Budgets', path: ROUTES.BUDGETS, icon: PieChart },
+  { label: 'Budgets', path: ROUTES.BUDGETS, icon: Wallet },
   { label: 'Goals', path: ROUTES.GOALS, icon: Target },
   { label: 'Health Score', path: ROUTES.FINANCIAL_HEALTH, icon: Activity },
   { label: 'Expense Prediction', path: ROUTES.EXPENSE_PREDICTION, icon: BrainCircuit },
   { label: 'Reports', path: ROUTES.REPORTS, icon: FileBarChart },
   { label: 'AI Advisor', path: ROUTES.AI_ADVISOR, icon: Bot },
+  { label: 'Help & Support', path: ROUTES.SUPPORT, icon: LifeBuoy },
 ];
 
 const MOBILE_NAV_ITEMS = [

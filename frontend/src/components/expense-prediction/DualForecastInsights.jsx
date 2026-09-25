@@ -76,7 +76,7 @@ export const DualForecastInsights = ({ drivers, confidenceRange, predictedSpend 
             </div>
           </div>
           <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 text-[11px] font-mono font-bold border border-cyan-500/20">
-            90% Confidence
+            P10–P90 Interval
           </span>
         </div>
 

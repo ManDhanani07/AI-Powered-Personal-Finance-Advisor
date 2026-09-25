@@ -20,6 +20,10 @@ from app.schemas.dashboard import (
     DashboardGoalsOverviewResponse,
     DashboardSpendingAnalysisResponse,
     DashboardCompleteResponse,
+    DashboardIncomeSourcesResponse,
+    DashboardSpendingPatternsResponse,
+    DashboardAnomalyTimelineResponse,
+    DashboardAccountsResponse,
 )
 
 router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
@@ -178,4 +182,76 @@ async def get_spending_analysis(
         success=True,
         message="Spending analysis retrieved successfully",
         data=DashboardSpendingAnalysisResponse(**data),
+    )
+
+
+@router.get(
+    "/income-sources",
+    response_model=APIResponse[DashboardIncomeSourcesResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Get income streams over time, source breakdown, and stability indicators",
+)
+async def get_income_sources(
+    current_user: User = Depends(get_current_user),
+    service: DashboardService = Depends(get_dashboard_service),
+):
+    data = await service.get_income_sources(current_user.id)
+    return APIResponse(
+        success=True,
+        message="Income sources and stability metrics retrieved successfully",
+        data=DashboardIncomeSourcesResponse(**data),
+    )
+
+
+@router.get(
+    "/spending-patterns",
+    response_model=APIResponse[DashboardSpendingPatternsResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Get 7-day Mon-Sun heatmap, weekday vs weekend comparison, and time-of-month spending",
+)
+async def get_spending_patterns(
+    current_user: User = Depends(get_current_user),
+    service: DashboardService = Depends(get_dashboard_service),
+):
+    data = await service.get_spending_patterns(current_user.id)
+    return APIResponse(
+        success=True,
+        message="Spending patterns and heatmap data retrieved successfully",
+        data=DashboardSpendingPatternsResponse(**data),
+    )
+
+
+@router.get(
+    "/anomaly-timeline",
+    response_model=APIResponse[DashboardAnomalyTimelineResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Get timeline of detected anomalies with severity levels and automated explanations",
+)
+async def get_anomaly_timeline(
+    current_user: User = Depends(get_current_user),
+    service: DashboardService = Depends(get_dashboard_service),
+):
+    data = await service.get_anomaly_timeline(current_user.id)
+    return APIResponse(
+        success=True,
+        message="Anomaly detection timeline retrieved successfully",
+        data=DashboardAnomalyTimelineResponse(**data),
+    )
+
+
+@router.get(
+    "/accounts",
+    response_model=APIResponse[DashboardAccountsResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Get linked accounts, live balances, credit utilization, and payment method distribution",
+)
+async def get_accounts(
+    current_user: User = Depends(get_current_user),
+    service: DashboardService = Depends(get_dashboard_service),
+):
+    data = await service.get_accounts(current_user.id)
+    return APIResponse(
+        success=True,
+        message="Linked accounts and payment methods retrieved successfully",
+        data=DashboardAccountsResponse(**data),
     )
