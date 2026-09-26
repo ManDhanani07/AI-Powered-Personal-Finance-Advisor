@@ -127,7 +127,6 @@ export const AdminOverview = () => {
   const activity = data?.platform_activity || [];
   const summary = data?.financial_summary || {};
   const mlModel = metrics?.expense_prediction_model || {};
-  const dataQuality = metrics?.data_quality || {};
   const systemHealth = metrics?.system_health || {};
   const isOperational = systemHealth?.status?.toLowerCase().includes('operational');
 
@@ -448,69 +447,7 @@ export const AdminOverview = () => {
         </div>
       </div>
 
-      {/* ── 5. Level 4: Transaction Data Quality ── */}
-      <div className="border border-zinc-800 bg-[#09090B] p-5 rounded-2xl shadow-sm space-y-5">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="p-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
-              <Database className="w-4 h-4 text-cyan-400" />
-            </div>
-            <div>
-              <h2 className="text-sm font-black text-white font-outfit">Transaction Data Quality</h2>
-              <p className="text-[11px] text-slate-500 mt-0.5">{metrics.total_transactions || 686} records analysed</p>
-            </div>
-          </div>
-          <div className="flex flex-col items-end gap-0.5">
-            <span className="text-2xl font-black text-white font-mono">{dataQuality.score || 99.8}%</span>
-            <span className="text-[10px] font-semibold text-cyan-400 uppercase tracking-wider">Overall Score</span>
-          </div>
-        </div>
 
-        {/* Metric cards grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          <DataQualityCard
-            label="Categorized"
-            sublabel="Transactions"
-            pct={dataQuality.categorized_pct || 99.7}
-            detail={`${dataQuality.categorized_count || 684} / ${metrics.total_transactions || 686} have a category`}
-            color="emerald"
-            icon="🏷️"
-          />
-          <DataQualityCard
-            label="Merchant"
-            sublabel="Identified"
-            pct={100 - (dataQuality.missing_merchant_pct || 0.6)}
-            detail={`${dataQuality.missing_merchant_count || 4} merchants unmapped`}
-            color="indigo"
-            icon="🏪"
-          />
-          <DataQualityCard
-            label="Valid Amounts"
-            sublabel="No anomalies"
-            pct={100 - (dataQuality.invalid_amount_pct || 0)}
-            detail="No zero or negative values"
-            color="sky"
-            icon="₹"
-          />
-          <DataQualityCard
-            label="Valid Dates"
-            sublabel="Timestamps"
-            pct={100 - (dataQuality.invalid_date_pct || 0)}
-            detail="All records have a valid date"
-            color="teal"
-            icon="📅"
-          />
-          <DataQualityCard
-            label="Uniqueness"
-            sublabel="Non-Duplicates"
-            pct={100 - (dataQuality.duplicate_pct || 0)}
-            detail="No duplicate candidates detected"
-            color="violet"
-            icon="✅"
-          />
-        </div>
-      </div>
     </div>
   );
 };
@@ -553,56 +490,6 @@ const KpiCard = ({ title, value, subtitle, trend, trendIsPositive, trendColor, i
   </div>
 );
 
-/* ── Reusable Component: Data Quality Card (grid style) ── */
-const colorMap = {
-  emerald: { bar: 'bg-emerald-500', glow: 'shadow-emerald-500/20', text: 'text-emerald-400', border: 'border-emerald-500/20', bg: 'bg-emerald-500/8' },
-  indigo:  { bar: 'bg-indigo-500',  glow: 'shadow-indigo-500/20',  text: 'text-indigo-400',  border: 'border-indigo-500/20',  bg: 'bg-indigo-500/8'  },
-  sky:     { bar: 'bg-sky-500',     glow: 'shadow-sky-500/20',     text: 'text-sky-400',     border: 'border-sky-500/20',     bg: 'bg-sky-500/8'     },
-  teal:    { bar: 'bg-teal-500',    glow: 'shadow-teal-500/20',    text: 'text-teal-400',    border: 'border-teal-500/20',    bg: 'bg-teal-500/8'    },
-  violet:  { bar: 'bg-violet-500',  glow: 'shadow-violet-500/20',  text: 'text-violet-400',  border: 'border-violet-500/20',  bg: 'bg-violet-500/8'  },
-};
-
-const DataQualityCard = ({ label, sublabel, pct, detail, color, icon }) => {
-  const c = colorMap[color] || colorMap.indigo;
-  const pctNum = parseFloat(pct) || 0;
-  const isGood = pctNum >= 99;
-  return (
-    <div className={`rounded-xl border ${c.border} bg-zinc-900/50 p-4 space-y-3 hover:bg-zinc-900/80 transition-colors`}>
-      {/* Top row: icon + label + badge */}
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <span className="text-base leading-none">{icon}</span>
-          <div>
-            <p className="text-xs font-bold text-white leading-tight">{label}</p>
-            <p className="text-[10px] text-slate-500 leading-tight mt-0.5">{sublabel}</p>
-          </div>
-        </div>
-        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${
-          isGood ? 'bg-emerald-500/15 text-emerald-400' : 'bg-amber-500/15 text-amber-400'
-        }`}>
-          {isGood ? '✓ Good' : '⚠ Review'}
-        </span>
-      </div>
-
-      {/* Big percentage */}
-      <div className="flex items-baseline gap-1">
-        <span className={`text-2xl font-black font-mono ${c.text}`}>{pctNum.toFixed(1)}</span>
-        <span className={`text-sm font-bold ${c.text}`}>%</span>
-      </div>
-
-      {/* Progress bar */}
-      <div className="h-2 w-full bg-zinc-800 rounded-full overflow-hidden">
-        <div
-          className={`h-full rounded-full transition-all duration-700 ${c.bar}`}
-          style={{ width: `${Math.min(pctNum, 100)}%` }}
-        />
-      </div>
-
-      {/* Detail text */}
-      <p className="text-[11px] text-slate-400 leading-tight">{detail}</p>
-    </div>
-  );
-};
 
 
 /* ── Reusable Component: Recharts Custom Tooltip ── */

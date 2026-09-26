@@ -17,7 +17,7 @@ import joblib
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status, Body
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, desc, or_, and_, delete, text
+from sqlalchemy import select, func, desc, or_, and_, delete, text, exists
 
 from app.database.session import get_db
 from app.dependencies.auth import get_current_user
@@ -29,7 +29,9 @@ from app.models.chat_history import ChatHistory
 from app.models.category import Category
 from app.models.audit_log import AuditLog
 from app.models.support_ticket import SupportTicket
-from app.exceptions.custom_exceptions import ForbiddenException, NotFoundException
+from app.models.admin_notification import AdminNotification
+from app.models.notification import Notification
+from app.exceptions.custom_exceptions import ForbiddenException, NotFoundException, BadRequestException
 from app.core.config import settings
 
 router = APIRouter(prefix="/admin", tags=["Admin Operations Console"])
@@ -510,7 +512,8 @@ async def get_admin_users(
     admin: User = Depends(verify_admin_access),
 ):
     """List platform users with search, role/status/risk filters, sorting, and pagination."""
-    stmt = select(User)
+    # Exclude admins: user directory is strictly for platform/customer accounts
+    stmt = select(User).where(func.coalesce(User.role, "USER") != "ADMIN")
 
     if search:
         search_fmt = f"%{search}%"
@@ -533,7 +536,7 @@ async def get_admin_users(
     elif status_filter == "unverified":
         stmt = stmt.where(or_(User.is_verified == False, User.email_verified == False))
 
-    if role_filter != "all":
+    if role_filter != "all" and role_filter.upper() != "ADMIN":
         stmt = stmt.where(User.role == role_filter.upper())
 
     total_count = (await db.execute(select(func.count()).select_from(stmt.subquery()))).scalar() or 0
@@ -797,7 +800,6 @@ async def delete_user(
     )
 
     return {"message": f"User {user_email} deleted successfully.", "deleted_id": str(user_id)}
-
 
 
 # ── 3. Transaction Operations & Data Quality Center ──────────────────────────
@@ -1360,15 +1362,35 @@ async def get_admin_transactions(
     quality_filter: Optional[str] = Query("ALL"),
     exception_type: Optional[str] = Query("ALL"),
     range: Optional[str] = Query("all"),
+    only_flagged: bool = Query(True),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
     admin: User = Depends(verify_admin_access),
 ):
-    """Retrieve platform-wide transactions with server-side filters, diagnostics, and pagination."""
+    """Retrieve platform-wide suspicious, unvalidated, and exception transactions with diagnostics and pagination."""
     now_utc = datetime.now(timezone.utc)
     future_cutoff = now_utc + timedelta(days=1)
     min_valid_date = datetime(1990, 1, 1, tzinfo=timezone.utc)
+
+    # Subquery to identify duplicate signatures (same user, date, amount, type)
+    dup_subq = (
+        select(
+            Transaction.user_id,
+            func.date(Transaction.transaction_date).label("tx_date"),
+            Transaction.amount,
+            Transaction.transaction_type,
+        )
+        .where(Transaction.is_deleted == False)
+        .group_by(
+            Transaction.user_id,
+            func.date(Transaction.transaction_date),
+            Transaction.amount,
+            Transaction.transaction_type,
+        )
+        .having(func.count(Transaction.id) > 1)
+        .subquery()
+    )
 
     stmt = (
         select(Transaction, User.first_name, User.last_name, User.email, Category.category_name)
@@ -1376,6 +1398,30 @@ async def get_admin_transactions(
         .outerjoin(Category, Transaction.category_id == Category.id)
         .where(Transaction.is_deleted == False)
     )
+
+    # Restrict to suspicious, unvalidated, or exception records (excludes normal completed transactions)
+    if only_flagged:
+        is_anomaly_clause = or_(
+            Transaction.amount > 100000,                                         # Suspicious high amount
+            Transaction.amount == None,                                          # Invalid/missing amount
+            Transaction.amount <= 0,                                             # Zero or negative amount
+            Transaction.transaction_date > future_cutoff,                       # Future dated
+            Transaction.transaction_date < min_valid_date,                       # Corrupted/invalid date
+            Transaction.merchant == None,                                        # Missing merchant
+            func.trim(Transaction.merchant) == "",                               # Blank merchant
+            Transaction.category_id == None,                                     # Uncategorized
+            Category.category_name == None,                                      # Missing category name
+            Category.category_name.ilike("uncategorized"),                       # Uncategorized
+            exists().where(                                                      # Duplicate transaction
+                and_(
+                    dup_subq.c.user_id == Transaction.user_id,
+                    dup_subq.c.tx_date == func.date(Transaction.transaction_date),
+                    dup_subq.c.amount == Transaction.amount,
+                    dup_subq.c.transaction_type == Transaction.transaction_type,
+                )
+            ),
+        )
+        stmt = stmt.where(is_anomaly_clause)
 
     range_val = range if isinstance(range, str) else "30d"
     start_dt, end_dt = get_tx_date_bounds(range_val)
@@ -1406,7 +1452,7 @@ async def get_admin_transactions(
     if exc_type_str and exc_type_str.upper() != "ALL":
         exc = exc_type_str.upper()
         if exc in ["FUTURE_DATE", "INVALID_DATE"]:
-            stmt = stmt.where(Transaction.transaction_date > future_cutoff)
+            stmt = stmt.where(or_(Transaction.transaction_date > future_cutoff, Transaction.transaction_date < min_valid_date))
         elif exc in ["MISSING_DATA", "MISSING_MERCHANT"]:
             stmt = stmt.where(or_(Transaction.merchant == None, func.trim(Transaction.merchant) == "", Transaction.category_id == None))
         elif exc == "UNCATEGORIZED":
@@ -1419,24 +1465,9 @@ async def get_admin_transactions(
             )
         elif exc in ["INVALID_AMOUNT", "OTHER"]:
             stmt = stmt.where(or_(Transaction.amount == None, Transaction.amount <= 0))
+        elif exc == "SUSPICIOUS":
+            stmt = stmt.where(Transaction.amount > 100000)
         elif exc == "DUPLICATE":
-            dup_subq = (
-                select(
-                    Transaction.user_id,
-                    func.date(Transaction.transaction_date).label("tx_date"),
-                    Transaction.amount,
-                    Transaction.transaction_type,
-                )
-                .where(Transaction.is_deleted == False)
-                .group_by(
-                    Transaction.user_id,
-                    func.date(Transaction.transaction_date),
-                    Transaction.amount,
-                    Transaction.transaction_type,
-                )
-                .having(func.count(Transaction.id) > 1)
-                .subquery()
-            )
             stmt = stmt.join(
                 dup_subq,
                 and_(
@@ -1518,14 +1549,19 @@ async def get_admin_transactions(
     for tx, fn, ln, email, cat_name in res:
         is_suspicious = float(tx.amount) > 100000 if tx.amount else False
         is_future = bool(tx.transaction_date and tx.transaction_date > future_cutoff)
+        is_corrupt_date = bool(tx.transaction_date and tx.transaction_date < min_valid_date)
         is_invalid_amt = bool(tx.amount is None or tx.amount <= 0)
         is_uncat = not cat_name or cat_name.lower() == "uncategorized"
         is_missing_merchant = not tx.merchant or not tx.merchant.strip()
 
         # Build quality issues list
         quality_issues = []
+        if is_suspicious:
+            quality_issues.append("Suspicious high-value anomaly (> ₹1,00,000)")
         if is_future:
             quality_issues.append(f"Future date: {tx.transaction_date.strftime('%d %b %Y')}")
+        if is_corrupt_date:
+            quality_issues.append("Invalid or corrupted timestamp (< 1990)")
         if is_invalid_amt:
             quality_issues.append("Invalid or zero monetary amount")
         if is_uncat:
@@ -1534,8 +1570,10 @@ async def get_admin_transactions(
             quality_issues.append("Merchant unresolved")
 
         # Determine quality status
-        if is_future or is_invalid_amt:
+        if is_future or is_corrupt_date or is_invalid_amt:
             data_quality = "Invalid"
+        elif is_suspicious:
+            data_quality = "Suspicious"
         elif is_uncat or is_missing_merchant:
             data_quality = "Warning"
         else:
@@ -1546,7 +1584,7 @@ async def get_admin_transactions(
             status_label = "Failed"
         elif is_suspicious:
             status_label = "Suspicious"
-        elif is_future or is_uncat or is_missing_merchant:
+        elif is_future or is_corrupt_date or is_uncat or is_missing_merchant:
             status_label = "Needs Review"
         else:
             status_label = "Completed"
@@ -2800,23 +2838,372 @@ async def get_admin_notifications(
     return {"broadcasts": broadcasts}
 
 
+@router.post("/notifications/broadcast")
 @router.post("/notifications")
 async def create_admin_broadcast(
     payload: Dict[str, Any] = Body(...),
     db: AsyncSession = Depends(get_db),
     admin: User = Depends(verify_admin_access),
 ):
-    """Create and broadcast a new platform announcement."""
-    title = payload.get("title", "Platform Update")
-    broadcast_type = payload.get("type", "System Announcement")
-    segment = payload.get("segment", "All Users")
+    """
+    Dispatch a platform-wide instruction, announcement, maintenance notice, or warning
+    to all registered platform users or specific segments.
+    Creates actual Notification records in PostgreSQL for every matching user.
+    """
+    title = (payload.get("title") or "Platform Announcement").strip()
+    message = (payload.get("message") or payload.get("description") or "").strip()
+    priority = (payload.get("priority") or "INFO").upper()
+    segment = payload.get("segment", payload.get("target", "All Users"))
+
+    if not title or not message:
+        raise BadRequestException("Announcement title and message content are required.")
+
+    # Query recipients (excluding ADMIN accounts)
+    query = select(User).where(User.role != "ADMIN")
+    if segment.lower() in ("active users", "active"):
+        query = query.where(User.is_active.is_(True))
+
+    res = await db.execute(query)
+    recipients = res.scalars().all()
+
+    icon = "alert-triangle" if priority in ["HIGH", "CRITICAL", "WARNING"] else "bell"
+    category = "SECURITY" if priority == "CRITICAL" else "SYSTEM"
+    broadcast_uuid = uuid.uuid4().hex[:8]
+
+    notifications_to_add = [
+        Notification(
+            user_id=u.id,
+            title=title,
+            message=message,
+            notification_type=f"BROADCAST_{broadcast_uuid}",
+            type=priority,
+            priority=priority,
+            status="UNREAD",
+            category=category,
+            related_module="PLATFORM_BROADCAST",
+            icon=icon,
+            is_read=False,
+        )
+        for u in recipients
+    ]
+
+    if notifications_to_add:
+        db.add_all(notifications_to_add)
 
     await safe_log_audit(
         db, admin, "PLATFORM_BROADCAST_CREATE", "NOTIFICATIONS",
-        f"Admin {admin.email} created broadcast '{title}' target: {segment}"
+        f"Admin {admin.email} broadcast '{title}' [{priority}] to {len(recipients)} users (segment: {segment})"
     )
+    await db.commit()
 
-    return {"message": "Platform announcement dispatched successfully.", "title": title}
+    return {
+        "success": True,
+        "message": f"Platform announcement dispatched successfully to {len(recipients)} user(s).",
+        "title": title,
+        "delivered_count": len(recipients),
+    }
+
+
+@router.post("/users/{user_id}/message")
+async def send_user_message(
+    user_id: UUID,
+    payload: Dict[str, Any] = Body(...),
+    db: AsyncSession = Depends(get_db),
+    admin: User = Depends(verify_admin_access),
+):
+    """
+    Send an administrative instruction, notice, or warning to an individual user.
+    Creates a real notification for the recipient and logs an audit trail.
+    """
+    title = (payload.get("title") or "").strip()
+    message = (payload.get("message") or "").strip()
+    priority = (payload.get("priority") or "MEDIUM").upper()
+    notification_type = (payload.get("type") or "ADMIN_INSTRUCTION").upper()
+
+    if not title or not message:
+        raise BadRequestException("Title and message are required.")
+
+    target_user = await db.get(User, user_id)
+    if not target_user:
+        raise NotFoundException("User not found.")
+
+    icon = "alert-triangle" if priority in ["HIGH", "CRITICAL", "WARNING"] else "bell"
+    category = "SECURITY" if "SECURITY" in notification_type or priority == "CRITICAL" else "SYSTEM"
+    msg_uuid = uuid.uuid4().hex[:8]
+
+    notif = Notification(
+        user_id=user_id,
+        title=title,
+        message=message,
+        notification_type=f"ADMIN_MESSAGE_{msg_uuid}",
+        type=priority,
+        priority=priority,
+        status="UNREAD",
+        category=category,
+        related_module="ADMIN",
+        icon=icon,
+        is_read=False,
+    )
+    db.add(notif)
+
+    await safe_log_audit(
+        db, admin, "ADMIN_USER_MESSAGE_SENT", "NOTIFICATIONS",
+        f"Admin {admin.email} sent message '{title}' [{priority}] to user {target_user.email}"
+    )
+    await db.commit()
+
+    return {
+        "success": True,
+        "message": f"Instruction sent successfully to {target_user.email}.",
+        "notification_id": str(notif.id),
+        "target_email": target_user.email,
+    }
+
+
+# ── 8B. Administrator Operational Alerts & Notifications ───────────────────────
+
+@router.get("/alerts")
+async def get_admin_alerts(
+    db: AsyncSession = Depends(get_db),
+    admin: User = Depends(verify_admin_access),
+):
+    """
+    Retrieve real administrative and system alerts for the active administrator.
+    Synthesizes and syncs real notifications from open support tickets,
+    suspicious/anomaly transactions, security audit events, and user onboarding.
+    """
+    now = datetime.now(timezone.utc)
+
+    # 1. Check open customer support tickets
+    ticket_query = select(func.count(SupportTicket.id)).where(
+        SupportTicket.status.in_(["Open", "In Progress", "Pending"])
+    )
+    open_tickets_count = (await db.execute(ticket_query)).scalar() or 0
+    if open_tickets_count > 0:
+        cutoff_12h = now - timedelta(hours=12)
+        exists_stmt = select(exists().where(
+            AdminNotification.admin_user_id == admin.id,
+            AdminNotification.title.ilike("%Support Ticket%"),
+            AdminNotification.created_at >= cutoff_12h,
+        ))
+        has_ticket_alert = (await db.execute(exists_stmt)).scalar()
+        if not has_ticket_alert:
+            db.add(AdminNotification(
+                admin_user_id=admin.id,
+                title="Support Tickets Pending Action",
+                message=f"{open_tickets_count} customer care & problem report tickets require administrator review and resolution.",
+                notification_type="WARNING",
+                is_read=False,
+                created_at=now,
+            ))
+
+    # 2. Check flagged / suspicious transactions requiring review
+    tx_query = select(func.count(Transaction.id)).where(
+        or_(
+            Transaction.category_id.is_(None),
+            Transaction.amount >= Decimal("100000"),
+            Transaction.transaction_date > now,
+        ),
+        Transaction.is_deleted.is_(False),
+    )
+    suspicious_tx_count = (await db.execute(tx_query)).scalar() or 0
+    if suspicious_tx_count > 0:
+        cutoff_12h = now - timedelta(hours=12)
+        exists_stmt = select(exists().where(
+            AdminNotification.admin_user_id == admin.id,
+            AdminNotification.title.ilike("%Suspicious Transactions%"),
+            AdminNotification.created_at >= cutoff_12h,
+        ))
+        has_tx_alert = (await db.execute(exists_stmt)).scalar()
+        if not has_tx_alert:
+            db.add(AdminNotification(
+                admin_user_id=admin.id,
+                title="Suspicious Transactions Flagged",
+                message=f"{suspicious_tx_count} transactions flagged with classification anomalies, high amounts, or data integrity exceptions.",
+                notification_type="ERROR",
+                is_read=False,
+                created_at=now,
+            ))
+
+    # 3. Check security audit events & failed access
+    audit_query = select(func.count(AuditLog.id)).where(
+        or_(
+            AuditLog.status == "Failure",
+            AuditLog.action.ilike("%FAIL%"),
+            AuditLog.action.ilike("%SECURITY%"),
+            AuditLog.action.ilike("%BLOCK%"),
+        )
+    )
+    security_alerts_count = (await db.execute(audit_query)).scalar() or 0
+    if security_alerts_count > 0:
+        cutoff_24h = now - timedelta(hours=24)
+        exists_stmt = select(exists().where(
+            AdminNotification.admin_user_id == admin.id,
+            AdminNotification.notification_type == "SECURITY",
+            AdminNotification.created_at >= cutoff_24h,
+        ))
+        has_sec_alert = (await db.execute(exists_stmt)).scalar()
+        if not has_sec_alert:
+            db.add(AdminNotification(
+                admin_user_id=admin.id,
+                title="Security Audit Anomaly Detected",
+                message=f"{security_alerts_count} security-related audit events or access failures recorded in system logs.",
+                notification_type="SECURITY",
+                is_read=False,
+                created_at=now,
+            ))
+
+    # 4. User Onboarding Activity
+    cutoff_7d = now - timedelta(days=7)
+    user_query = select(func.count(User.id)).where(User.created_at >= cutoff_7d)
+    new_users_count = (await db.execute(user_query)).scalar() or 0
+    if new_users_count > 0:
+        cutoff_48h = now - timedelta(hours=48)
+        exists_stmt = select(exists().where(
+            AdminNotification.admin_user_id == admin.id,
+            AdminNotification.title.ilike("%User Onboarding%"),
+            AdminNotification.created_at >= cutoff_48h,
+        ))
+        has_user_alert = (await db.execute(exists_stmt)).scalar()
+        if not has_user_alert:
+            db.add(AdminNotification(
+                admin_user_id=admin.id,
+                title="New User Onboarding",
+                message=f"{new_users_count} new user accounts registered in the platform over the last 7 days.",
+                notification_type="INFO",
+                is_read=False,
+                created_at=now,
+            ))
+
+    # 5. Baseline operational status if no notifications exist at all
+    all_count_stmt = select(func.count(AdminNotification.id)).where(
+        AdminNotification.admin_user_id == admin.id
+    )
+    total_existing = (await db.execute(all_count_stmt)).scalar() or 0
+    if total_existing == 0:
+        db.add(AdminNotification(
+            admin_user_id=admin.id,
+            title="System Operational: All Services Online",
+            message="PostgreSQL database, background workers, and AI services are running within normal SLA parameters.",
+            notification_type="INFO",
+            is_read=False,
+            created_at=now,
+        ))
+
+    await db.commit()
+
+    # Query notifications for this admin
+    stmt = (
+        select(AdminNotification)
+        .where(AdminNotification.admin_user_id == admin.id)
+        .order_by(desc(AdminNotification.created_at))
+        .limit(20)
+    )
+    res = await db.execute(stmt)
+    records = res.scalars().all()
+
+    unread_count = sum(1 for r in records if not r.is_read)
+
+    items = []
+    for r in records:
+        t_low = r.title.lower()
+        if "support" in t_low or "ticket" in t_low:
+            action_url = "/admin/support"
+            action_label = "View Tickets"
+        elif "transaction" in t_low or "suspicious" in t_low:
+            action_url = "/admin/transactions"
+            action_label = "Review Transactions"
+        elif "security" in t_low or "audit" in t_low:
+            action_url = "/admin/security"
+            action_label = "Security Logs"
+        elif "user" in t_low:
+            action_url = "/admin/users"
+            action_label = "Users Directory"
+        else:
+            action_url = "/admin/overview"
+            action_label = "Overview"
+
+        items.append({
+            "id": str(r.id),
+            "title": r.title,
+            "message": r.message,
+            "type": r.notification_type,
+            "is_read": r.is_read,
+            "created_at": r.created_at.isoformat() if r.created_at else now.isoformat(),
+            "action_url": action_url,
+            "action_label": action_label,
+        })
+
+    return {
+        "unread_count": unread_count,
+        "items": items,
+    }
+
+
+@router.put("/alerts/{alert_id}/read")
+async def mark_admin_alert_read(
+    alert_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    admin: User = Depends(verify_admin_access),
+):
+    """Mark a specific admin notification as read."""
+    stmt = select(AdminNotification).where(
+        AdminNotification.id == alert_id,
+        AdminNotification.admin_user_id == admin.id,
+    )
+    res = await db.execute(stmt)
+    alert = res.scalar_one_or_none()
+    if not alert:
+        raise NotFoundException("Admin alert not found.")
+    alert.is_read = True
+    await db.commit()
+    return {"message": "Alert marked as read.", "id": str(alert_id)}
+
+
+@router.put("/alerts/read-all")
+async def mark_all_admin_alerts_read(
+    db: AsyncSession = Depends(get_db),
+    admin: User = Depends(verify_admin_access),
+):
+    """Mark all admin notifications as read for current administrator."""
+    stmt = text(
+        "UPDATE admin_notifications SET is_read = true WHERE admin_user_id = :uid AND is_read = false"
+    )
+    await db.execute(stmt, {"uid": admin.id})
+    await db.commit()
+    return {"message": "All admin alerts marked as read."}
+
+
+@router.delete("/alerts/{alert_id}")
+async def delete_admin_alert(
+    alert_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    admin: User = Depends(verify_admin_access),
+):
+    """Delete or dismiss a specific admin notification."""
+    stmt = select(AdminNotification).where(
+        AdminNotification.id == alert_id,
+        AdminNotification.admin_user_id == admin.id,
+    )
+    res = await db.execute(stmt)
+    alert = res.scalar_one_or_none()
+    if not alert:
+        raise NotFoundException("Admin alert not found.")
+    await db.delete(alert)
+    await db.commit()
+    return {"message": "Alert dismissed.", "id": str(alert_id)}
+
+
+@router.delete("/alerts")
+async def clear_admin_alerts(
+    db: AsyncSession = Depends(get_db),
+    admin: User = Depends(verify_admin_access),
+):
+    """Clear all read admin notifications for current administrator."""
+    stmt = text("DELETE FROM admin_notifications WHERE admin_user_id = :uid AND is_read = true")
+    await db.execute(stmt, {"uid": admin.id})
+    await db.commit()
+    return {"message": "Read admin alerts cleared."}
 
 
 # ── 9. Support & Issue Ticketing ──────────────────────────────────────────────

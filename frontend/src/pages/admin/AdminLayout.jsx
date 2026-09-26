@@ -16,12 +16,14 @@ import {
   CheckCircle2,
   ChevronDown,
   Menu,
-  X,
   AlertTriangle,
   RefreshCw,
+  Megaphone,
+  X,
 } from 'lucide-react';
 import useAuth from '../../hooks/useAuth.js';
 import NotificationPopover from '../../components/layout/NotificationPopover.jsx';
+import AdminBroadcastModal from './AdminBroadcastModal.jsx';
 
 const ADMIN_EMAIL = 'fintech0707@gmail.com';
 
@@ -71,6 +73,7 @@ export const AdminLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isBroadcastOpen, setIsBroadcastOpen] = useState(false);
 
   // Flatten items for current header title
   const allItems = NAV_GROUPS.flatMap((g) => g.items);
@@ -230,11 +233,15 @@ export const AdminLayout = () => {
             {/* Notifications Popover */}
             <NotificationPopover />
 
-            {/* Super Admin Badge */}
-            <div className="hidden md:flex items-center space-x-2 border border-zinc-800 bg-zinc-900 px-3 py-1 rounded-xl text-xs font-mono">
-              <span className="w-2 h-2 rounded-full bg-indigo-400 animate-ping" />
-              <span className="text-slate-300 font-bold">PRO CONSOLE</span>
-            </div>
+            {/* Platform Broadcast Button */}
+            <button
+              onClick={() => setIsBroadcastOpen(true)}
+              className="hidden md:flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-slate-300 hover:text-white text-xs font-bold transition-colors"
+              title="Broadcast platform message or warning to all users"
+            >
+              <Megaphone className="w-3.5 h-3.5 text-indigo-400" />
+              <span>Broadcast</span>
+            </button>
           </div>
         </header>
 
@@ -244,6 +251,12 @@ export const AdminLayout = () => {
             <Outlet />
           </AdminErrorBoundary>
         </main>
+
+        {/* Global Platform Broadcast Modal */}
+        <AdminBroadcastModal
+          isOpen={isBroadcastOpen}
+          onClose={() => setIsBroadcastOpen(false)}
+        />
       </div>
     </div>
   );

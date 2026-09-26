@@ -7,9 +7,11 @@ import {
   Loader2,
   CheckCircle2,
   Sparkles,
+  Send,
 } from 'lucide-react';
 import adminService from '../../services/adminService.js';
 import AdminUserDetailModal from './AdminUserDetailModal.jsx';
+import AdminBroadcastModal from './AdminBroadcastModal.jsx';
 import { showToast } from '../../components/common/ToastProvider.jsx';
 
 export const AdminUsers = () => {
@@ -17,7 +19,6 @@ export const AdminUsers = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [roleFilter, setRoleFilter] = useState('all');
   const [planFilter, setPlanFilter] = useState('all');
   const [sortBy, setSortBy] = useState('created_at');
   const [sortOrder, setSortOrder] = useState('desc');
@@ -28,11 +29,13 @@ export const AdminUsers = () => {
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [userDetail, setUserDetail] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalInitialTab, setModalInitialTab] = useState('account');
+  const [isBroadcastOpen, setIsBroadcastOpen] = useState(false);
+  const [broadcastTargetUser, setBroadcastTargetUser] = useState(null);
   const [inspectLoadingId, setInspectLoadingId] = useState(null);
 
   const getPlanTier = (u) => {
     if (u.plan_tier) return u.plan_tier;
-    if (u.role === 'ADMIN') return 'Enterprise';
     if ((u.transactions_count || 0) > 40) return 'Pro';
     return 'Free';
   };
@@ -45,16 +48,16 @@ export const AdminUsers = () => {
       const res = await adminService.getUsers({
         search,
         status_filter: statusFilter,
-        role_filter: roleFilter,
         sort_by: sortBy,
         sort_order: sortOrder,
         page,
         page_size: 15,
       });
       const payload = res?.data || res || {};
-      setUsers(payload.items || []);
+      const platformUsers = (payload.items || []).filter((u) => u.role !== 'ADMIN');
+      setUsers(platformUsers);
       setTotalPages(payload.total_pages || 1);
-      setTotalCount(payload.total_count || 0);
+      setTotalCount(payload.total_count || platformUsers.length);
     } catch (err) {
       console.error('Failed to load users:', err);
       showToast.error('Failed to load user directory.');
@@ -65,10 +68,11 @@ export const AdminUsers = () => {
 
   useEffect(() => {
     loadUsers();
-  }, [search, statusFilter, roleFilter, sortBy, sortOrder, page]);
+  }, [search, statusFilter, sortBy, sortOrder, page]);
 
-  const handleViewUser = async (userId) => {
+  const handleViewUser = async (userId, initialTab = 'account') => {
     setInspectLoadingId(userId);
+    setModalInitialTab(initialTab);
     try {
       const res = await adminService.getUserDetails(userId);
       const detail = res?.data || res || {};
@@ -83,8 +87,6 @@ export const AdminUsers = () => {
     }
   };
 
-
-
   return (
     <div className="space-y-5 max-w-[1920px] w-full mx-auto">
       {/* Header & Stats Banner */}
@@ -95,8 +97,10 @@ export const AdminUsers = () => {
             Monitor identities, verify accounts, evaluate risk levels and enforce access controls.
           </p>
         </div>
-        <div className="flex items-center space-x-2 text-xs font-mono text-slate-400 bg-zinc-900 border border-zinc-800 px-3.5 py-1.5 rounded-xl">
-          <span>Total Records: <strong className="text-white">{totalCount}</strong></span>
+        <div className="flex items-center space-x-2.5">
+          <div className="flex items-center space-x-2 text-xs font-mono text-slate-400 bg-zinc-900 border border-zinc-800 px-3.5 py-2 rounded-xl">
+            <span>Total: <strong className="text-white">{totalCount}</strong></span>
+          </div>
         </div>
       </div>
 
@@ -130,20 +134,6 @@ export const AdminUsers = () => {
               <option value="blocked">Blocked Only</option>
               <option value="verified">Verified Only</option>
               <option value="unverified">Unverified Only</option>
-            </select>
-          </div>
-
-          {/* Role Filter */}
-          <div className="flex items-center space-x-1.5">
-            <span className="font-semibold text-slate-500">Role:</span>
-            <select
-              value={roleFilter}
-              onChange={(e) => { setRoleFilter(e.target.value); setPage(1); }}
-              className="rounded-xl border border-zinc-800 bg-zinc-900 py-2 px-3 text-xs font-medium text-slate-300 focus:outline-none focus:ring-1 focus:ring-zinc-600"
-            >
-              <option value="all">All Roles</option>
-              <option value="USER">Standard User</option>
-              <option value="ADMIN">Administrator</option>
             </select>
           </div>
 
@@ -209,7 +199,7 @@ export const AdminUsers = () => {
               </thead>
               <tbody className="divide-y divide-zinc-900">
                 {users
-                  .filter((u) => planFilter === 'all' || getPlanTier(u) === planFilter)
+                  .filter((u) => u.role !== 'ADMIN' && (planFilter === 'all' || getPlanTier(u) === planFilter))
                   .map((u) => {
                     const tier = getPlanTier(u);
                     return (
@@ -299,18 +289,30 @@ export const AdminUsers = () => {
                           </span>
                         </td>
                         <td className="py-3 px-4 text-center">
-                          <button
-                            onClick={() => handleViewUser(u.id)}
-                            disabled={inspectLoadingId === u.id}
-                            className="p-1.5 rounded-lg border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-slate-300 hover:text-indigo-400 transition-colors disabled:opacity-50"
-                            title="Inspect Account Details"
-                          >
-                            {inspectLoadingId === u.id ? (
-                              <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-400" />
-                            ) : (
-                              <Eye className="w-3.5 h-3.5" />
-                            )}
-                          </button>
+                          <div className="flex items-center justify-center space-x-1.5">
+                            <button
+                              onClick={() => {
+                                setBroadcastTargetUser(u);
+                                setIsBroadcastOpen(true);
+                              }}
+                              className="p-1.5 rounded-lg border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-slate-400 hover:text-amber-400 transition-colors"
+                              title="Send Notice / Warning to this User"
+                            >
+                              <Send className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleViewUser(u.id, 'account')}
+                              disabled={inspectLoadingId === u.id}
+                              className="p-1.5 rounded-lg border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-slate-300 hover:text-indigo-400 transition-colors disabled:opacity-50"
+                              title="Inspect Account Details"
+                            >
+                              {inspectLoadingId === u.id ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-400" />
+                              ) : (
+                                <Eye className="w-3.5 h-3.5" />
+                              )}
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -351,6 +353,18 @@ export const AdminUsers = () => {
         onClose={() => setIsModalOpen(false)}
         userDetail={userDetail}
         onUserUpdated={loadUsers}
+        initialTab={modalInitialTab}
+      />
+
+      {/* Broadcast & User Notice Modal */}
+      <AdminBroadcastModal
+        isOpen={isBroadcastOpen}
+        onClose={() => {
+          setIsBroadcastOpen(false);
+          setBroadcastTargetUser(null);
+        }}
+        onBroadcastSent={loadUsers}
+        preselectedUser={broadcastTargetUser}
       />
 
 

@@ -1,16 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip as RechartsTooltip,
-} from 'recharts';
-import {
   Search,
   RefreshCw,
   AlertTriangle,
@@ -25,8 +14,6 @@ import {
   ShieldAlert,
   Clock,
   Sparkles,
-  TrendingUp,
-  BarChart3,
   Layers,
   Database,
   Check,
@@ -38,28 +25,6 @@ import { showToast } from '../../components/common/ToastProvider.jsx';
 import { formatCurrency } from '../../utils/formatters.js';
 import AdminTransactionDetailModal from './AdminTransactionDetailModal.jsx';
 
-// Custom dark Recharts tooltip
-const ChartTooltip = ({ active, payload, label, isRate = false }) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-zinc-950/95 border border-zinc-800 p-3 rounded-xl shadow-xl text-xs space-y-1.5 backdrop-blur-md z-50">
-        <p className="font-semibold text-white font-mono border-b border-zinc-800/80 pb-1">{label}</p>
-        {payload.map((entry, index) => (
-          <div key={`item-${index}`} className="flex items-center justify-between space-x-4">
-            <span className="flex items-center space-x-1.5 text-slate-400">
-              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color || entry.stroke }} />
-              <span>{entry.name}:</span>
-            </span>
-            <span className="font-mono font-bold text-white">
-              {isRate ? `${entry.value}%` : entry.value.toLocaleString()}
-            </span>
-          </div>
-        ))}
-      </div>
-    );
-  }
-  return null;
-};
 
 export const AdminTransactions = () => {
   // Global Controls - Default to 30 Days as requested
@@ -70,7 +35,6 @@ export const AdminTransactions = () => {
   // Core Data States
   const [summary, setSummary] = useState(null);
   const [quality, setQuality] = useState(null);
-  const [trends, setTrends] = useState({ processing_trend: [], quality_trend: [], has_sufficient_data: false });
   const [exceptions, setExceptions] = useState([]);
   const [loadingMetrics, setLoadingMetrics] = useState(true);
 
@@ -99,16 +63,14 @@ export const AdminTransactions = () => {
     else setLoadingMetrics(true);
 
     try {
-      const [sumRes, qualRes, trendRes, excRes] = await Promise.all([
+      const [sumRes, qualRes, excRes] = await Promise.all([
         adminService.getTransactionSummary(dateRange),
         adminService.getTransactionQuality(dateRange),
-        adminService.getTransactionTrends(dateRange),
         adminService.getTransactionExceptions(dateRange),
       ]);
 
       setSummary(sumRes?.data || sumRes || null);
       setQuality(qualRes?.data || qualRes || null);
-      setTrends(trendRes?.data || trendRes || { processing_trend: [], quality_trend: [], has_sufficient_data: false });
       const excData = excRes?.data || excRes || {};
       setExceptions(excData.items || []);
       setLastUpdated(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
@@ -239,11 +201,6 @@ export const AdminTransactions = () => {
     return { label: 'Critical Attention Required', color: 'text-rose-400', badge: 'bg-rose-500/10 border-rose-500/20 text-rose-400' };
   };
   const qualityGrade = getQualityGrade(overallScore);
-
-  const processingTrendData = trends?.processing_trend || [];
-  const qualityTrendData = trends?.quality_trend || [];
-  const hasProcessingTrend = processingTrendData.length >= 2;
-  const hasQualityTrend = qualityTrendData.length >= 2;
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-14 text-slate-100">
@@ -549,121 +506,6 @@ export const AdminTransactions = () => {
         </div>
       </div>
 
-      {/* ── Section 3: Dual Trend Visualizations (Processing + Quality) ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {/* Chart 1: Processing Throughput Trend */}
-        <div className="p-5 rounded-2xl border border-zinc-800 bg-[#09090B] space-y-4 shadow-sm">
-          <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
-            <div>
-              <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-400 font-outfit flex items-center space-x-2">
-                <BarChart3 className="w-3.5 h-3.5 text-sky-400" />
-                <span>Processing Throughput & Classification</span>
-              </h3>
-              <p className="text-[11px] text-slate-500 mt-0.5 font-sans">
-                Volume of transactions ingested, verified, and flagged over time.
-              </p>
-            </div>
-            <span className="text-[10px] font-mono text-slate-500 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
-              {processingTrendData.length} records
-            </span>
-          </div>
-
-          <div className="h-64 w-full">
-            {hasProcessingTrend ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={processingTrendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="processedGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#0EA5E9" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#0EA5E9" stopOpacity={0.0} />
-                    </linearGradient>
-                    <linearGradient id="successGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10B981" stopOpacity={0.25} />
-                      <stop offset="95%" stopColor="#10B981" stopOpacity={0.0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" vertical={false} />
-                  <XAxis dataKey="date" tick={{ fill: '#94a3b8', fontSize: 10 }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fill: '#94a3b8', fontSize: 10 }} axisLine={false} tickLine={false} />
-                  <RechartsTooltip content={<ChartTooltip />} />
-                  <Area type="monotone" dataKey="processed" name="Total Ingested" stroke="#0EA5E9" strokeWidth={2} fill="url(#processedGrad)" />
-                  <Area type="monotone" dataKey="successful" name="Verified" stroke="#10B981" strokeWidth={1.5} fill="url(#successGrad)" />
-                  <Line type="monotone" dataKey="needs_review" name="Needs Review" stroke="#F59E0B" strokeWidth={1.5} dot={false} />
-                  <Line type="monotone" dataKey="failed" name="Failed" stroke="#F43F5E" strokeWidth={1.5} dot={false} />
-                </AreaChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-full flex flex-col items-center justify-center text-slate-500 space-y-2">
-                <Database className="w-8 h-8 opacity-40" />
-                <p className="text-xs font-mono">
-                  {dateRange === 'all' ? 'Insufficient time-series data.' : 'No trend points recorded for this window.'}
-                </p>
-                {dateRange !== 'all' && (
-                  <button
-                    type="button"
-                    onClick={() => setDateRange('all')}
-                    className="text-xs text-indigo-400 hover:text-indigo-300 underline font-mono"
-                  >
-                    Switch to All Time
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Chart 2: Data Quality Compliance Trend */}
-        <div className="p-5 rounded-2xl border border-zinc-800 bg-[#09090B] space-y-4 shadow-sm">
-          <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
-            <div>
-              <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-400 font-outfit flex items-center space-x-2">
-                <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Data Quality Compliance Trend (%)</span>
-              </h3>
-              <p className="text-[11px] text-slate-500 mt-0.5 font-sans">
-                Chronological integrity rates for categorization, dates, and amounts.
-              </p>
-            </div>
-            <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-              0-100% Scale
-            </span>
-          </div>
-
-          <div className="h-64 w-full">
-            {hasQualityTrend ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={qualityTrendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" vertical={false} />
-                  <XAxis dataKey="date" tick={{ fill: '#94a3b8', fontSize: 10 }} axisLine={false} tickLine={false} />
-                  <YAxis domain={[0, 100]} tick={{ fill: '#94a3b8', fontSize: 10 }} axisLine={false} tickLine={false} unit="%" />
-                  <RechartsTooltip content={<ChartTooltip isRate={true} />} />
-                  <Line type="monotone" dataKey="categorized_rate" name="Categorized %" stroke="#6366F1" strokeWidth={2} dot={false} />
-                  <Line type="monotone" dataKey="valid_amount_rate" name="Valid Amount %" stroke="#10B981" strokeWidth={1.5} dot={false} />
-                  <Line type="monotone" dataKey="valid_date_rate" name="Valid Date %" stroke="#0EA5E9" strokeWidth={1.5} dot={false} />
-                  <Line type="monotone" dataKey="merchant_rate" name="Merchant %" stroke="#A855F7" strokeWidth={1.5} dot={false} />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-full flex flex-col items-center justify-center text-slate-500 space-y-2">
-                <Database className="w-8 h-8 opacity-40" />
-                <p className="text-xs font-mono">
-                  {dateRange === 'all' ? 'Insufficient time-series quality data.' : 'No quality trend points recorded for this window.'}
-                </p>
-                {dateRange !== 'all' && (
-                  <button
-                    type="button"
-                    onClick={() => setDateRange('all')}
-                    className="text-xs text-indigo-400 hover:text-indigo-300 underline font-mono"
-                  >
-                    Switch to All Time
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
       {/* ── Section 4: Anomaly & Exception Center ── */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
@@ -734,20 +576,20 @@ export const AdminTransactions = () => {
         )}
       </div>
 
-      {/* ── Section 5: Transaction Explorer (Bottom Section) ── */}
+      {/* ── Section 5: Suspicious & Exception Transactions (Bottom Section) ── */}
       <div ref={explorerRef} className="space-y-4 pt-2">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <h2 className="text-base font-bold text-white font-outfit flex items-center space-x-2">
-              <Layers className="w-4 h-4 text-indigo-400" />
-              <span>Transaction Explorer</span>
+              <ShieldAlert className="w-4 h-4 text-amber-400" />
+              <span>Suspicious & Flagged Transactions</span>
             </h2>
             <p className="text-xs text-slate-400 mt-0.5">
-              Filter, search, and drill-down into individual transaction records.
+              Only showing transactions requiring review: anomalies, unvalidated data, high values, or missing classifications.
             </p>
           </div>
           <span className="text-xs font-mono text-slate-500">
-            Server-side paginated ({totalCount.toLocaleString()} total)
+            {totalCount.toLocaleString()} flagged record{totalCount === 1 ? '' : 's'}
           </span>
         </div>
 
@@ -773,10 +615,10 @@ export const AdminTransactions = () => {
                 onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
                 className="w-full rounded-xl border border-zinc-800 bg-zinc-900 py-2 px-3 text-xs font-medium text-slate-300 focus:outline-none focus:ring-1 focus:ring-zinc-700"
               >
-                <option value="ALL">All Status</option>
-                <option value="COMPLETED">Completed</option>
+                <option value="ALL">All Severities</option>
+                <option value="SUSPICIOUS">Suspicious Anomaly</option>
                 <option value="NEEDS_REVIEW">Needs Review</option>
-                <option value="FAILED">Failed</option>
+                <option value="FAILED">Failed / Invalid</option>
               </select>
             </div>
 
@@ -787,10 +629,10 @@ export const AdminTransactions = () => {
                 onChange={(e) => { setQualityFilter(e.target.value); setPage(1); }}
                 className="w-full rounded-xl border border-zinc-800 bg-zinc-900 py-2 px-3 text-xs font-medium text-slate-300 focus:outline-none focus:ring-1 focus:ring-zinc-700"
               >
-                <option value="ALL">All Quality</option>
-                <option value="VALID">Valid</option>
-                <option value="INVALID">Invalid</option>
-                <option value="WARNING">Warning</option>
+                <option value="ALL">All Quality Issues</option>
+                <option value="SUSPICIOUS">Suspicious Anomaly</option>
+                <option value="WARNING">Warning (Incomplete)</option>
+                <option value="INVALID">Invalid / Corrupted</option>
               </select>
             </div>
 
@@ -802,10 +644,12 @@ export const AdminTransactions = () => {
                 className="w-full rounded-xl border border-zinc-800 bg-zinc-900 py-2 px-3 text-xs font-medium text-slate-300 focus:outline-none focus:ring-1 focus:ring-zinc-700"
               >
                 <option value="ALL">All Exceptions</option>
-                <option value="INVALID_DATE">Invalid Date</option>
-                <option value="DUPLICATE">Duplicate</option>
-                <option value="MISSING_DATA">Missing Data</option>
-                <option value="OTHER">Other</option>
+                <option value="SUSPICIOUS">High-Value / Suspicious</option>
+                <option value="MISSING_MERCHANT">Missing Merchant</option>
+                <option value="UNCATEGORIZED">Uncategorized</option>
+                <option value="INVALID_DATE">Future / Invalid Date</option>
+                <option value="INVALID_AMOUNT">Invalid / Zero Amount</option>
+                <option value="DUPLICATE">Duplicate Signature</option>
               </select>
             </div>
           </div>
@@ -877,7 +721,9 @@ export const AdminTransactions = () => {
                         </td>
                         <td className="py-2.5 px-4 whitespace-nowrap">
                           <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-md border ${
-                            tx.data_quality === 'Verified' || tx.data_quality === 'Valid'
+                            tx.data_quality === 'Suspicious'
+                              ? 'bg-purple-500/10 text-purple-400 border-purple-500/20'
+                              : tx.data_quality === 'Verified' || tx.data_quality === 'Valid'
                               ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                               : tx.data_quality === 'Invalid'
                               ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
@@ -888,7 +734,9 @@ export const AdminTransactions = () => {
                         </td>
                         <td className="py-2.5 px-4 whitespace-nowrap">
                           <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-md border ${
-                            tx.status === 'Completed'
+                            tx.status === 'Suspicious'
+                              ? 'bg-purple-500/10 text-purple-400 border-purple-500/20'
+                              : tx.status === 'Completed'
                               ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                               : tx.status === 'Failed'
                               ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
@@ -921,28 +769,26 @@ export const AdminTransactions = () => {
               </table>
             </div>
           ) : (
-            <div className="py-16 text-center space-y-3">
-              <p className="text-xs text-slate-400">
-                {search || statusFilter !== 'ALL' || qualityFilter !== 'ALL' || exceptionFilter !== 'ALL'
-                  ? 'No transactions match the selected filters.'
-                  : dateRange === 'today'
-                  ? 'No transactions recorded for Today.'
-                  : dateRange === '7d'
-                  ? 'No transactions recorded in the last 7 days.'
-                  : dateRange === '30d'
-                  ? 'No transactions recorded in the last 30 days.'
-                  : 'No transactions found.'}
+            <div className="py-16 text-center space-y-2.5">
+              <div className="inline-flex p-3 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+                <CheckCircle2 className="w-6 h-6" />
+              </div>
+              <p className="text-sm font-bold text-white font-outfit">
+                No Suspicious or Invalid Transactions Detected
               </p>
-              {(dateRange !== 'all' || search || statusFilter !== 'ALL' || qualityFilter !== 'ALL' || exceptionFilter !== 'ALL') && (
+              <p className="text-xs text-slate-400 max-w-md mx-auto">
+                {search || statusFilter !== 'ALL' || qualityFilter !== 'ALL' || exceptionFilter !== 'ALL'
+                  ? 'No flagged records match the selected filter criteria.'
+                  : 'All transactions within this period have passed verification, validation, and integrity checks.'}
+              </p>
+              {(search || statusFilter !== 'ALL' || qualityFilter !== 'ALL' || exceptionFilter !== 'ALL') && (
                 <button
                   type="button"
-                  onClick={() => {
-                    setDateRange('all');
-                    handleResetFilters();
-                  }}
-                  className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-xs font-medium text-slate-300 transition-colors"
+                  onClick={handleResetFilters}
+                  className="mt-2 inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-xs font-medium text-slate-300 transition-colors"
                 >
-                  <span>View All Transactions</span>
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Reset filters</span>
                 </button>
               )}
             </div>

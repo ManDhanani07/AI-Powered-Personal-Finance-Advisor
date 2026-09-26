@@ -57,6 +57,43 @@ const AdminDataManagement = lazy(() => import('../pages/admin/AdminDataManagemen
 const AdminSupport = lazy(() => import('../pages/admin/AdminSupport.jsx'));
 const AdminSystemConsole = lazy(() => import('../pages/admin/AdminSystemConsole.jsx'));
 
+class GlobalErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error('Portal Error:', error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-[#09090B] flex items-center justify-center p-6 text-white font-sans">
+          <div className="p-8 max-w-md w-full text-center space-y-4 rounded-3xl border border-zinc-800 bg-zinc-950 shadow-2xl">
+            <h3 className="text-base font-bold text-white font-outfit">Console View Recovered</h3>
+            <p className="text-xs text-slate-400">
+              An unexpected render issue was safely intercepted. Click below to reload.
+            </p>
+            <button
+              onClick={() => {
+                this.setState({ hasError: false, error: null });
+                window.location.reload();
+              }}
+              className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-colors"
+            >
+              Reload Console
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export const AppRoutes = () => {
   return (
     <Suspense fallback={<RouteLoadingFallback />}>
@@ -150,9 +187,11 @@ export const AppRoutes = () => {
         <Route
           path="/admin"
           element={
-            <AdminProtectedRoute>
-              <AdminLayout />
-            </AdminProtectedRoute>
+            <GlobalErrorBoundary>
+              <AdminProtectedRoute>
+                <AdminLayout />
+              </AdminProtectedRoute>
+            </GlobalErrorBoundary>
           }
         >
           <Route index element={<Navigate to="/admin/overview" replace />} />

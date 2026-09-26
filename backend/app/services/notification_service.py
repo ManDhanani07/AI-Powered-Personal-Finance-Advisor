@@ -14,6 +14,7 @@ from app.repositories.goal_repository import GoalRepository
 from app.repositories.report_repository import ReportRepository
 from app.schemas.notification import NotificationResponse
 from app.models.notification import Notification
+from app.core.logging import logger
 from app.exceptions.custom_exceptions import NotFoundException, BadRequestException
 
 
@@ -38,6 +39,11 @@ class NotificationService:
         page_size: int = 20,
     ) -> Dict[str, Any]:
         """Fetch stored notifications for user from PostgreSQL without side-effect creation."""
+        try:
+            await self.evaluate_dynamic_rules(user_id)
+        except Exception as e:
+            logger.warning(f"Error evaluating notifications for user {user_id}: {e}")
+
         items, total_count = await self.notif_repo.get_user_notifications(
             user_id=user_id,
             is_read=is_read,
@@ -63,6 +69,11 @@ class NotificationService:
 
     async def get_unread_summary(self, user_id: UUID, limit: int = 5) -> Dict[str, Any]:
         """Fetch unread count and latest unread notifications for navbar preview popover."""
+        try:
+            await self.evaluate_dynamic_rules(user_id)
+        except Exception as e:
+            logger.warning(f"Error evaluating notifications for user {user_id}: {e}")
+
         count = await self.notif_repo.get_unread_count(user_id)
         latest = await self.notif_repo.get_latest_unread(user_id, limit)
         latest_schema = [NotificationResponse.model_validate(item) for item in latest]
@@ -92,15 +103,30 @@ class NotificationService:
     async def evaluate_dynamic_rules(self, user_id: UUID):
         """Evaluate real financial condition rules against PostgreSQL user data."""
         now = datetime.utcnow()
+        start_30d = now - timedelta(days=30)
 
         # 1. Fetch live financial summary & user records
         summary = await self.report_repo.get_income_expense_summary(user_id, None, None)
-        txs = await self.report_repo.get_filtered_transactions(user_id, None, None)
+        txs = await self.report_repo.get_filtered_transactions(user_id, start_date=start_30d, end_date=now)
         budgets_res = await self.budget_repo.get_by_user(user_id)
         budgets = budgets_res.items if hasattr(budgets_res, 'items') else budgets_res
         goals_res = await self.goal_repo.get_by_user(user_id)
         goals = goals_res.items if hasattr(goals_res, 'items') else goals_res
         health_history = await self.report_repo.get_health_score_history(user_id, limit=2)
+
+        # Welcome rule: if total notifications for user is 0 and user is newly onboarded
+        total_existing = await self.notif_repo.get_unread_count(user_id)
+        if total_existing == 0 and len(txs) == 0:
+            if not await self.notif_repo.exists_recent_type(user_id, "WELCOME_NOTIFICATION", 8760):
+                await self._create_notification(
+                    user_id=user_id,
+                    title="👋 Welcome to FinTech AI!",
+                    message="Start managing your finances by logging transactions, tracking budget limits, and establishing savings goals.",
+                    priority="LOW",
+                    category="SYSTEM",
+                    notification_type="WELCOME_NOTIFICATION",
+                    icon="bell",
+                )
 
         # Rule 1 & 2: Budget Limit Reached & Budget Exceeded
         for b in budgets:
@@ -275,13 +301,19 @@ class NotificationService:
                     )
 
         # Rule 12 & 13: Subscription & Recurring Bill Reminders (STRICTLY for EXPENSE transactions)
+        seen_subscription_keys = set()
         for t in txs:
             t_type = (t.transaction_type or "").upper()
             cat_name = (t.category.category_name if t.category else "").lower()
             if t_type == "EXPENSE" and (
                 t.is_recurring or "subscription" in cat_name or "bill" in cat_name or "utility" in cat_name or "rent" in cat_name
             ):
-                notif_type = f"SUBSCRIPTION_REMINDER_{t.id}"
+                sub_key = (t.merchant or t.title or "subscription").strip().lower()
+                if sub_key in seen_subscription_keys:
+                    continue
+                seen_subscription_keys.add(sub_key)
+
+                notif_type = f"SUBSCRIPTION_REMINDER_{sub_key}"
                 if not await self.notif_repo.exists_recent_type(user_id, notif_type, 72):
                     await self._create_notification(
                         user_id=user_id,

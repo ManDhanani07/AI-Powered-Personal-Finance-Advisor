@@ -6,7 +6,6 @@ import {
   DatabaseZap,
   CheckCircle2,
   ArrowRight,
-  PlayCircle,
   Sparkles,
 } from 'lucide-react';
 import { ROUTES } from '../../constants/index.js';
@@ -27,13 +26,6 @@ export const HeroSection = () => {
     }
   };
 
-  const handleExplore = () => {
-    if (isUserAuthenticated) {
-      navigate(ROUTES.DASHBOARD);
-    } else {
-      navigate(ROUTES.AUTH.LOGIN);
-    }
-  };
 
   return (
     <section className="relative pt-24 pb-12 md:pt-28 md:pb-16 overflow-hidden bg-transparent">
@@ -118,14 +110,6 @@ export const HeroSection = () => {
             >
               <span>Get Started Free</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform text-slate-950" />
-            </button>
-
-            <button
-              onClick={handleExplore}
-              className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-[#121216] hover:bg-zinc-800 text-slate-200 font-semibold text-sm border border-zinc-800 transition-all flex items-center justify-center space-x-2 active:scale-[0.98] cursor-pointer font-outfit"
-            >
-              <PlayCircle className="w-4 h-4 text-emerald-400" />
-              <span>Explore Dashboard</span>
             </button>
           </motion.div>
 

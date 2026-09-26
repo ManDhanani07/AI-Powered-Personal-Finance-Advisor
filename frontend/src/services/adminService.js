@@ -135,6 +135,42 @@ export const adminService = {
     return res.data || res;
   },
 
+  // ── 8. Admin Operational Alerts & Notifications ──
+  getAdminAlerts: async () => {
+    const res = await apiClient.get('/admin/alerts');
+    return res.data || res;
+  },
+
+  markAdminAlertRead: async (alertId) => {
+    const res = await apiClient.put(`/admin/alerts/${alertId}/read`);
+    return res.data || res;
+  },
+
+  markAllAdminAlertsRead: async () => {
+    const res = await apiClient.put('/admin/alerts/read-all');
+    return res.data || res;
+  },
+
+  deleteAdminAlert: async (alertId) => {
+    const res = await apiClient.delete(`/admin/alerts/${alertId}`);
+    return res.data || res;
+  },
+
+  clearAdminAlerts: async () => {
+    const res = await apiClient.delete('/admin/alerts');
+    return res.data || res;
+  },
+
+  // ── 8B. User Messaging & Platform Broadcasts ──
+  broadcastMessage: async (payload) => {
+    const res = await apiClient.post('/admin/notifications/broadcast', payload);
+    return res.data || res;
+  },
+
+  sendUserMessage: async (userId, payload) => {
+    const res = await apiClient.post(`/admin/users/${userId}/message`, payload);
+    return res.data || res;
+  },
 
   // ── 9. Support & Issue Ticketing ──
   getSupportTickets: async () => {
