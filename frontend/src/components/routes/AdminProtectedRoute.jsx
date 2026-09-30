@@ -11,11 +11,11 @@ export const AdminProtectedRoute = ({ children }) => {
   const location = useLocation();
   const hasAlerted = useRef(false);
 
-  const isNonAdmin = Boolean(
-    isAuthenticated &&
-    user?.email &&
-    user.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()
+  const isAdmin = Boolean(
+    (user?.email && user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) ||
+    user?.role?.toUpperCase() === 'ADMIN'
   );
+  const isNonAdmin = Boolean(isAuthenticated && user && !isAdmin);
 
   useEffect(() => {
     if (isNonAdmin && !hasAlerted.current) {

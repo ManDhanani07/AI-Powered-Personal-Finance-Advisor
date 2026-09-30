@@ -7,7 +7,10 @@ from typing import Dict, Any, Tuple, Optional
 from uuid import UUID
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
+from sqlalchemy import select
 
+from app.models.user import User
+from app.models.admin_notification import AdminNotification
 from app.repositories.user_repository import UserRepository
 from app.repositories.email_verification_repository import EmailVerificationRepository
 from app.core.security import (
@@ -221,6 +224,23 @@ class AuthService:
         # Send background welcome email once activated
         asyncio.create_task(email_service.send_welcome_email(user.email, user.first_name))
 
+        # Notify platform administrators of verified user onboarding
+        try:
+            admin_stmt = select(User).where(User.role == "ADMIN")
+            admin_users = (await self.user_repository.db.execute(admin_stmt)).scalars().all()
+            for a in admin_users:
+                self.user_repository.db.add(AdminNotification(
+                    admin_user_id=a.id,
+                    title="New User Registered",
+                    message=f"{user.first_name} {user.last_name or ''} ({clean_email}) verified their account and joined the platform.",
+                    notification_type="INFO",
+                    is_read=False,
+                    created_at=now,
+                ))
+            await self.user_repository.db.commit()
+        except Exception as ex:
+            logger.warning(f"Failed to record admin user registration notification: {ex}")
+
         # Generate JWT session tokens
         access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         refresh_token_expires = timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
@@ -331,6 +351,24 @@ class AuthService:
                 update_fields["lock_until"] = now + timedelta(minutes=ACCOUNT_LOCK_DURATION_MINUTES)
                 await self.user_repository.update(user.id, update_fields)
                 logger.warning(f"[AuthService] User {email} account locked due to {failed_attempts} failed login attempts.")
+
+                # Notify administrators of genuine security lockout event
+                try:
+                    admin_stmt = select(User).where(User.role == "ADMIN")
+                    admin_users = (await self.user_repository.db.execute(admin_stmt)).scalars().all()
+                    for a in admin_users:
+                        self.user_repository.db.add(AdminNotification(
+                            admin_user_id=a.id,
+                            title="Security Alert: Account Locked",
+                            message=f"Account {email} was locked for {ACCOUNT_LOCK_DURATION_MINUTES}m after {failed_attempts} consecutive failed login attempts.",
+                            notification_type="SECURITY",
+                            is_read=False,
+                            created_at=now,
+                        ))
+                    await self.user_repository.db.commit()
+                except Exception as ex:
+                    logger.warning(f"Failed to record admin account lock notification: {ex}")
+
                 raise ForbiddenException(
                     f"Account locked due to {MAX_FAILED_LOGIN_ATTEMPTS} consecutive failed attempts. Locked for {ACCOUNT_LOCK_DURATION_MINUTES} minutes."
                 )

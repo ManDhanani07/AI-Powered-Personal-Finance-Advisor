@@ -98,8 +98,10 @@ export const AppRoutes = () => {
   return (
     <Suspense fallback={<RouteLoadingFallback />}>
       <Routes>
-        {/* Landing Page */}
+        {/* Landing Page Entry Route */}
         <Route path={ROUTES.HOME} element={<LandingPage />} />
+        <Route path="/welcome" element={<LandingPage />} />
+        <Route path="/landing" element={<LandingPage />} />
 
         {/* Guest Authentication Routes */}
         <Route

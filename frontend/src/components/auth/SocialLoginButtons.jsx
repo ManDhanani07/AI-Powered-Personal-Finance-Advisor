@@ -26,8 +26,11 @@ export const SocialLoginButtons = () => {
       });
       setShowGoogleModal(false);
 
-      // Instant role-aware redirection based on resolved user email
-      const isAdmin = userEmail.toLowerCase() === 'fintech0707@gmail.com';
+      // Instant role-aware redirection based on resolved user email and role
+      const isAdmin = Boolean(
+        userEmail.toLowerCase() === 'fintech0707@gmail.com' ||
+        user?.role?.toUpperCase() === 'ADMIN'
+      );
       const targetRoute = isAdmin ? '/admin/overview' : ROUTES.DASHBOARD;
 
       navigate(targetRoute, { replace: true });

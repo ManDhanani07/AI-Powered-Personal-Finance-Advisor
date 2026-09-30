@@ -6,11 +6,11 @@ import authService from '../services/authService.js';
 export const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
   const [accessToken, setAccessToken] = useState(() => getItem(STORAGE_KEYS.AUTH_TOKEN) || null);
   const [refreshToken, setRefreshToken] = useState(() => getItem(STORAGE_KEYS.REFRESH_TOKEN) || null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(() => Boolean(getItem(STORAGE_KEYS.AUTH_TOKEN)));
+  const [user, setUser] = useState(() => getItem(STORAGE_KEYS.USER_DATA) || null);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => Boolean(getItem(STORAGE_KEYS.AUTH_TOKEN)));
+  const [isLoading, setIsLoading] = useState(() => Boolean(getItem(STORAGE_KEYS.AUTH_TOKEN) && !getItem(STORAGE_KEYS.USER_DATA)));
 
   /**
    * Clear session state & local storage
@@ -22,13 +22,16 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(false);
     removeItem(STORAGE_KEYS.AUTH_TOKEN);
     removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+    removeItem(STORAGE_KEYS.USER_DATA);
+    removeItem(STORAGE_KEYS.LAST_ROLE);
+    removeItem(STORAGE_KEYS.LAST_DASHBOARD);
     try {
       sessionStorage.clear();
     } catch {}
   }, []);
 
   /**
-   * Save session tokens
+   * Save session tokens & user profile
    */
   const saveAuthState = useCallback((tokens, userData = null) => {
     try {
@@ -44,6 +47,13 @@ export const AuthProvider = ({ children }) => {
     }
     if (userData) {
       setUser(userData);
+      setItem(STORAGE_KEYS.USER_DATA, userData);
+      const isAdmin = Boolean(
+        (userData.email && userData.email.toLowerCase() === 'fintech0707@gmail.com') ||
+        userData.role?.toUpperCase() === 'ADMIN'
+      );
+      setItem(STORAGE_KEYS.LAST_ROLE, isAdmin ? 'ADMIN' : 'USER');
+      setItem(STORAGE_KEYS.LAST_DASHBOARD, isAdmin ? '/admin/overview' : '/dashboard');
     }
     setIsAuthenticated(true);
   }, []);
@@ -80,11 +90,20 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
-      setIsLoading(true);
+      if (!getItem(STORAGE_KEYS.USER_DATA)) {
+        setIsLoading(true);
+      }
       const res = await authService.getCurrentUser();
       const userData = res?.data?.data ?? res?.data;
       if (userData && (userData.id || userData.email)) {
         setUser(userData);
+        setItem(STORAGE_KEYS.USER_DATA, userData);
+        const isAdmin = Boolean(
+          (userData.email && userData.email.toLowerCase() === 'fintech0707@gmail.com') ||
+          userData.role?.toUpperCase() === 'ADMIN'
+        );
+        setItem(STORAGE_KEYS.LAST_ROLE, isAdmin ? 'ADMIN' : 'USER');
+        setItem(STORAGE_KEYS.LAST_DASHBOARD, isAdmin ? '/admin/overview' : '/dashboard');
         setIsAuthenticated(true);
       } else {
         clearAuthState();
@@ -202,7 +221,15 @@ export const AuthProvider = ({ children }) => {
   const updateUser = useCallback((updatedFields) => {
     setUser((prev) => {
       if (!prev) return prev;
-      return { ...prev, ...updatedFields };
+      const merged = { ...prev, ...updatedFields };
+      setItem(STORAGE_KEYS.USER_DATA, merged);
+      const isAdmin = Boolean(
+        (merged.email && merged.email.toLowerCase() === 'fintech0707@gmail.com') ||
+        merged.role?.toUpperCase() === 'ADMIN'
+      );
+      setItem(STORAGE_KEYS.LAST_ROLE, isAdmin ? 'ADMIN' : 'USER');
+      setItem(STORAGE_KEYS.LAST_DASHBOARD, isAdmin ? '/admin/overview' : '/dashboard');
+      return merged;
     });
   }, []);
 

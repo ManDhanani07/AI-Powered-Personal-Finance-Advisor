@@ -16,21 +16,21 @@ export const CTASection = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
   const isUserAuthenticated = Boolean(isAuthenticated && user);
+  const isAdmin = Boolean(
+    (user?.email && user.email.toLowerCase() === 'fintech0707@gmail.com') ||
+    user?.role?.toUpperCase() === 'ADMIN'
+  );
 
   const handleGetStarted = () => {
     if (isUserAuthenticated) {
-      navigate(ROUTES.DASHBOARD);
+      navigate(isAdmin ? '/admin/overview' : ROUTES.DASHBOARD);
     } else {
       navigate(ROUTES.AUTH.REGISTER);
     }
   };
 
   const handleSignIn = () => {
-    if (isUserAuthenticated) {
-      navigate(ROUTES.DASHBOARD);
-    } else {
-      navigate(ROUTES.AUTH.LOGIN);
-    }
+    navigate(ROUTES.AUTH.LOGIN);
   };
 
   return (

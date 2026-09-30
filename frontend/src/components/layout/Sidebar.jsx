@@ -42,7 +42,10 @@ const MOBILE_NAV_ITEMS = [
 
 export const Sidebar = ({ isCollapsed, onToggleCollapse }) => {
   const { user } = useAuth();
-  const isAdmin = user?.email && user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+  const isAdmin = Boolean(
+    (user?.email && user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) ||
+    user?.role?.toUpperCase() === 'ADMIN'
+  );
 
   return (
     <>

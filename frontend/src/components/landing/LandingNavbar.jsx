@@ -49,6 +49,7 @@ export const LandingNavbar = () => {
     }
   };
 
+
   const handleSignIn = () => {
     navigate(ROUTES.AUTH.LOGIN);
   };

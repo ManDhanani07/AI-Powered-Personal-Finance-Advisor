@@ -65,6 +65,9 @@ export const STORAGE_KEYS = {
   THEME: 'fintech_theme_mode',
   AUTH_TOKEN: 'fintech_auth_token',
   REFRESH_TOKEN: 'fintech_refresh_token',
+  USER_DATA: 'fintech_user_profile',
+  LAST_ROLE: 'fintech_last_role',
+  LAST_DASHBOARD: 'fintech_last_dashboard',
   USER_PREFERENCES: 'fintech_user_prefs',
 };
 

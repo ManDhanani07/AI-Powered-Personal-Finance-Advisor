@@ -7,11 +7,9 @@ import {
   Loader2,
   CheckCircle2,
   Sparkles,
-  Send,
 } from 'lucide-react';
 import adminService from '../../services/adminService.js';
 import AdminUserDetailModal from './AdminUserDetailModal.jsx';
-import AdminBroadcastModal from './AdminBroadcastModal.jsx';
 import { showToast } from '../../components/common/ToastProvider.jsx';
 
 export const AdminUsers = () => {
@@ -30,8 +28,6 @@ export const AdminUsers = () => {
   const [userDetail, setUserDetail] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalInitialTab, setModalInitialTab] = useState('account');
-  const [isBroadcastOpen, setIsBroadcastOpen] = useState(false);
-  const [broadcastTargetUser, setBroadcastTargetUser] = useState(null);
   const [inspectLoadingId, setInspectLoadingId] = useState(null);
 
   const getPlanTier = (u) => {
@@ -289,30 +285,18 @@ export const AdminUsers = () => {
                           </span>
                         </td>
                         <td className="py-3 px-4 text-center">
-                          <div className="flex items-center justify-center space-x-1.5">
-                            <button
-                              onClick={() => {
-                                setBroadcastTargetUser(u);
-                                setIsBroadcastOpen(true);
-                              }}
-                              className="p-1.5 rounded-lg border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-slate-400 hover:text-amber-400 transition-colors"
-                              title="Send Notice / Warning to this User"
-                            >
-                              <Send className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={() => handleViewUser(u.id, 'account')}
-                              disabled={inspectLoadingId === u.id}
-                              className="p-1.5 rounded-lg border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-slate-300 hover:text-indigo-400 transition-colors disabled:opacity-50"
-                              title="Inspect Account Details"
-                            >
-                              {inspectLoadingId === u.id ? (
-                                <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-400" />
-                              ) : (
-                                <Eye className="w-3.5 h-3.5" />
-                              )}
-                            </button>
-                          </div>
+                          <button
+                            onClick={() => handleViewUser(u.id, 'account')}
+                            disabled={inspectLoadingId === u.id}
+                            className="p-1.5 rounded-lg border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-slate-300 hover:text-indigo-400 transition-colors disabled:opacity-50"
+                            title="Inspect Account Details"
+                          >
+                            {inspectLoadingId === u.id ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-400" />
+                            ) : (
+                              <Eye className="w-3.5 h-3.5" />
+                            )}
+                          </button>
                         </td>
                       </tr>
                     );
@@ -355,19 +339,6 @@ export const AdminUsers = () => {
         onUserUpdated={loadUsers}
         initialTab={modalInitialTab}
       />
-
-      {/* Broadcast & User Notice Modal */}
-      <AdminBroadcastModal
-        isOpen={isBroadcastOpen}
-        onClose={() => {
-          setIsBroadcastOpen(false);
-          setBroadcastTargetUser(null);
-        }}
-        onBroadcastSent={loadUsers}
-        preselectedUser={broadcastTargetUser}
-      />
-
-
     </div>
   );
 };

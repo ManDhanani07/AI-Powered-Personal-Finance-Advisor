@@ -17,6 +17,7 @@ from app.database.session import get_db
 from app.dependencies.auth import get_current_user
 from app.models.user import User
 from app.models.support_ticket import SupportTicket
+from app.models.admin_notification import AdminNotification
 from app.core.logging import logger
 
 router = APIRouter(prefix="/support", tags=["User Support & Issue Reporting"])
@@ -126,6 +127,23 @@ async def submit_ticket(
         await db.commit()
     except Exception as e:
         logger.warning(f"Failed to record audit log for support ticket: {e}")
+
+    # Create real AdminNotification for administrators
+    try:
+        admin_stmt = select(User).where(User.role == "ADMIN")
+        admin_users = (await db.execute(admin_stmt)).scalars().all()
+        for a in admin_users:
+            db.add(AdminNotification(
+                admin_user_id=a.id,
+                title=f"Support Ticket #{ticket_code}",
+                message=f"{user_full_name} ({current_user.email}) reported: \"{payload.subject[:70]}\" ({payload.priority} Priority).",
+                notification_type="WARNING" if (payload.priority or "").upper() in ["CRITICAL", "HIGH"] else "INFO",
+                is_read=False,
+                created_at=now,
+            ))
+        await db.commit()
+    except Exception as e:
+        logger.warning(f"Failed to create admin notification for support ticket: {e}")
 
     return {
         "message": "Problem report submitted successfully. Our engineering and support team will triage it shortly.",

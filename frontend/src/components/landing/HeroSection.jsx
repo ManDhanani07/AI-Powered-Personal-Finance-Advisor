@@ -16,11 +16,15 @@ import useAuth from '../../hooks/useAuth.js';
 export const HeroSection = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
+  const isAdmin = Boolean(
+    (user?.email && user.email.toLowerCase() === 'fintech0707@gmail.com') ||
+    user?.role?.toUpperCase() === 'ADMIN'
+  );
   const isUserAuthenticated = Boolean(isAuthenticated && user);
 
   const handleGetStarted = () => {
     if (isUserAuthenticated) {
-      navigate(ROUTES.DASHBOARD);
+      navigate(isAdmin ? '/admin/overview' : ROUTES.DASHBOARD);
     } else {
       navigate(ROUTES.AUTH.REGISTER);
     }

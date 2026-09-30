@@ -60,9 +60,13 @@ export const VerifyEmail = () => {
   // Redirect if already authenticated and verified
   useEffect(() => {
     if (isAuthenticated) {
-      navigate(ROUTES.DASHBOARD, { replace: true });
+      const isAdmin = Boolean(
+        (user?.email && user.email.toLowerCase() === 'fintech0707@gmail.com') ||
+        user?.role?.toUpperCase() === 'ADMIN'
+      );
+      navigate(isAdmin ? '/admin/overview' : ROUTES.DASHBOARD, { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, user, navigate]);
 
   // Focus first input on mount
   useEffect(() => {
@@ -234,8 +238,13 @@ export const VerifyEmail = () => {
           sessionStorage.removeItem('pending_verify_email');
           sessionStorage.removeItem('pending_verify_purpose');
 
+          const isVerifiedAdmin = Boolean(
+            (authData?.user?.email && authData.user.email.toLowerCase() === 'fintech0707@gmail.com') ||
+            authData?.user?.role?.toUpperCase() === 'ADMIN'
+          );
+
           setTimeout(() => {
-            navigate(ROUTES.DASHBOARD, { replace: true });
+            navigate(isVerifiedAdmin ? '/admin/overview' : ROUTES.DASHBOARD, { replace: true });
           }, 1200);
         } else {
           setError(response?.message || 'Invalid verification code.');

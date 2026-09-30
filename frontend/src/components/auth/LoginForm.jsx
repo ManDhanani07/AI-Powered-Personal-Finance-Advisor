@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Mail,
@@ -20,6 +20,7 @@ import { ROUTES } from '../../constants/index.js';
 export const LoginForm = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loginError, setLoginError] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -37,13 +38,21 @@ export const LoginForm = () => {
     setIsSubmitting(true);
     setLoginError(null);
     try {
-      await login(data.email, data.password, data.remember_me);
+      const loginRes = await login(data.email, data.password, data.remember_me);
+      const loggedUser = loginRes?.user || {};
+      const isAdmin = Boolean(
+        (loggedUser?.email && loggedUser.email.toLowerCase() === 'fintech0707@gmail.com') ||
+        loggedUser?.role?.toUpperCase() === 'ADMIN' ||
+        data.email.toLowerCase() === 'fintech0707@gmail.com'
+      );
       toast.success('Welcome back! Successfully authenticated.', { icon: '🔐' });
-      if (data.email.toLowerCase() === 'fintech0707@gmail.com') {
-        navigate('/admin/overview');
-      } else {
-        navigate(ROUTES.DASHBOARD);
-      }
+      
+      const defaultRoute = isAdmin ? '/admin/overview' : ROUTES.DASHBOARD;
+      const rawFrom = typeof location.state?.from === 'string' ? location.state.from : location.state?.from?.pathname;
+      const validFrom = (rawFrom && rawFrom !== ROUTES.AUTH.LOGIN && rawFrom !== '/login' && rawFrom !== ROUTES.AUTH.REGISTER && rawFrom !== '/register' && rawFrom !== '/') ? rawFrom : null;
+      const target = (validFrom && (!isAdmin && validFrom.startsWith('/admin') ? ROUTES.DASHBOARD : validFrom)) || defaultRoute;
+
+      navigate(target, { replace: true });
     } catch (error) {
       const errMsg = error.message || 'Invalid email or password. Please check your credentials.';
       setLoginError(errMsg);

@@ -12,7 +12,10 @@ const ADMIN_EMAIL = 'fintech0707@gmail.com';
  */
 export const ProtectedLayout = () => {
   const { user } = useAuth();
-  const isAdmin = user?.email && user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+  const isAdmin = Boolean(
+    (user?.email && user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) ||
+    user?.role?.toUpperCase() === 'ADMIN'
+  );
 
   if (isAdmin) {
     return <Navigate to="/admin/overview" replace />;

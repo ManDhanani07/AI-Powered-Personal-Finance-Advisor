@@ -127,29 +127,15 @@ export const AdminOverview = () => {
   const activity = data?.platform_activity || [];
   const summary = data?.financial_summary || {};
   const mlModel = metrics?.expense_prediction_model || {};
-  const systemHealth = metrics?.system_health || {};
-  const isOperational = systemHealth?.status?.toLowerCase().includes('operational');
 
   return (
     <div className="space-y-6 max-w-[1920px] w-full mx-auto">
       {/* ── 1. Executive Operations Header ── */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-5 rounded-2xl border border-zinc-800 bg-[#09090B] shadow-sm">
         <div className="space-y-1">
-          <div className="flex items-center gap-2.5 flex-wrap">
-            <h1 className="text-lg font-black text-white font-outfit tracking-tight">
-              {getGreeting()}, Admin
-            </h1>
-            <span
-              className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold font-mono border ${
-                isOperational
-                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                  : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-              }`}
-            >
-              <span className={`w-1.5 h-1.5 rounded-full ${isOperational ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
-              {systemHealth.status || 'All Systems Operational'}
-            </span>
-          </div>
+          <h1 className="text-lg font-black text-white font-outfit tracking-tight">
+            {getGreeting()}, Admin
+          </h1>
           <p className="text-xs text-slate-400">
             Here’s what’s happening across FinTech AI today.
           </p>

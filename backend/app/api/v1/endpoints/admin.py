@@ -2969,154 +2969,33 @@ async def get_admin_alerts(
 ):
     """
     Retrieve real administrative and system alerts for the active administrator.
-    Synthesizes and syncs real notifications from open support tickets,
-    suspicious/anomaly transactions, security audit events, and user onboarding.
+    Only returns genuine event-driven notifications.
     """
-    now = datetime.now(timezone.utc)
-
-    # 1. Check open customer support tickets
-    ticket_query = select(func.count(SupportTicket.id)).where(
-        SupportTicket.status.in_(["Open", "In Progress", "Pending"])
-    )
-    open_tickets_count = (await db.execute(ticket_query)).scalar() or 0
-    if open_tickets_count > 0:
-        cutoff_12h = now - timedelta(hours=12)
-        exists_stmt = select(exists().where(
-            AdminNotification.admin_user_id == admin.id,
-            AdminNotification.title.ilike("%Support Ticket%"),
-            AdminNotification.created_at >= cutoff_12h,
-        ))
-        has_ticket_alert = (await db.execute(exists_stmt)).scalar()
-        if not has_ticket_alert:
-            db.add(AdminNotification(
-                admin_user_id=admin.id,
-                title="Support Tickets Pending Action",
-                message=f"{open_tickets_count} customer care & problem report tickets require administrator review and resolution.",
-                notification_type="WARNING",
-                is_read=False,
-                created_at=now,
-            ))
-
-    # 2. Check flagged / suspicious transactions requiring review
-    tx_query = select(func.count(Transaction.id)).where(
-        or_(
-            Transaction.category_id.is_(None),
-            Transaction.amount >= Decimal("100000"),
-            Transaction.transaction_date > now,
-        ),
-        Transaction.is_deleted.is_(False),
-    )
-    suspicious_tx_count = (await db.execute(tx_query)).scalar() or 0
-    if suspicious_tx_count > 0:
-        cutoff_12h = now - timedelta(hours=12)
-        exists_stmt = select(exists().where(
-            AdminNotification.admin_user_id == admin.id,
-            AdminNotification.title.ilike("%Suspicious Transactions%"),
-            AdminNotification.created_at >= cutoff_12h,
-        ))
-        has_tx_alert = (await db.execute(exists_stmt)).scalar()
-        if not has_tx_alert:
-            db.add(AdminNotification(
-                admin_user_id=admin.id,
-                title="Suspicious Transactions Flagged",
-                message=f"{suspicious_tx_count} transactions flagged with classification anomalies, high amounts, or data integrity exceptions.",
-                notification_type="ERROR",
-                is_read=False,
-                created_at=now,
-            ))
-
-    # 3. Check security audit events & failed access
-    audit_query = select(func.count(AuditLog.id)).where(
-        or_(
-            AuditLog.status == "Failure",
-            AuditLog.action.ilike("%FAIL%"),
-            AuditLog.action.ilike("%SECURITY%"),
-            AuditLog.action.ilike("%BLOCK%"),
-        )
-    )
-    security_alerts_count = (await db.execute(audit_query)).scalar() or 0
-    if security_alerts_count > 0:
-        cutoff_24h = now - timedelta(hours=24)
-        exists_stmt = select(exists().where(
-            AdminNotification.admin_user_id == admin.id,
-            AdminNotification.notification_type == "SECURITY",
-            AdminNotification.created_at >= cutoff_24h,
-        ))
-        has_sec_alert = (await db.execute(exists_stmt)).scalar()
-        if not has_sec_alert:
-            db.add(AdminNotification(
-                admin_user_id=admin.id,
-                title="Security Audit Anomaly Detected",
-                message=f"{security_alerts_count} security-related audit events or access failures recorded in system logs.",
-                notification_type="SECURITY",
-                is_read=False,
-                created_at=now,
-            ))
-
-    # 4. User Onboarding Activity
-    cutoff_7d = now - timedelta(days=7)
-    user_query = select(func.count(User.id)).where(User.created_at >= cutoff_7d)
-    new_users_count = (await db.execute(user_query)).scalar() or 0
-    if new_users_count > 0:
-        cutoff_48h = now - timedelta(hours=48)
-        exists_stmt = select(exists().where(
-            AdminNotification.admin_user_id == admin.id,
-            AdminNotification.title.ilike("%User Onboarding%"),
-            AdminNotification.created_at >= cutoff_48h,
-        ))
-        has_user_alert = (await db.execute(exists_stmt)).scalar()
-        if not has_user_alert:
-            db.add(AdminNotification(
-                admin_user_id=admin.id,
-                title="New User Onboarding",
-                message=f"{new_users_count} new user accounts registered in the platform over the last 7 days.",
-                notification_type="INFO",
-                is_read=False,
-                created_at=now,
-            ))
-
-    # 5. Baseline operational status if no notifications exist at all
-    all_count_stmt = select(func.count(AdminNotification.id)).where(
-        AdminNotification.admin_user_id == admin.id
-    )
-    total_existing = (await db.execute(all_count_stmt)).scalar() or 0
-    if total_existing == 0:
-        db.add(AdminNotification(
-            admin_user_id=admin.id,
-            title="System Operational: All Services Online",
-            message="PostgreSQL database, background workers, and AI services are running within normal SLA parameters.",
-            notification_type="INFO",
-            is_read=False,
-            created_at=now,
-        ))
-
-    await db.commit()
-
-    # Query notifications for this admin
     stmt = (
         select(AdminNotification)
         .where(AdminNotification.admin_user_id == admin.id)
         .order_by(desc(AdminNotification.created_at))
-        .limit(20)
+        .limit(30)
     )
     res = await db.execute(stmt)
     records = res.scalars().all()
 
     unread_count = sum(1 for r in records if not r.is_read)
 
+    now = datetime.now(timezone.utc)
     items = []
     for r in records:
         t_low = r.title.lower()
         if "support" in t_low or "ticket" in t_low:
             action_url = "/admin/support"
-            action_label = "View Tickets"
+            action_label = "View Ticket"
         elif "transaction" in t_low or "suspicious" in t_low:
             action_url = "/admin/transactions"
             action_label = "Review Transactions"
-        elif "security" in t_low or "audit" in t_low:
-            action_url = "/admin/security"
-            action_label = "Security Logs"
-        elif "user" in t_low:
+        elif "security" in t_low or "lock" in t_low or "audit" in t_low:
+            action_url = "/admin/risk-security"
+            action_label = "Security Events"
+        elif "user" in t_low or "register" in t_low:
             action_url = "/admin/users"
             action_label = "Users Directory"
         else:
@@ -3272,6 +3151,23 @@ async def update_ticket_status(
         ticket.admin_reply = admin_reply.strip()
         ticket.replied_at = now
     ticket.updated_at = now
+
+    # Dispatch real notification to user regarding ticket status / response
+    if ticket.user_id:
+        reply_snip = f": \"{ticket.admin_reply[:100]}\"" if ticket.admin_reply else ""
+        db.add(Notification(
+            user_id=ticket.user_id,
+            title=f"Support Ticket #{ticket.ticket_code} Updated",
+            message=f"Status: {ticket.status}{reply_snip}",
+            notification_type="SUPPORT_UPDATE",
+            type="INFO",
+            priority="HIGH" if (ticket.priority or "").lower() in ["critical", "high"] else "MEDIUM",
+            category="SUPPORT",
+            related_module="SUPPORT",
+            icon="life-buoy",
+            reference_id=ticket.ticket_code,
+            is_read=False,
+        ))
 
     await safe_log_audit(
         db, admin, "SUPPORT_TICKET_UPDATE", "SUPPORT",

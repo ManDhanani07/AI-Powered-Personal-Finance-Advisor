@@ -250,9 +250,9 @@ export const NotificationPopover = () => {
                   <div className="w-10 h-10 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mx-auto">
                     <CheckCircle2 className="w-5 h-5" />
                   </div>
-                  <h4 className="text-xs font-bold text-white">All Systems Operational</h4>
+                  <h4 className="text-xs font-bold text-white">All Caught Up</h4>
                   <p className="text-[11px] text-slate-400 leading-relaxed max-w-xs mx-auto">
-                    No administrative anomalies, unresolved tickets, or flagged transactions requiring review.
+                    No pending administrative alerts or issue reports.
                   </p>
                 </div>
               ) : (
