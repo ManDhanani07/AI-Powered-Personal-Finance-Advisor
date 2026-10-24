@@ -12,8 +12,10 @@ import {
   CheckCircle2,
   Lock,
   ArrowRight,
+  Calendar,
+  Users,
 } from 'lucide-react';
-import { formatCurrency } from '../../utils/formatters.js';
+import { formatCurrency, formatDate } from '../../utils/formatters.js';
 import { toast } from 'react-toastify';
 import authService from '../../services/authService.js';
 
@@ -86,6 +88,20 @@ export const ProfileCard = ({ user, onVerifySuccess }) => {
       label: 'Phone Number',
       value: user?.phone || 'Not provided',
       colorClass: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+    },
+    {
+      icon: Users,
+      label: 'Gender',
+      value: user?.gender
+        ? user.gender.charAt(0).toUpperCase() + user.gender.slice(1).toLowerCase()
+        : 'Not specified',
+      colorClass: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+    },
+    {
+      icon: Calendar,
+      label: 'Date of Birth',
+      value: user?.date_of_birth ? formatDate(user.date_of_birth) : 'Not specified',
+      colorClass: 'bg-teal-500/10 text-teal-400 border-teal-500/20',
     },
     {
       icon: Briefcase,

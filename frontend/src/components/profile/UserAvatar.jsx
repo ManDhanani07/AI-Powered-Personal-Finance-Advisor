@@ -17,8 +17,8 @@ export const UserAvatar = ({
     xs: 'h-8 w-8 text-xs font-bold',
     sm: 'h-9 w-9 text-xs font-bold',
     md: 'h-20 w-20 text-xl font-bold',
-    lg: 'h-28 w-28 text-3xl font-black',
-  }[size] || 'h-28 w-28 text-3xl font-black';
+    lg: 'h-20 w-20 sm:h-24 sm:w-24 text-2xl sm:text-3xl font-black',
+  }[size] || 'h-20 w-20 sm:h-24 sm:w-24 text-2xl sm:text-3xl font-black';
 
   const handleInputChange = (e) => {
     const rawFile = e.target.files?.[0];

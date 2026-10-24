@@ -26,7 +26,6 @@ export const LandingLoginModal = ({ isOpen, onClose }) => {
     setLoading(true);
     try {
       await login(email, password);
-      toast.success('Welcome back! Authentication successful.', { icon: '✨' });
       onClose();
       navigate(ROUTES.DASHBOARD);
     } catch (err) {

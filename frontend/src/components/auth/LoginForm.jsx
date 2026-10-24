@@ -45,7 +45,6 @@ export const LoginForm = () => {
         loggedUser?.role?.toUpperCase() === 'ADMIN' ||
         data.email.toLowerCase() === 'fintech0707@gmail.com'
       );
-      toast.success('Welcome back! Successfully authenticated.', { icon: '🔐' });
       
       const defaultRoute = isAdmin ? '/admin/overview' : ROUTES.DASHBOARD;
       const rawFrom = typeof location.state?.from === 'string' ? location.state.from : location.state?.from?.pathname;

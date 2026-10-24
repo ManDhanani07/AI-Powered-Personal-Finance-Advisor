@@ -1,6 +1,24 @@
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+// Filter out welcome, greeting, and login/auth success popups globally
+const isSuppressedMessage = (msg) => {
+  if (typeof msg !== 'string') return false;
+  return /welcome/i.test(msg) || /authenticated/i.test(msg) || /signed in/i.test(msg) || /logged in/i.test(msg);
+};
+
+// Monkey-patch react-toastify's toast.success to ensure no component can trigger welcome toasts
+if (toast.success && !toast.success.__suppressPatched) {
+  const originalSuccess = toast.success.bind(toast);
+  toast.success = (content, options) => {
+    if (isSuppressedMessage(content)) {
+      return null;
+    }
+    return originalSuccess(content, options);
+  };
+  toast.success.__suppressPatched = true;
+}
+
 export const ToastProvider = () => {
   return (
     <ToastContainer
@@ -20,7 +38,10 @@ export const ToastProvider = () => {
 };
 
 export const showToast = {
-  success: (message, options = {}) => toast.success(message, options),
+  success: (message, options = {}) => {
+    if (isSuppressedMessage(message)) return null;
+    return toast.success(message, options);
+  },
   error: (message, options = {}) => toast.error(message, options),
   warning: (message, options = {}) => toast.warning(message, options),
   // Info notifications (like "Signed out successfully") disabled so bright pop-ups never appear

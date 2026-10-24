@@ -58,6 +58,30 @@ export const formatDate = (dateInput, options = null) => {
 };
 
 /**
+ * Format timestamp into standard Indian Date & Time (IST, en-IN)
+ * e.g. "07 Oct 2026, 09:16 AM"
+ * @param {string | Date} dateInput
+ * @returns {string}
+ */
+export const formatIndianDateTime = (dateInput) => {
+  if (!dateInput) return '—';
+  const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
+  if (isNaN(date.getTime())) {
+    return typeof dateInput === 'string' ? dateInput : '—';
+  }
+
+  return new Intl.DateTimeFormat('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  }).format(date);
+};
+
+/**
  * Abbreviate large financial values in Lakhs / Crores
  * @param {number} amount
  * @returns {string}

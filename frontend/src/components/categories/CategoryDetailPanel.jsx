@@ -12,7 +12,7 @@ import {
   Palette,
   Check,
 } from 'lucide-react';
-import * as Icons from 'lucide-react';
+import { getDynamicIcon } from '../../utils/dynamicIcon.jsx';
 import CategoryColorPicker from './CategoryColorPicker.jsx';
 import CategoryIconPicker from './CategoryIconPicker.jsx';
 import CategoryRuleBuilder from './CategoryRuleBuilder.jsx';
@@ -50,7 +50,7 @@ export const CategoryDetailPanel = ({
     );
   }
 
-  const IconComp = Icons[selectedIcon] || Icons.Tag;
+  const IconComp = getDynamicIcon(selectedIcon, 'Tag');
   const isIncome = category.category_type === 'INCOME';
 
   const handleSaveCustomization = () => {

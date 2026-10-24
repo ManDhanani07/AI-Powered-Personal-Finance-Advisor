@@ -1,28 +1,5 @@
 import React from 'react';
-import * as Icons from 'lucide-react';
-
-const AVAILABLE_ICONS = [
-  'Utensils',
-  'ShoppingBag',
-  'Car',
-  'HeartPulse',
-  'Zap',
-  'Film',
-  'Briefcase',
-  'TrendingUp',
-  'PiggyBank',
-  'Landmark',
-  'Gift',
-  'GraduationCap',
-  'Plane',
-  'Home',
-  'Smartphone',
-  'ShieldAlert',
-  'Tag',
-  'Receipt',
-  'DollarSign',
-  'Laptop',
-];
+import { getDynamicIcon, AVAILABLE_ICON_NAMES } from '../../utils/dynamicIcon.jsx';
 
 export const CategoryIconPicker = ({ selectedIcon, onSelectIcon }) => {
   return (
@@ -31,8 +8,8 @@ export const CategoryIconPicker = ({ selectedIcon, onSelectIcon }) => {
         Choose Icon
       </label>
       <div className="grid grid-cols-5 gap-2 max-h-40 overflow-y-auto p-2 rounded-2xl border border-slate-200 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/50">
-        {AVAILABLE_ICONS.map((iconName) => {
-          const IconComp = Icons[iconName] || Icons.Tag;
+        {AVAILABLE_ICON_NAMES.map((iconName) => {
+          const IconComp = getDynamicIcon(iconName);
           const isSelected = selectedIcon === iconName;
           return (
             <button

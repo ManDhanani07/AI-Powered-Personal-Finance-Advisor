@@ -11,7 +11,12 @@ from app.core.logging import logger
 
 
 async def app_exception_handler(request: Request, exc: AppException) -> JSONResponse:
-    logger.warning("AppException on {path}: {msg}", path=request.url.path, msg=exc.message)
+    if exc.status_code == status.HTTP_401_UNAUTHORIZED:
+        logger.info("Authentication check [401] on {path}: {msg}", path=request.url.path, msg=exc.message)
+    elif exc.status_code >= status.HTTP_500_INTERNAL_SERVER_ERROR:
+        logger.error("AppException [{status}] on {path}: {msg}", status=exc.status_code, path=request.url.path, msg=exc.message)
+    else:
+        logger.warning("AppException [{status}] on {path}: {msg}", status=exc.status_code, path=request.url.path, msg=exc.message)
     return JSONResponse(
         status_code=exc.status_code,
         content={

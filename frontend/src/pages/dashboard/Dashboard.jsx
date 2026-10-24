@@ -1,13 +1,24 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { motion } from 'framer-motion';
 import { useDashboard } from '../../hooks/useDashboard.js';
 
-// Dashboard Components
+// Dashboard Core Components
 import { DashboardHeader } from '../../components/dashboard/DashboardHeader.jsx';
 import { FinancialSummary } from '../../components/dashboard/FinancialSummary.jsx';
-import { IncomeExpenseChart } from '../../components/dashboard/IncomeExpenseChart.jsx';
-import { CashFlowChart } from '../../components/dashboard/CashFlowChart.jsx';
-import { CategoryChart } from '../../components/dashboard/CategoryChart.jsx';
+
+// Heavy Visual Charts (Lazy Loaded so Recharts does not block initial FCP/LCP)
+const IncomeExpenseChart = lazy(() => import('../../components/dashboard/IncomeExpenseChart.jsx'));
+const CashFlowChart = lazy(() => import('../../components/dashboard/CashFlowChart.jsx'));
+const CategoryChart = lazy(() => import('../../components/dashboard/CategoryChart.jsx'));
+
+const ChartSkeletonFallback = () => (
+  <div className="h-[280px] w-full flex items-center justify-center bg-zinc-950/40 rounded-2xl animate-pulse border border-zinc-800/40">
+    <div className="flex flex-col items-center gap-2.5">
+      <div className="w-5 h-5 rounded-full border-2 border-emerald-500/20 border-t-emerald-400 animate-spin" />
+      <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500">Rendering Data</span>
+    </div>
+  </div>
+);
 
 /**
  * Card wrapper — consistent glassmorphic card shell used throughout the executive dashboard.
@@ -61,16 +72,22 @@ export const Dashboard = () => {
       {/* ── 3. Primary Visual Graphs (Income vs Expense + Cash Flow Trajectory) ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
-          <IncomeExpenseChart charts={data.charts} loading={loading} onSeeded={refresh} />
+          <Suspense fallback={<ChartSkeletonFallback />}>
+            <IncomeExpenseChart charts={data.charts} loading={loading} onSeeded={refresh} />
+          </Suspense>
         </Card>
         <Card>
-          <CashFlowChart charts={data.charts} loading={loading} onSeeded={refresh} />
+          <Suspense fallback={<ChartSkeletonFallback />}>
+            <CashFlowChart charts={data.charts} loading={loading} onSeeded={refresh} />
+          </Suspense>
         </Card>
       </div>
 
       {/* ── 4. Secondary Visual Graph (Category Spending Breakdown) ── */}
       <Card>
-        <CategoryChart charts={data.charts} loading={loading} onSeeded={refresh} />
+        <Suspense fallback={<ChartSkeletonFallback />}>
+          <CategoryChart charts={data.charts} loading={loading} onSeeded={refresh} />
+        </Suspense>
       </Card>
     </motion.div>
   );

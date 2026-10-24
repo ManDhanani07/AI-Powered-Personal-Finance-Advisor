@@ -1,9 +1,9 @@
 import React from 'react';
-import * as Icons from 'lucide-react';
 import { Edit3, Copy, Trash2, Shield } from 'lucide-react';
+import { getDynamicIcon } from '../../utils/dynamicIcon.jsx';
 
 export const CategoryCard = ({ category, onEdit, onDuplicate, onDelete }) => {
-  const IconComp = Icons[category.icon] || Icons.Tag;
+  const IconComp = getDynamicIcon(category.icon, 'Tag');
   const isDefault = category.is_default;
 
   return (

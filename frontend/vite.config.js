@@ -19,8 +19,6 @@ export default defineConfig({
       'tailwind-merge',
       'react-hook-form',
       'react-toastify',
-      'canvas-confetti',
-      'date-fns',
     ],
   },
   resolve: {
@@ -52,17 +50,30 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+            if (
+              id.includes('/node_modules/react/') ||
+              id.includes('/node_modules/react-dom/') ||
+              id.includes('/node_modules/scheduler/')
+            ) {
               return 'vendor-react';
             }
-            if (id.includes('recharts') || id.includes('d3')) {
+            if (
+              id.includes('/node_modules/react-router/') ||
+              id.includes('/node_modules/react-router-dom/')
+            ) {
+              return 'vendor-router';
+            }
+            if (id.includes('recharts') || id.includes('d3') || id.includes('victory')) {
               return 'vendor-charts';
             }
-            if (id.includes('framer-motion') || id.includes('lucide-react')) {
-              return 'vendor-ui';
+            if (id.includes('framer-motion')) {
+              return 'vendor-motion';
             }
             if (id.includes('@tanstack') || id.includes('axios')) {
-              return 'vendor-core';
+              return 'vendor-network';
+            }
+            if (id.includes('@tsparticles') || id.includes('ogl') || id.includes('gsap')) {
+              return 'vendor-graphics';
             }
             if (id.includes('jspdf') || id.includes('html2canvas') || id.includes('xlsx')) {
               return 'vendor-reports';

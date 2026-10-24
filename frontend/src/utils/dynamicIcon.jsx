@@ -1,0 +1,111 @@
+import React from 'react';
+import {
+  Utensils,
+  ShoppingBag,
+  Car,
+  HeartPulse,
+  Zap,
+  Film,
+  Briefcase,
+  TrendingUp,
+  PiggyBank,
+  Landmark,
+  Gift,
+  GraduationCap,
+  Plane,
+  Home,
+  Smartphone,
+  ShieldAlert,
+  Tag,
+  Receipt,
+  DollarSign,
+  Laptop,
+  Target,
+  Wallet,
+  Coffee,
+  Music,
+  Book,
+  Dumbbell,
+  Key,
+  Shield,
+  Award,
+  Sparkles,
+  Activity,
+  CreditCard,
+  CircleDollarSign,
+  CheckCircle2,
+  Calendar,
+} from 'lucide-react';
+
+export const ICON_MAP = {
+  Utensils,
+  ShoppingBag,
+  Car,
+  HeartPulse,
+  Zap,
+  Film,
+  Briefcase,
+  TrendingUp,
+  PiggyBank,
+  Landmark,
+  Gift,
+  GraduationCap,
+  Plane,
+  Home,
+  Smartphone,
+  ShieldAlert,
+  Tag,
+  Receipt,
+  DollarSign,
+  Laptop,
+  Target,
+  Wallet,
+  Coffee,
+  Music,
+  Book,
+  Dumbbell,
+  Key,
+  Shield,
+  Award,
+  Sparkles,
+  Activity,
+  CreditCard,
+  CircleDollarSign,
+  CheckCircle2,
+  Calendar,
+};
+
+export const AVAILABLE_ICON_NAMES = [
+  'Utensils',
+  'ShoppingBag',
+  'Car',
+  'HeartPulse',
+  'Zap',
+  'Film',
+  'Briefcase',
+  'TrendingUp',
+  'PiggyBank',
+  'Landmark',
+  'Gift',
+  'GraduationCap',
+  'Plane',
+  'Home',
+  'Smartphone',
+  'ShieldAlert',
+  'Tag',
+  'Receipt',
+  'DollarSign',
+  'Laptop',
+];
+
+export const getDynamicIcon = (name, fallback = Tag) => {
+  if (!name) return fallback;
+  return ICON_MAP[name] || fallback;
+};
+
+export const DynamicIcon = ({ name, fallback = Tag, ...props }) => {
+  const Component = getDynamicIcon(name, fallback);
+  return <Component {...props} />;
+};
+
+export default DynamicIcon;

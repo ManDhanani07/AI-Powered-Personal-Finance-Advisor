@@ -11,6 +11,7 @@ import {
 import adminService from '../../services/adminService.js';
 import AdminUserDetailModal from './AdminUserDetailModal.jsx';
 import { showToast } from '../../components/common/ToastProvider.jsx';
+import { formatIndianDateTime } from '../../utils/formatters.js';
 
 export const AdminUsers = () => {
   const [users, setUsers] = useState([]);
@@ -248,7 +249,7 @@ export const AdminUsers = () => {
                           )}
                         </td>
                         <td className="py-3 px-4 text-slate-400 font-mono text-[11px] whitespace-nowrap">{u.joined}</td>
-                        <td className="py-3 px-4 text-slate-400 whitespace-nowrap">{u.last_active}</td>
+                        <td className="py-3 px-4 text-slate-400 font-mono text-[11px] whitespace-nowrap">{formatIndianDateTime(u.last_active_raw || u.last_active)}</td>
                         <td className="py-3 px-4 text-center font-mono text-sky-400 font-bold">{u.transactions_count}</td>
                         <td className="py-3 px-4 text-center font-mono text-violet-400 font-bold">{u.ai_queries_count}</td>
                         <td className="py-3 px-4">

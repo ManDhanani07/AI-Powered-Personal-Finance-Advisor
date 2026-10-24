@@ -33,6 +33,7 @@ from app.models.admin_notification import AdminNotification
 from app.models.notification import Notification
 from app.exceptions.custom_exceptions import ForbiddenException, NotFoundException, BadRequestException
 from app.core.config import settings
+from app.utils.formatters import format_datetime_ist, to_ist
 
 router = APIRouter(prefix="/admin", tags=["Admin Operations Console"])
 
@@ -541,7 +542,13 @@ async def get_admin_users(
 
     total_count = (await db.execute(select(func.count()).select_from(stmt.subquery()))).scalar() or 0
 
-    order_col = User.created_at if sort_by == "created_at" else User.last_login if sort_by == "last_login" else User.first_name
+    if sort_by == "last_login":
+        order_col = func.coalesce(User.last_login, User.created_at)
+    elif sort_by == "created_at":
+        order_col = User.created_at
+    else:
+        order_col = User.first_name
+
     stmt = stmt.order_by(desc(order_col) if sort_order == "desc" else order_col).offset((page - 1) * page_size).limit(page_size)
     users_res = (await db.execute(stmt)).scalars().all()
 
@@ -552,14 +559,20 @@ async def get_admin_users(
 
         risk_level = "High" if not u.is_active else "Medium" if getattr(u, "failed_login_attempts", 0) >= 3 else "Low"
 
+        # Resolve true last active timestamp in Indian Standard Time (IST)
+        active_dt = u.last_login or getattr(u, "updated_at", None) or u.created_at
+        last_active_str = format_datetime_ist(active_dt, fmt="%b %d, %Y, %I:%M %p")
+        joined_str = format_datetime_ist(u.created_at, fmt="%b %d, %Y")
+
         items.append({
             "id": str(u.id),
             "name": f"{u.first_name} {u.last_name}".strip() or "User",
             "email": u.email,
             "role": getattr(u, "role", "USER"),
             "profile_picture": u.profile_picture,
-            "joined": u.created_at.strftime("%b %d, %Y") if u.created_at else "—",
-            "last_active": u.last_login.strftime("%b %d, %I:%M %p") if u.last_login else "Recent",
+            "joined": joined_str,
+            "last_active": last_active_str,
+            "last_active_raw": active_dt.isoformat() if active_dt else None,
             "transactions_count": tx_count,
             "ai_queries_count": ai_count,
             "is_active": u.is_active,
@@ -610,9 +623,11 @@ async def get_admin_user_details(
             "status": "Active" if user.is_active else "Suspended",
             "is_active": user.is_active,
             "is_verified": getattr(user, "is_verified", True),
-            "joined": user.created_at.strftime("%b %d, %Y") if user.created_at else "—",
-            "last_login": user.last_login.strftime("%b %d, %Y, %I:%M %p") if user.last_login else "—",
+            "joined": format_datetime_ist(user.created_at, fmt="%b %d, %Y"),
+            "last_login": format_datetime_ist(user.last_login or getattr(user, "updated_at", None) or user.created_at, fmt="%b %d, %Y, %I:%M %p"),
             "occupation": user.occupation or "Not specified",
+            "gender": user.gender or "Not specified",
+            "date_of_birth": user.date_of_birth.strftime("%b %d, %Y") if user.date_of_birth else "Not specified",
             "currency": user.currency or "INR",
             "monthly_income_masked": "₹**,***.00",
         },
@@ -637,7 +652,7 @@ async def get_admin_user_details(
                 "title": t.title,
                 "amount": float(t.amount),
                 "type": t.transaction_type,
-                "date": t.transaction_date.strftime("%b %d, %Y") if t.transaction_date else "—",
+                "date": format_datetime_ist(t.transaction_date, fmt="%b %d, %Y"),
             } for t in tx_res
         ],
         "recent_ai_queries": [
@@ -1830,8 +1845,8 @@ async def get_ai_models_telemetry(
         FROM merchant_categorization_rules
     """))).fetchone()
     db_active_rules = int(db_rules.active_rules or 0) if db_rules else 0
-    builtin_rules_count = len(MERCHANT_CATEGORY_RULES)
-    total_active_rules = builtin_rules_count + db_active_rules
+    # Live active rules from database (single source of truth for all transactions)
+    total_active_rules = db_active_rules if db_active_rules > 0 else len(MERCHANT_CATEGORY_RULES)
 
     # Top categorized categories from live transactions
     top_cat_rows = (await db.execute(text("""

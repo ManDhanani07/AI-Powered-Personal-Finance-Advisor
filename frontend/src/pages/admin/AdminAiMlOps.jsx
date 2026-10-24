@@ -89,19 +89,19 @@ export const AdminAiMlOps = () => {
         {
           label: 'Auto-Tagged Rate',
           value: rawCat.metrics?.[0]?.value || '100.0%',
-          context: '388 of 388 transactions mapped',
+          context: rawCat.metrics?.[0]?.sublabel || '388 of 388 transactions mapped',
           accent: 'text-cyan-400',
         },
         {
           label: 'Active Rules',
-          value: rawCat.metrics?.[1]?.value || '403 Rules',
-          context: 'Merchant pattern matching rules',
+          value: rawCat.metrics?.[1]?.value || '349 Rules',
+          context: rawCat.metrics?.[1]?.sublabel || 'Merchant pattern matching rules',
           accent: 'text-sky-400',
         },
         {
           label: 'Top Category',
           value: rawCat.metrics?.[2]?.value || 'Transportation',
-          context: 'Most frequent spending category',
+          context: rawCat.metrics?.[2]?.sublabel || 'Most frequent spending category',
           accent: 'text-slate-100',
         },
       ],

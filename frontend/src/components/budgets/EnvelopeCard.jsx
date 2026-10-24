@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Sliders,
   AlertTriangle,
@@ -7,7 +6,7 @@ import {
   Edit3,
   Trash2,
 } from 'lucide-react';
-import * as Icons from 'lucide-react';
+import { getDynamicIcon } from '../../utils/dynamicIcon.jsx';
 import { formatCurrency } from '../../utils/formatters.js';
 
 // Curated professional fintech palette across categories
@@ -79,8 +78,7 @@ export const EnvelopeCard = ({ budget, onEdit, onQuickEdit, onDelete, index = 0 
 
   const catName = budget?.category?.category_name || budget?.budget_name || 'General Expense';
   const iconName = budget?.category?.icon || budget?.category?.icon_name || 'Tag';
-  const RawIcon = Icons[iconName] || Icons.Tag;
-  const IconComp = typeof RawIcon === 'function' || (typeof RawIcon === 'object' && RawIcon !== null) ? RawIcon : Icons.Tag;
+  const IconComp = getDynamicIcon(iconName, 'Tag');
 
   // Pick theme based on index or hash of category name
   const themeIndex = (typeof index === 'number' && index >= 0)

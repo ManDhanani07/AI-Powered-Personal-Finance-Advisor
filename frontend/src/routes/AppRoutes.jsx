@@ -31,9 +31,9 @@ const Profile = lazy(() => import('../pages/profile/Profile.jsx'));
 const EditProfile = lazy(() => import('../pages/profile/EditProfile.jsx'));
 const SecuritySettings = lazy(() => import('../pages/profile/SecuritySettings.jsx'));
 
-// Statically loaded core entry pages (Zero waterfall / instant cold render)
-import LandingPage from '../pages/landing/LandingPage.jsx';
-import Dashboard from '../pages/dashboard/Dashboard.jsx';
+// Core Entry Pages (Lazy Loaded for Optimal Bundle Splitting & Fast TBT)
+const LandingPage = lazy(() => import('../pages/landing/LandingPage.jsx'));
+const Dashboard = lazy(() => import('../pages/dashboard/Dashboard.jsx'));
 
 // Dynamic Lazy-Loaded Core Feature Modules
 const Transactions = lazy(() => import('../pages/transactions/Transactions.jsx'));

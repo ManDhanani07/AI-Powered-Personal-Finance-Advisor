@@ -1,6 +1,6 @@
 import React from 'react';
-import * as Icons from 'lucide-react';
 import { Edit3, Trash2, Pause, Play } from 'lucide-react';
+import { getDynamicIcon } from '../../utils/dynamicIcon.jsx';
 import { formatCurrency, formatDate } from '../../utils/formatters.js';
 import GoalProgress from './GoalProgress.jsx';
 
@@ -24,7 +24,7 @@ export const GoalTable = ({ goals = [], onEdit, onToggleStatus, onDelete }) => {
 
         <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
           {goals.map((g) => {
-            const IconComp = (g.icon && Icons[g.icon]) || Icons.Target;
+            const IconComp = getDynamicIcon(g.icon, 'Target');
             const isPaused = g.status === 'PAUSED';
 
             return (

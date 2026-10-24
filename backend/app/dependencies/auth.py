@@ -60,6 +60,15 @@ async def get_current_user(
     if not user.is_active:
         raise ForbiddenException("User account is deactivated")
 
+    # Throttled update of last active / last login (update at most once every 60 seconds)
+    now_utc = datetime.now(timezone.utc)
+    if not user.last_login or (now_utc - user.last_login).total_seconds() > 60:
+        try:
+            user.last_login = now_utc
+            await user_repo.update(user.id, {"last_login": now_utc})
+        except Exception:
+            pass
+
     return user
 
 

@@ -1,11 +1,11 @@
 import React from 'react';
-import * as Icons from 'lucide-react';
 import { Edit3, Trash2, Calendar, Pause, Play, CheckCircle2 } from 'lucide-react';
+import { getDynamicIcon } from '../../utils/dynamicIcon.jsx';
 import { formatCurrency, formatDate } from '../../utils/formatters.js';
 import GoalProgress from './GoalProgress.jsx';
 
 export const GoalCard = ({ goal, onEdit, onToggleStatus, onDelete }) => {
-  const IconComp = (goal.icon && Icons[goal.icon]) || Icons.Target;
+  const IconComp = getDynamicIcon(goal.icon);
   const isAchieved = goal.status === 'ACHIEVED' || goal.completion_percentage >= 100;
   const isPaused = goal.status === 'PAUSED';
 

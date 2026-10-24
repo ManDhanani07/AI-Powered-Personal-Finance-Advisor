@@ -20,10 +20,6 @@ export const SocialLoginButtons = () => {
       const userEmail = user.email || (typeof selectedEmailOrToken === 'string' && selectedEmailOrToken.includes('@') ? selectedEmailOrToken : 'User');
       const displayName = user.first_name || userEmail.split('@')[0] || 'User';
 
-      toast.success(`Welcome back, ${displayName}!`, {
-        icon: '🚀',
-        autoClose: 2500,
-      });
       setShowGoogleModal(false);
 
       // Instant role-aware redirection based on resolved user email and role

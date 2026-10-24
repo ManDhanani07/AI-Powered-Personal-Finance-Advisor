@@ -1,6 +1,6 @@
 import React from 'react';
-import * as Icons from 'lucide-react';
 import { Edit3, Trash2 } from 'lucide-react';
+import { getDynamicIcon } from '../../utils/dynamicIcon.jsx';
 import { formatCurrency, formatDate } from '../../utils/formatters.js';
 import BudgetProgress from './BudgetProgress.jsx';
 
@@ -25,7 +25,7 @@ export const BudgetTable = ({ budgets = [], onEdit, onDelete }) => {
         <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
           {budgets.map((b) => {
             const category = b.category;
-            const IconComp = (category?.icon && Icons[category.icon]) || Icons.PiggyBank;
+            const IconComp = getDynamicIcon(category?.icon, 'PiggyBank');
 
             return (
               <tr key={b.id} className="transition-colors hover:bg-slate-50/70 dark:hover:bg-slate-800/50">

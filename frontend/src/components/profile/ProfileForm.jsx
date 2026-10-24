@@ -16,6 +16,8 @@ export const ProfileForm = ({ user, onCancel, onSuccess, onSave, isSaving = fals
       first_name: user?.first_name || '',
       last_name: user?.last_name || '',
       phone: user?.phone || '',
+      gender: user?.gender || '',
+      date_of_birth: user?.date_of_birth ? String(user.date_of_birth).split('T')[0] : '',
       occupation: user?.occupation || '',
       monthly_income: user?.monthly_income || '0.00',
       city: user?.city || '',
@@ -29,6 +31,8 @@ export const ProfileForm = ({ user, onCancel, onSuccess, onSave, isSaving = fals
       first_name: data.first_name.trim(),
       last_name: data.last_name.trim(),
       phone: data.phone?.trim() || null,
+      gender: data.gender?.trim() || null,
+      date_of_birth: data.date_of_birth?.trim() || null,
       occupation: data.occupation?.trim() || null,
       monthly_income: parseFloat(data.monthly_income) || 0.0,
       city: data.city?.trim() || null,
@@ -121,6 +125,37 @@ export const ProfileForm = ({ user, onCancel, onSuccess, onSave, isSaving = fals
               placeholder="Software Engineer / Financial Analyst"
               {...register('occupation')}
               className="w-full rounded-xl border border-zinc-800 bg-black/60 py-2.5 px-3.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50"
+            />
+          </div>
+        </div>
+
+        {/* Gender & Date of Birth */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-300">
+              Gender
+            </label>
+            <select
+              {...register('gender')}
+              className="w-full rounded-xl border border-zinc-800 bg-black/60 py-2.5 px-3.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 cursor-pointer"
+            >
+              <option value="" className="bg-zinc-950 text-slate-400">Select Gender (Optional)</option>
+              <option value="Male" className="bg-zinc-950 text-white">Male</option>
+              <option value="Female" className="bg-zinc-950 text-white">Female</option>
+              <option value="Other" className="bg-zinc-950 text-white">Other</option>
+              <option value="Prefer not to say" className="bg-zinc-950 text-white">Prefer not to say</option>
+            </select>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-300">
+              Date of Birth
+            </label>
+            <input
+              type="date"
+              max={new Date().toISOString().split('T')[0]}
+              {...register('date_of_birth')}
+              className="w-full rounded-xl border border-zinc-800 bg-black/60 py-2.5 px-3.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 [color-scheme:dark] cursor-pointer"
             />
           </div>
         </div>

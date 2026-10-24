@@ -1,6 +1,6 @@
 import React from 'react';
-import * as Icons from 'lucide-react';
 import { Edit3, Copy, Trash2, Shield } from 'lucide-react';
+import { getDynamicIcon } from '../../utils/dynamicIcon.jsx';
 
 export const CategoryTable = ({ categories = [], onEdit, onDuplicate, onDelete }) => {
   if (!categories.length) return null;
@@ -20,7 +20,7 @@ export const CategoryTable = ({ categories = [], onEdit, onDuplicate, onDelete }
 
         <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
           {categories.map((cat) => {
-            const IconComp = Icons[cat.icon] || Icons.Tag;
+            const IconComp = getDynamicIcon(cat.icon, 'Tag');
             const isDefault = cat.is_default;
 
             return (

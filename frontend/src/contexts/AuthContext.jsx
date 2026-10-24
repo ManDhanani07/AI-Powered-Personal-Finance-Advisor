@@ -1,9 +1,22 @@
-import React, { createContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useState, useEffect, useCallback, useRef } from 'react';
 import { STORAGE_KEYS } from '../constants/index.js';
 import { getItem, setItem, removeItem } from '../utils/storage.js';
 import authService from '../services/authService.js';
 
 export const AuthContext = createContext(null);
+
+const isJwtExpired = (tokenStr) => {
+  if (!tokenStr || typeof tokenStr !== 'string') return true;
+  try {
+    const parts = tokenStr.split('.');
+    if (parts.length !== 3) return true;
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+    if (!payload.exp) return false;
+    return (Date.now() / 1000) >= (payload.exp - 10);
+  } catch {
+    return true;
+  }
+};
 
 export const AuthProvider = ({ children }) => {
   const [accessToken, setAccessToken] = useState(() => getItem(STORAGE_KEYS.AUTH_TOKEN) || null);
@@ -11,6 +24,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => getItem(STORAGE_KEYS.USER_DATA) || null);
   const [isAuthenticated, setIsAuthenticated] = useState(() => Boolean(getItem(STORAGE_KEYS.AUTH_TOKEN)));
   const [isLoading, setIsLoading] = useState(() => Boolean(getItem(STORAGE_KEYS.AUTH_TOKEN) && !getItem(STORAGE_KEYS.USER_DATA)));
+  const isVerifyingRef = useRef(false);
 
   /**
    * Clear session state & local storage
@@ -62,6 +76,9 @@ export const AuthProvider = ({ children }) => {
    * Fetch current user profile on app startup (supports URL query token callback)
    */
   const loadCurrentUser = useCallback(async () => {
+    if (isVerifyingRef.current) return;
+    isVerifyingRef.current = true;
+
     // Check if redirected from Google OAuth callback with tokens in URL query
     try {
       const urlParams = new URLSearchParams(window.location.search);
@@ -82,10 +99,21 @@ export const AuthProvider = ({ children }) => {
     }
 
     const token = getItem(STORAGE_KEYS.AUTH_TOKEN);
+    const refreshToken = getItem(STORAGE_KEYS.REFRESH_TOKEN);
+
     if (!token) {
       setIsLoading(false);
       setIsAuthenticated(false);
       setUser(null);
+      isVerifyingRef.current = false;
+      return;
+    }
+
+    // Proactively purge session if both access and refresh tokens have expired
+    if (isJwtExpired(token) && (!refreshToken || isJwtExpired(refreshToken))) {
+      clearAuthState();
+      setIsLoading(false);
+      isVerifyingRef.current = false;
       return;
     }
 
@@ -112,6 +140,7 @@ export const AuthProvider = ({ children }) => {
       console.warn('Session verification notice (clearing unauthenticated state):', err);
       clearAuthState();
     } finally {
+      isVerifyingRef.current = false;
       setIsLoading(false);
     }
   }, [clearAuthState]);

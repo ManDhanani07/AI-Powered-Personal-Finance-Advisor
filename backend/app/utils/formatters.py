@@ -3,7 +3,31 @@ Formatting Utilities for Currency (INR), Dates, Numbers, and API Responses.
 """
 
 from typing import Any, Optional, Dict
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
+
+# Indian Standard Time (IST) offset is UTC + 5 hours 30 minutes
+IST_TIMEZONE = timezone(timedelta(hours=5, minutes=30))
+
+
+def to_ist(dt: Optional[datetime]) -> Optional[datetime]:
+    """Convert any UTC or naive datetime to Indian Standard Time (IST, UTC+5:30)."""
+    if not dt:
+        return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(IST_TIMEZONE)
+
+
+def format_datetime_ist(
+    dt: Optional[datetime],
+    fmt: str = "%b %d, %Y, %I:%M %p",
+    fallback: str = "—"
+) -> str:
+    """Format a datetime into a human-readable string in true Indian Standard Time (IST)."""
+    if not dt:
+        return fallback
+    ist_dt = to_ist(dt)
+    return ist_dt.strftime(fmt)
 
 
 def format_currency_inr(amount: float) -> str:

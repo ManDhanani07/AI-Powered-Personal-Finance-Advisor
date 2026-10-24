@@ -1,12 +1,12 @@
 import React from 'react';
-import * as Icons from 'lucide-react';
 import { Edit3, Trash2, Calendar, AlertCircle } from 'lucide-react';
+import { getDynamicIcon } from '../../utils/dynamicIcon.jsx';
 import { formatCurrency, formatDate } from '../../utils/formatters.js';
 import BudgetProgress from './BudgetProgress.jsx';
 
 export const BudgetCard = ({ budget, onEdit, onDelete }) => {
   const category = budget.category;
-  const IconComp = (category?.icon && Icons[category.icon]) || Icons.PiggyBank;
+  const IconComp = getDynamicIcon(category?.icon, 'PiggyBank');
 
   const isExceeded = budget.utilization_percentage >= 100;
   const isCritical = budget.utilization_percentage >= 90 && !isExceeded;

@@ -11,8 +11,10 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 from sqlalchemy.orm import DeclarativeBase
+from fastapi import HTTPException
 from app.core.config import settings
 from app.core.logging import logger
+from app.exceptions.custom_exceptions import AppException
 
 
 class Base(DeclarativeBase):
@@ -40,11 +42,19 @@ AsyncSessionLocal = async_sessionmaker(
 )
 
 
+
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """Dependency Injection for acquiring AsyncSession per request."""
     async with AsyncSessionLocal() as session:
         try:
             yield session
+        except (AppException, HTTPException) as ex:
+            await session.rollback()
+            # Do not log standard client/auth exceptions (4xx) as database error level
+            status_code = getattr(ex, "status_code", 400)
+            if status_code >= 500:
+                logger.error(f"Database session rollback due to server error ({status_code}): {ex}")
+            raise
         except Exception as ex:
             await session.rollback()
             logger.error(f"Database session rollback due to error: {ex}")
